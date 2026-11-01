@@ -293,7 +293,9 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         {"date": "2026-01-01", "python": "3", "device": "cpu", "packages": {}},
         ["note"],
     )
-    assert "| x | 0.600 |" in text and "未通过" in text and "- note" in text  # aam row is gated
+    assert "| x | 0.600 |" in text and "- note" in text
+    assert "| 2.00 s | 参考 |" in text  # the solo-only and mixed GuitarSet rows are reference
+    assert "| 3.00 s | 通过 |" in text  # the AAM row is gated and clears both thresholds
     assert (
         "仅独奏" in text
         and "| x | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s | 参考 |" in text
