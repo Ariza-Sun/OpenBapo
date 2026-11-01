@@ -293,7 +293,7 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         {"date": "2026-01-01", "python": "3", "device": "cpu", "packages": {}},
         ["note"],
     )
-    assert "| x | 0.600 |" in text and "未通过" in text and "- note" in text
+    assert "| x | 0.600 |" in text and "未通过" in text and "- note" in text  # aam row is gated
     assert (
         "仅独奏" in text
         and "| x | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s | 参考 |" in text

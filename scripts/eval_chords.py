@@ -664,13 +664,15 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
         "",
         "拍网格来自数据集自带的拍点标注；分轨来自 Demucs（低音线用）。"
         "指标：mir_eval `chord`（按时长加权）与调性精确匹配。"
-        f"验收门槛：GuitarSet（报数半）与 AAM 上 majmin ≥ {ACCEPTANCE_MAJMIN:.0%}、"
-        f"调性 ≥ {ACCEPTANCE_KEY:.0%}。调参只用 GuitarSet 吉他手 00–02。",
+        f"验收门槛：GuitarSet（报数半，仅伴奏曲目）与 AAM 上 majmin ≥ {ACCEPTANCE_MAJMIN:.0%}、"
+        f"调性 ≥ {ACCEPTANCE_KEY:.0%}（`docs/plans/step-2.md` 决定 7）。"
+        "GuitarSet 的独奏曲目是单音旋律、标注的是隐含和弦，只报数。"
+        "调参只用 GuitarSet 吉他手 00–02。",
         "",
     ]
     for subset, title in (
-        ("guitarset_report", "GuitarSet 报数半（吉他手 03–05，伴奏 + 独奏）"),
-        ("guitarset_report_comp", "GuitarSet 报数半，仅伴奏（comp）曲目"),
+        ("guitarset_report_comp", "GuitarSet 报数半（吉他手 03–05），仅伴奏（comp）曲目——验收依据"),
+        ("guitarset_report", "GuitarSet 报数半，伴奏 + 独奏（参考）"),
         (
             "guitarset_report_solo",
             "GuitarSet 报数半，仅独奏（solo）曲目：单音旋律，标注是隐含的和弦",
@@ -703,7 +705,7 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
             )
             if subset.startswith("guitarset_tune"):
                 verdict = "对照"
-            elif subset.endswith(("_comp", "_solo")):
+            elif subset in ("guitarset_report", "guitarset_report_solo"):
                 verdict = "参考"
             cells = [
                 s["system"],
@@ -716,7 +718,7 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
     final = next((s for s in systems if s["system"] == "committee (tuned)"), None)
     if final is not None:
         lines += ["## 按风格 / 流派（committee (tuned) 的 majmin / 调性精确）", ""]
-        for subset in ("guitarset_report", "aam"):
+        for subset in ("guitarset_report_comp", "guitarset_report_solo", "aam"):
             groups = final["summary"].get(subset, {}).get("by_group")
             if groups:
                 lines.append(f"**{subset}**")
