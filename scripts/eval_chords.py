@@ -129,7 +129,11 @@ def guitarset_tracks(root: Path, *, chords: str = "instructed", audio: str = "mi
 
 
 def read_arff(path: Path) -> tuple[list[str], list[list[str]]]:
-    """Minimal ARFF reader: attribute names and the data rows as strings."""
+    """Minimal ARFF reader: attribute names and the data rows as strings.
+
+    AAM's beatinfo files omit the `@DATA` line, so the first line after the
+    header that does not start with `@` also opens the data section.
+    """
     attributes: list[str] = []
     rows: list[list[str]] = []
     in_data = False
@@ -137,14 +141,15 @@ def read_arff(path: Path) -> tuple[list[str], list[list[str]]]:
         line = raw.strip()
         if not line or line.startswith("%"):
             continue
-        if in_data:
-            rows.append([cell.strip().strip("'\"") for cell in _split_csv(line)])
-        elif line.lower().startswith("@attribute"):
+        if not in_data and line.lower().startswith("@data"):
+            in_data = True
+        elif not in_data and line.startswith("@"):
             match = re.match(r"@attribute\s+('([^']*)'|\"([^\"]*)\"|(\S+))", line, re.IGNORECASE)
             if match:
                 attributes.append(match.group(2) or match.group(3) or match.group(4) or "")
-        elif line.lower().startswith("@data"):
+        else:
             in_data = True
+            rows.append([cell.strip().strip("'\"") for cell in _split_csv(line)])
     return attributes, rows
 
 
@@ -559,13 +564,20 @@ def score_system(
 
 def summarize(system: dict) -> dict:
     rows = system["rows"]
+    guitarset = [r for r in rows if r["dataset"] == "guitarset"]
     subsets = {
-        "guitarset_tune": [r for r in rows if r["dataset"] == "guitarset" and r["split"] == "tune"],
-        "guitarset_report": [
-            r for r in rows if r["dataset"] == "guitarset" and r["split"] == "report"
-        ],
+        "guitarset_tune": [r for r in guitarset if r["split"] == "tune"],
+        "guitarset_report": [r for r in guitarset if r["split"] == "report"],
         "aam": [r for r in rows if r["dataset"] == "aam"],
     }
+    # GuitarSet pairs every progression as a comping take (chords are played)
+    # and a soloing take (a single-note line over the same chart, so the
+    # instructed chords are implied rather than sounded); report them apart.
+    for split in ("report", "tune"):
+        for kind in ("comp", "solo"):
+            subsets[f"guitarset_{split}_{kind}"] = [
+                r for r in subsets[f"guitarset_{split}"] if r["track"].endswith(f"_{kind}")
+            ]
     summary = {}
     for subset, subset_rows in subsets.items():
         if not subset_rows:
@@ -657,9 +669,15 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
         "",
     ]
     for subset, title in (
-        ("guitarset_report", "GuitarSet 报数半（吉他手 03–05）"),
+        ("guitarset_report", "GuitarSet 报数半（吉他手 03–05，伴奏 + 独奏）"),
+        ("guitarset_report_comp", "GuitarSet 报数半，仅伴奏（comp）曲目"),
+        (
+            "guitarset_report_solo",
+            "GuitarSet 报数半，仅独奏（solo）曲目：单音旋律，标注是隐含的和弦",
+        ),
         ("aam", "AAM（500 首）"),
         ("guitarset_tune", "GuitarSet 调参半（吉他手 00–02，仅供对照）"),
+        ("guitarset_tune_comp", "GuitarSet 调参半，仅伴奏（comp）曲目"),
     ):
         if not any(subset in s["summary"] for s in systems):
             continue
@@ -683,8 +701,10 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
                     else "未通过"
                 )
             )
-            if subset == "guitarset_tune":
+            if subset.startswith("guitarset_tune"):
                 verdict = "对照"
+            elif subset.endswith(("_comp", "_solo")):
+                verdict = "参考"
             cells = [
                 s["system"],
                 *(fmt(m[k]) for k in (*CHORD_METRICS, "key_exact", "key_weighted")),

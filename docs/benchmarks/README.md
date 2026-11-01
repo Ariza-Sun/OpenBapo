@@ -43,7 +43,7 @@
 两个数据集都在 Zenodo，用它的 API 列文件再下载（`curl -s https://zenodo.org/api/records/<id>` 的 `files` 字段）。
 
 1. **GuitarSet**（Zenodo record 3371780；360 段约 30 秒的原声吉他录音，谱面 / 实奏和弦、调性、拍点）：下载 `annotation.zip` 与 `audio_mono-mic.zip`，解压到 `/data/guitarset/`，得到 `annotation/*.jams` 与 `audio_mono-mic/*_mic.wav`。脚本默认用谱面和弦（lead sheet）与麦克风录音；吉他手 00–02 调参、03–05 报数。
-2. **AAM**（Zenodo record 5794629，CC BY 4.0；3000 首合成多轨）：下载标注包 `0001-1000-annotations-v1.1.0.zip`（8 MB）和混音包 `0001-1000-audio-mixes.zip`（14.7 GB；混音按 1000 首一包切，没有更小的单位，所以前 500 首也得下整包），解压到 `/data/aam/`。每首只有三个 ARFF：`<id>_beatinfo.arff`（每个和弦起点一行：起始秒、小节数、拍数、`Chord name`，**不是**每拍一行）、`<id>_segments.arff`（每段一行：起始秒、段落标记、`Tempo`、`Key`，最后一行 `end`）、`<id>_onsets.arff`（不用）。脚本按编号取前 500 首；和弦取 beatinfo 的行并合并相邻同名；调性取各段里累计时长最长的 `Key`（有的曲子中途转调）；拍网格按各段速度合成、用小节 / 拍数定强拍；音频是 `/data/aam/` 下任何以编号开头的音频文件（名字含 `mix` 者优先）。
+2. **AAM**（Zenodo record 5794629，CC BY 4.0；3000 首合成多轨）：下载标注包 `0001-1000-annotations-v1.1.0.zip`（8 MB）和混音包 `0001-1000-audio-mixes.zip`（14.7 GB；混音按 1000 首一包切，没有更小的单位，所以前 500 首也得下整包），解压到 `/data/aam/`。每首只有三个 ARFF：`<id>_beatinfo.arff`（每个和弦起点一行：起始秒、小节数、拍数、`Chord name`，**不是**每拍一行；这个文件没有 `@DATA` 行，读取器已兼容）、`<id>_segments.arff`（每段一行：起始秒、段落标记、`Tempo`、`Key`，最后一行 `end`）、`<id>_onsets.arff`（不用）。脚本按编号取前 500 首；和弦取 beatinfo 的行并合并相邻同名；调性取各段里累计时长最长的 `Key`（有的曲子中途转调）；拍网格按各段速度合成、用小节 / 拍数定强拍；音频是 `/data/aam/` 下任何以编号开头的音频文件（名字含 `mix` 者优先）。
 3. 运行：
 
    ```bash

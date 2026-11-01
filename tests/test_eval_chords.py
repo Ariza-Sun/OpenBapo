@@ -145,6 +145,21 @@ def test_aam_loader_reads_the_v110_layout(tmp_path: Path) -> None:
     assert eval_chords.aam_tracks(root, count=0) == []
 
 
+def test_arff_reader_accepts_a_missing_data_line(tmp_path: Path) -> None:
+    path = tmp_path / "x.arff"
+    path.write_text(
+        "@RELATION 'Beat information of 0001'\n@ATTRIBUTE 'Start time in seconds' NUMERIC\n"
+        "@ATTRIBUTE 'Chord name' STRING\n\n0.0,'Fmaj'\n% comment\n0.5,'Gmin'\n",
+        encoding="utf-8",
+    )
+    assert eval_chords.read_arff(path) == (
+        ["Start time in seconds", "Chord name"],
+        [["0.0", "Fmaj"], ["0.5", "Gmin"]],
+    )
+    path.write_text("@ATTRIBUTE a NUMERIC\n@DATA\n@1\n", encoding="utf-8")
+    assert eval_chords.read_arff(path) == (["a"], [["@1"]])
+
+
 def test_aam_meter_and_key_fallbacks() -> None:
     anchors = [(0.0, 1, 1, "C"), (1.5, 2, 1, "F"), (3.0, 3, 1, "G"), (4.0, 3, 3, "C")]
     sections = [(0.0, 120.0, "Cmaj")]
@@ -264,8 +279,13 @@ def test_summarize_splits_by_dataset_and_group() -> None:
             "seconds": 3.0,
         },
     ]
+    rows[0]["track"] = "00_BN1-129-Eb_comp"
+    rows[1]["track"] = "03_Rock1-130-A_solo"
     summary = eval_chords.summarize({"rows": rows})
     assert summary["guitarset_tune"]["majmin"] == 0.8 and summary["guitarset_tune"]["tracks"] == 1
+    assert summary["guitarset_tune_comp"]["tracks"] == 1 and "guitarset_tune_solo" not in summary
+    assert summary["guitarset_report_solo"]["majmin"] == 0.6
+    assert "guitarset_report_comp" not in summary
     assert summary["guitarset_report"]["key_exact"] == 0.0
     assert summary["aam"]["seconds"] == 3.0
     text = eval_chords.markdown(
@@ -274,3 +294,7 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         ["note"],
     )
     assert "| x | 0.600 |" in text and "未通过" in text and "- note" in text
+    assert (
+        "仅独奏" in text
+        and "| x | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s | 参考 |" in text
+    )
