@@ -160,6 +160,20 @@ def test_arff_reader_accepts_a_missing_data_line(tmp_path: Path) -> None:
     assert eval_chords.read_arff(path) == (["a"], [["@1"]])
 
 
+def test_inspect_reports_unparsable_labels_in_any_track(capsys: pytest.CaptureFixture[str]) -> None:
+    def track(name: str, labels: list[str]) -> eval_chords.Track:
+        n = len(labels)
+        return eval_chords.Track(
+            dataset="aam", split="report", name=name, group="aam", audio=Path("x.wav"),
+            chord_intervals=np.array([[i, i + 1] for i in range(n)], dtype=float),
+            chord_labels=labels, key=None, beats=np.zeros(0), downbeats=np.zeros(0),
+        )  # fmt: skip
+
+    eval_chords.inspect([track("0001", ["C:maj", "N"]), track("0007", ["N.C.", "G:min"])])
+    out = capsys.readouterr().out
+    assert "[aam] 0001" in out and "WARNING unparsable label 'N.C.' in 1 tracks, e.g. 0007" in out
+
+
 def test_aam_meter_and_key_fallbacks() -> None:
     anchors = [(0.0, 1, 1, "C"), (1.5, 2, 1, "F"), (3.0, 3, 1, "G"), (4.0, 3, 3, "C")]
     sections = [(0.0, 120.0, "Cmaj")]
@@ -199,6 +213,8 @@ def test_parse_key(text: str, expected: tuple[int, str] | None) -> None:
         ("Bbm7", "Bb:min7"),
         ("F#dim", "F#:dim"),
         ("N", "N"),
+        ("N.C.", "N"),
+        ("n.c", "N"),
         ("D:maj/3", "D:maj/3"),
         ("Cm7b5", "C:hdim7"),
     ],

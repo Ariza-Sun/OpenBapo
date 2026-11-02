@@ -364,8 +364,8 @@ def parse_key(text: str) -> tuple[int, str] | None:
 def normalize_aam_label(text: str) -> str:
     """AAM chord labels to Harte; `N` for none. Unknown spellings pass through."""
     t = text.strip()
-    if not t or t.upper() in ("N", "NONE", "NO CHORD"):
-        return "N"
+    if not t or t.upper().replace(".", "") in ("N", "NC", "NONE", "NO CHORD"):
+        return "N"  # AAM writes no-chord as N.C.
     if ":" in t or t in ("X",):
         return t
     match = re.match(r"^([A-G][#b]?)(.*)$", t)
@@ -748,9 +748,17 @@ def inspect(tracks: list[Track]) -> None:
         print(f"  chords: {len(t.chord_labels)} segments, first: {first}")
         print(f"  key: {t.key}; beats: {len(t.beats)} (downbeats {len(t.downbeats)})")
         print(f"  first beats: {t.beats[:4].tolist()}")
-        unknown = sorted({label for label in t.chord_labels if not _parses(label)})
-        if unknown:
-            print(f"  WARNING unparsable labels: {unknown[:10]}")
+    # Every reference label of every track must parse (ours and mir_eval's
+    # grammar agree on Harte), or the self-check in main() would fail later.
+    unknown: dict[str, set[str]] = {}
+    for t in tracks:
+        for label in t.chord_labels:
+            if not _parses(label):
+                unknown.setdefault(label, set()).add(t.name)
+    for label, names in sorted(unknown.items()):
+        print(
+            f"  WARNING unparsable label {label!r} in {len(names)} tracks, e.g. {sorted(names)[0]}"
+        )
     counts: dict[tuple[str, str], int] = {}
     for t in tracks:
         counts[(t.dataset, t.split)] = counts.get((t.dataset, t.split), 0) + 1
