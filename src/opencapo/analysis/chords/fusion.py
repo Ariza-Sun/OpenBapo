@@ -72,13 +72,17 @@ class BassEstimate:
 
 @dataclass(frozen=True)
 class FusionParams:
-    """The few tunable knobs (section 2.3); defaults are the pre-tuning guesses."""
+    """The few tunable knobs (section 2.3)."""
 
-    weights: Mapping[str, float] = field(default_factory=dict)  # per expert name; missing = 1
+    # Defaults are the values tuned on GuitarSet's tuning half
+    # (docs/benchmarks/step-2-chords.md, 调参结果); a missing weight means 1.
+    weights: Mapping[str, float] = field(
+        default_factory=lambda: {"btc": 0.5, "lvchordia": 0.5, "chroma": 0.5}
+    )
     key_prior: float = 0.5  # added to the log score of chords whose root is in the key
-    change_cost_downbeat: float = 0.3  # cost of changing chord on a downbeat
-    change_cost_beat: float = 1.5  # ... on any other beat
-    no_chord_bias: float = 0.0  # added to the log score of "N"
+    change_cost_downbeat: float = 0.1  # cost of changing chord on a downbeat
+    change_cost_beat: float = 3.0  # ... on any other beat
+    no_chord_bias: float = -1.0  # added to the log score of "N"
     foreign_bass_penalty: float = 0.7  # confidence multiplier when the bass is not a chord tone
     min_bass_strength: float = 0.3  # weaker bass evidence is ignored
     # A lead sheet holds the chord through a rest shorter than a bar; longer
@@ -87,7 +91,7 @@ class FusionParams:
     # The detected bass note as evidence for the label (a transcriber's first
     # move): log-score bonus, scaled by the detection strength, for chords
     # whose root is the bass note; half of it when the bass is another chord tone.
-    bass_weight: float = 0.0
+    bass_weight: float = 1.0
     # Weight frames by 1 - P(N) when pooling an expert's output per beat (see
     # aggregate_to_beats); applied before decode by whoever aggregates.
     voiced_aggregation: bool = False
