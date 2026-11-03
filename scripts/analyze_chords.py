@@ -35,6 +35,7 @@ from eval_chords import (
     guitarset_tracks,
     key_name,
     run_fusion,
+    sheet_tracks,
 )
 
 STEP = 0.05  # seconds per analysis frame
@@ -144,8 +145,8 @@ def load_params(path: Path | None):  # type: ignore[no-untyped-def]
 def pick_subset(tracks: list[Track], subset: str) -> list[Track]:
     if subset == "aam_single":
         return [t for t in tracks if t.dataset == "aam" and t.key_share >= 0.999]
-    if subset == "aam":
-        return [t for t in tracks if t.dataset == "aam"]
+    if subset in ("aam", "sheets"):
+        return [t for t in tracks if t.dataset == subset]
     split, kind = subset.split("_")
     return [
         t
@@ -250,13 +251,14 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--guitarset", type=Path)
     parser.add_argument("--aam", type=Path)
+    parser.add_argument("--sheets", type=Path)
     parser.add_argument("--aam-count", type=int, default=500)
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--experts", default="btc,lvchordia,chroma")
     parser.add_argument(
         "--subset",
         default="report_comp",
-        help="report_comp, tune_comp, report_solo, aam, aam_single",
+        help="report_comp, tune_comp, report_solo, aam, aam_single, sheets",
     )
     parser.add_argument("--params", type=Path, help="step-2-chords.json whose tuned params to use")
     parser.add_argument("--worst", type=int, default=10)
@@ -267,6 +269,8 @@ def main(argv: list[str] | None = None) -> int:
         tracks += guitarset_tracks(args.guitarset)
     if args.aam:
         tracks += aam_tracks(args.aam, args.aam_count)
+    if args.sheets:
+        tracks += sheet_tracks(args.sheets)
     tracks = pick_subset(tracks, args.subset)
     if not tracks:
         print("no tracks in that subset", file=sys.stderr)

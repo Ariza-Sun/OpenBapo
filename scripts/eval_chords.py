@@ -143,6 +143,44 @@ def guitarset_tracks(root: Path, *, chords: str = "instructed", audio: str = "mi
     return tracks
 
 
+def sheet_tracks(root: Path) -> list[Track]:
+    """Renders of lead sheets (scripts/sheet_synth.py): <name>.wav + <name>.json side by side.
+
+    The reference is the sheet itself in the sheet's timing: sounding chords,
+    sung key and beat grid. These test the analysis on a song book without
+    any recording; they are reported, never gated.
+    """
+    tracks = []
+    for ref_path in sorted(root.rglob("*.json")):
+        audio = ref_path.with_suffix(".wav")
+        if not audio.exists():
+            print(f"skip: no audio for sheet {ref_path.stem}", file=sys.stderr)
+            continue
+        ref = json.loads(ref_path.read_text(encoding="utf-8"))
+        if "chords" not in ref or "beats" not in ref:
+            print(f"skip: {ref_path.name} is not a sheet reference", file=sys.stderr)
+            continue
+        intervals = np.array([[c[0], c[1]] for c in ref["chords"]], dtype=float).reshape(-1, 2)
+        labels = [str(c[2]) for c in ref["chords"]]
+        key = parse_key(str(ref.get("key", "")).replace(" ", ":"))
+        tracks.append(
+            Track(
+                dataset="sheets",
+                split="report",
+                name=ref_path.stem,
+                group=str(ref.get("title", ref_path.stem)),
+                audio=audio,
+                chord_intervals=intervals,
+                chord_labels=labels,
+                key=key,
+                beats=np.array(ref["beats"], dtype=float),
+                downbeats=np.array(ref.get("downbeats", []), dtype=float),
+                key_times={} if key is None else {key_name(key): float(ref.get("duration", 0.0))},
+            )
+        )
+    return tracks
+
+
 def read_arff(path: Path) -> tuple[list[str], list[list[str]]]:
     """Minimal ARFF reader: attribute names and the data rows as strings.
 
@@ -721,6 +759,7 @@ def summarize(system: dict) -> dict:
         "guitarset_tune": [r for r in guitarset if r["split"] == "tune"],
         "guitarset_report": [r for r in guitarset if r["split"] == "report"],
         "aam": [r for r in rows if r["dataset"] == "aam"],
+        "sheets": [r for r in rows if r["dataset"] == "sheets"],
     }
     # GuitarSet pairs every progression as a comping take (chords are played)
     # and a soloing take (a single-note line over the same chart, so the
@@ -853,6 +892,7 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
             "GuitarSet 报数半，仅独奏（solo）曲目：单音旋律，标注是隐含的和弦",
         ),
         ("aam", "AAM（500 首）"),
+        ("sheets", "曲库合成（谱子渲染的音频，参考，不设门槛）"),
         ("guitarset_tune", "GuitarSet 调参半（吉他手 00–02，仅供对照）"),
         ("guitarset_tune_comp", "GuitarSet 调参半，仅伴奏（comp）曲目"),
     ):
@@ -881,7 +921,7 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
             )
             if subset.startswith("guitarset_tune"):
                 verdict = "对照"
-            elif subset in ("guitarset_report", "guitarset_report_solo"):
+            elif subset in ("guitarset_report", "guitarset_report_solo", "sheets"):
                 verdict = "参考"
             cells = [
                 s["system"],
@@ -923,7 +963,7 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
     final = next((s for s in systems if s["system"] == "committee (tuned)"), None)
     if final is not None:
         lines += ["## 按风格 / 流派（committee (tuned) 的 majmin / 调性精确）", ""]
-        for subset in ("guitarset_report_comp", "guitarset_report_solo", "aam"):
+        for subset in ("guitarset_report_comp", "guitarset_report_solo", "aam", "sheets"):
             groups = final["summary"].get(subset, {}).get("by_group")
             if groups:
                 lines.append(f"**{subset}**")
@@ -939,7 +979,7 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
             "| 单一调性曲目的正确率（门槛依据） | 转调曲目命中任一主要调 |"
         )
         lines.append("|---|---|---|---|---|---|---|---|---|")
-        for subset in ("guitarset_report_comp", "guitarset_report_solo", "aam"):
+        for subset in ("guitarset_report_comp", "guitarset_report_solo", "aam", "sheets"):
             m = final["summary"].get(subset)
             if not m or "key_relations" not in m:
                 continue
@@ -1004,6 +1044,7 @@ def main(argv: list[str] | None = None) -> int:
         "--guitarset", type=Path, help="GuitarSet root (annotation/ + audio_mono-*/)"
     )
     parser.add_argument("--aam", type=Path, help="AAM root (annotations + mixes)")
+    parser.add_argument("--sheets", type=Path, help="rendered lead sheets (sheet_synth.py --out)")
     parser.add_argument("--aam-count", type=int, default=500)
     parser.add_argument(
         "--guitarset-chords", choices=("instructed", "performed"), default="instructed"
@@ -1031,13 +1072,15 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.aam:
         tracks += aam_tracks(args.aam, args.aam_count)
+    if args.sheets:
+        tracks += sheet_tracks(args.sheets)
     if not tracks:
-        print("no tracks found; check --guitarset / --aam", file=sys.stderr)
+        print("no tracks found; check --guitarset / --aam / --sheets", file=sys.stderr)
         return 1
     if args.limit:
         tracks = [
             t
-            for d in ("guitarset", "aam")
+            for d in ("guitarset", "aam", "sheets")
             for t in [x for x in tracks if x.dataset == d][: args.limit]
         ]
     if args.inspect:

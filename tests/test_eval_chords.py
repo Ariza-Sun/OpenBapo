@@ -357,3 +357,21 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         "| committee (tuned) | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s"
     )
     assert "仅独奏" in text and solo_row + " | 参考 |" in text
+
+
+def test_sheet_loader_reads_renders(tmp_path: Path) -> None:
+    from opencapo.sheet import parse_sheet, render, write_reference, write_wav
+
+    sheet = parse_sheet("title: t\nkey: D\ncapo: 2\nbpm: 120\n---\nC | 1 2 3 4\nG | 5 - - -\n")
+    rendered = render(sheet, melody=False)
+    write_wav(tmp_path / "t.wav", rendered.samples, rendered.sample_rate)
+    write_reference(tmp_path / "t.json", rendered.reference)
+    (tmp_path / "other.json").write_text("{}", encoding="utf-8")  # not a reference
+    tracks = eval_chords.sheet_tracks(tmp_path)
+    assert [t.name for t in tracks] == ["t"]
+    t = tracks[0]
+    assert t.dataset == "sheets" and t.group == "t" and t.key == (2, "major")
+    assert t.chord_labels == ["D:maj", "A:maj"]
+    np.testing.assert_allclose(t.chord_intervals, [[0.0, 2.0], [2.0, 4.0]])
+    assert len(t.beats) == 8 and t.downbeats.tolist() == [0.0, 2.0]
+    assert t.key_times == {"D major": 4.0} and t.key_share == 1.0

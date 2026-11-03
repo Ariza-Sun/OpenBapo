@@ -56,6 +56,16 @@
 
    `--cache` 把各专家的逐拍输出存下来，调参和复跑不用重算模型。
 
+4. **曲库合成评测（不需要任何录音）**：把谱子录成文本（格式见 `docs/examples/songbie.sheet`：头部是 `1=` 调、变调夹、速度、拍号，正文每行一小节，左边和弦指法、右边简谱），用 `scripts/sheet_synth.py` 渲染成音频加带时间戳的参考（扫弦吉他 + 贝斯 + 旋律声部，全部由代码合成），再喂给评测：
+
+   ```bash
+   python scripts/sheet_synth.py my-songs/*.sheet --out /data/sheets
+   python scripts/eval_chords.py --sheets /data/sheets --device cuda --cache /data/eval-cache --out /tmp/sheets-report
+   python scripts/analyze_chords.py --sheets /data/sheets --cache /data/eval-cache --subset sheets
+   ```
+
+   报表里这一组标"曲库合成（参考）"，不设门槛：合成音频和弦干净、没有人声，分数是真录音的上限而非估计。你录入的歌谱和渲染结果都不要提交，仓库只保留公有领域的示例曲。
+
    **torch 提醒**：lv-chordia 的依赖声明是 `torch>=2.13`，在只能用旧 CUDA 驱动（因而只能装旧 torch）的机器上，`pip install -e ".[analysis]"` 会把 torch 换成不匹配驱动的新版本。先装好与驱动匹配的 torch / torchaudio，再用约束文件钉住它们、lv-chordia 用 `--no-deps` 装并手动补其纯 Python 依赖：
 
    ```bash
