@@ -4,21 +4,24 @@ A sheet mirrors what a printed Chinese guitar sheet shows: a header (title,
 ``1=`` key, capo, tempo, metre) and one line per bar with the chord shapes
 on the left and the numbered melody on the right::
 
-    title: 送别
-    key: C         # the sheet's 1=, i.e. the sung key
-    capo: 0        # chord shapes are written in key - capo
-    bpm: 72
+    title: 小星星
+    key: D         # the sheet's 1=, i.e. the sung key
+    capo: 2        # chord shapes are written in key - capo
+    bpm: 100
     time: 4/4
     ---
-    C      | 5 3 5 1'
-    F C    | 6 1' 5 -
-    C(3) G | 5 [1 2] 3 -
+    C      | 1 1 5 5
+    F C    | 6 6 5 -
+    C(3) G | 4 [4 3] 3 -
 
 Chords divide the bar evenly unless given beat counts in parentheses.
 Melody tokens divide the bar evenly too; ``[ ]`` groups tokens into one
-share (so ``[6 6]`` is two eighths), ``'`` and ``,`` raise or lower an
-octave, ``0`` is a rest and ``-`` extends the previous note. A bar may
-leave either side empty. Lines starting with ``#`` are comments.
+share (so ``[6 6]`` is two eighths), a trailing ``.`` dots a note (it takes
+three quarters of its share plus the next token's, as ``[2. 5]`` for a
+dotted eighth and a sixteenth), ``'`` and ``,`` raise or lower an octave,
+``0`` is a rest and ``-`` extends the previous note, also across a bar
+line when it opens a bar. A bar may leave either side empty. Lines
+starting with ``#`` are comments.
 
 The sounding pitches follow the sheet's convention: the melody degrees are
 in the ``key`` (what is sung), the chord shapes sound ``capo`` semitones
@@ -79,6 +82,7 @@ class NoteSpan:
     degree: int | None  # 1-7, None for a rest
     octave: int  # 0 = the sheet's plain digits, +1 per ', -1 per ,
     beats: Fraction
+    tied: bool = False  # continues the previous bar's last note (a '-' opening the bar)
 
 
 @dataclass(frozen=True)
@@ -174,15 +178,22 @@ def _group_tokens(text: str) -> list:  # type: ignore[type-arg]
 
 
 def _flatten(items: list, share: Fraction) -> list[tuple[str, Fraction]]:  # type: ignore[type-arg]
+    """Share the beats among the items; a dotted token takes 1.5, the one after it 0.5."""
     out: list[tuple[str, Fraction]] = []
     if not items:
         return out
-    each = share / len(items)
-    for item in items:
+    weights = []
+    for i, item in enumerate(items):
+        dotted = isinstance(item, str) and item.endswith(".")
+        after_dot = i > 0 and isinstance(items[i - 1], str) and items[i - 1].endswith(".")
+        weights.append(Fraction(3, 2) if dotted else Fraction(1, 2) if after_dot else Fraction(1))
+    total = sum(weights, Fraction(0))
+    for item, weight in zip(items, weights, strict=True):
+        part = share * weight / total
         if isinstance(item, list):
-            out.extend(_flatten(item, each))
+            out.extend(_flatten(item, part))
         else:
-            out.append((item, each))
+            out.append((item.rstrip("."), part))
     return out
 
 
@@ -192,9 +203,11 @@ def parse_melody(text: str, beats_per_bar: int) -> tuple[NoteSpan, ...]:
     for token, beats in tokens:
         if token == "-":
             if not spans:
-                raise SheetError(f"'-' with nothing to extend in {text!r}")
+                # Opening a bar with '-' ties the previous bar's last note over.
+                spans.append(NoteSpan(None, 0, beats, tied=True))
+                continue
             last = spans[-1]
-            spans[-1] = NoteSpan(last.degree, last.octave, last.beats + beats)
+            spans[-1] = NoteSpan(last.degree, last.octave, last.beats + beats, last.tied)
             continue
         match = re.fullmatch(r"([0-7])('*)(,*)", token)
         if not match:
@@ -236,12 +249,16 @@ def parse_sheet(text: str, *, source: str = "") -> Sheet:
         raise SheetError(f"bad header value: {e}") from e
     if not 0 <= capo <= 11 or bpm <= 0 or beats_per_bar <= 0:
         raise SheetError("capo must be 0-11, bpm and time positive")
-    bars = []
+    bars: list[Bar] = []
     for line in body:
         chords_text, _, melody_text = line.partition("|")
-        bars.append(
-            Bar(parse_chords(chords_text, beats_per_bar), parse_melody(melody_text, beats_per_bar))
-        )
+        notes = parse_melody(melody_text, beats_per_bar)
+        if notes and notes[0].tied:
+            previous = bars[-1].notes[-1] if bars and bars[-1].notes else None
+            if previous is None:
+                raise SheetError(f"'-' opens a bar with nothing to tie to: {line!r}")
+            notes = (NoteSpan(previous.degree, previous.octave, notes[0].beats, True), *notes[1:])
+        bars.append(Bar(parse_chords(chords_text, beats_per_bar), notes))
     if not bars:
         raise SheetError("no bars")
     return Sheet(

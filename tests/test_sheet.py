@@ -16,22 +16,22 @@ from opencapo.model import ChordQuality, Mode
 from opencapo.sheet import SheetError, load_sheet, parse_sheet, render, write_reference, write_wav
 from opencapo.sheet.format import degree_midi, parse_chord_name, parse_chords, parse_melody
 
-EXAMPLE = Path(__file__).parents[1] / "docs" / "examples" / "songbie.sheet"
+EXAMPLE = Path(__file__).parents[1] / "docs" / "examples" / "xiaoxingxing.sheet"
 
 
 def test_parse_example_sheet() -> None:
     sheet = load_sheet(EXAMPLE)
-    assert sheet.title == "送别" and sheet.key == 2 and sheet.capo == 2 and sheet.bpm == 72
-    assert sheet.fingering_key == 0 and sheet.beats_per_bar == 4 and len(sheet.bars) == 16
-    assert sheet.duration == pytest.approx(16 * 4 * 60 / 72)
+    assert sheet.title == "小星星" and sheet.key == 2 and sheet.capo == 2 and sheet.bpm == 100
+    assert sheet.fingering_key == 0 and sheet.beats_per_bar == 4 and len(sheet.bars) == 12
+    assert sheet.duration == pytest.approx(12 * 4 * 60 / 100)
     first = sheet.bars[0]
     assert [(c.root, c.quality, c.beats) for c in first.chords] == [(0, ChordQuality.MAJ, 4)]
     assert [(n.degree, n.octave, n.beats) for n in first.notes] == [
-        (5, 0, 1), (3, 0, 1), (5, 0, 1), (1, 1, 1)
+        (1, 0, 1), (1, 0, 1), (5, 0, 1), (5, 0, 1)
     ]  # fmt: skip
     second = sheet.bars[1]
     assert [(c.root, c.beats) for c in second.chords] == [(5, 2), (0, 2)]
-    assert [(n.degree, n.beats) for n in second.notes] == [(6, 1), (1, 1), (5, 2)]  # the tie
+    assert [(n.degree, n.beats) for n in second.notes] == [(6, 1), (6, 1), (5, 2)]  # the tie
 
 
 @pytest.mark.parametrize(
@@ -75,8 +75,13 @@ def test_chord_and_melody_splitting() -> None:
         (1, 1, 1), (1, -2, 1), (1, 0, half), (2, 0, quarter), (3, 0, quarter)
     ]  # fmt: skip
     assert parse_melody("", 4) == ()
-    with pytest.raises(SheetError):
-        parse_melody("- 1", 4)
+    dotted = parse_melody("[0 2] [2. 5,] [2 2] [5, 6,]", 4)
+    assert [(n.degree, n.octave, n.beats) for n in dotted[1:4]] == [
+        (2, 0, Fraction(1, 2)), (2, 0, Fraction(3, 4)), (5, -1, Fraction(1, 4))
+    ]  # fmt: skip
+    assert parse_melody("1. 2 3", 4)[0].beats == Fraction(3, 2) * 4 / 3  # 1.5 : 0.5 : 1 of 4
+    opening_tie = parse_melody("- 0 0 0", 4)
+    assert opening_tie[0].tied and opening_tie[0].degree is None and opening_tie[0].beats == 1
     with pytest.raises(SheetError):
         parse_melody("8", 4)
     with pytest.raises(SheetError):
@@ -114,12 +119,12 @@ def test_render_reference_and_wav(tmp_path: Path) -> None:
     rendered = render(sheet)
     ref = rendered.reference
     assert ref["key"] == "D major" and ref["capo"] == 2 and ref["fingering_key"] == 0
-    assert len(ref["beats"]) == 64 and len(ref["downbeats"]) == 16
-    assert ref["chords"][0] == [0.0, pytest.approx(4 * 60 / 72), "D:maj"]  # C shape, capo 2
+    assert len(ref["beats"]) == 48 and len(ref["downbeats"]) == 12
+    assert ref["chords"][0] == [0.0, pytest.approx(4 * 60 / 100), "D:maj"]  # C shape, capo 2
     labels = {c[2] for c in ref["chords"]}
-    assert labels == {"D:maj", "G:maj", "A:maj", "A:7"}
+    assert labels == {"D:maj", "G:maj", "A:maj"}
     assert ref["chords"][-1][1] == pytest.approx(sheet.duration)
-    assert ref["melody"][0][2] == 69 and ref["melody"][3][2] == 74  # 5 and 1' in D
+    assert ref["melody"][0][2] == 62 and ref["melody"][2][2] == 69  # 1 and 5 in D
     assert rendered.samples.shape[0] == 2 and rendered.samples.shape[1] > sheet.duration * 44100
     assert 0.5 < float(np.abs(rendered.samples).max()) <= 0.9
     again = render(sheet)
@@ -129,7 +134,7 @@ def test_render_reference_and_wav(tmp_path: Path) -> None:
         assert f.getnchannels() == 2 and f.getframerate() == 44100
         assert f.getnframes() == rendered.samples.shape[1]
     write_reference(tmp_path / "x.json", ref)
-    assert json.loads((tmp_path / "x.json").read_text(encoding="utf-8"))["title"] == "送别"
+    assert json.loads((tmp_path / "x.json").read_text(encoding="utf-8"))["title"] == "小星星"
 
 
 def test_render_without_bass_or_melody_is_quieter() -> None:
@@ -149,3 +154,14 @@ def test_chroma_expert_hears_the_rendered_sheet() -> None:
     assert result.key is not None and (result.key.tonic, result.key.mode) == (2, Mode.MAJOR)
     in_key = sum(c.end - c.start for c in result.chords if c.root in (2, 7, 9))
     assert in_key / sheet.duration > 0.7
+
+
+def test_tie_across_a_bar_line_holds_one_note() -> None:
+    sheet = parse_sheet("key: C\nbpm: 120\n---\nC | 1 2 3 6,\nC | - 0 0 0\nC | 1 1 1 1\n")
+    held = sheet.bars[1].notes[0]
+    assert held.tied and (held.degree, held.octave, held.beats) == (6, -1, 1)
+    ref = render(sheet, bass=False).reference["melody"]
+    assert ref[3] == [1.5, 2.5, 57]  # 6, lasts into the next bar as one note
+    assert len(ref) == 4 + 3 + 4
+    with pytest.raises(SheetError):
+        parse_sheet("---\nC | - 1 1 1\n")

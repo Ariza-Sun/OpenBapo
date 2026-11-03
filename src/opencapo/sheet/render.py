@@ -125,10 +125,15 @@ def render(sheet: Sheet, *, bass: bool = True, melody: bool = True, seed: int = 
     def seconds(beat_position: Fraction) -> float:
         return round(float(beat_position) * spb, 6)
 
-    def add(track: NDArray[np.float64], start: float, signal: NDArray[np.float64]) -> None:
+    def add(
+        track: NDArray[np.float64], start: float, signal: NDArray[np.float64], replace: bool = False
+    ) -> None:
         i = int(start * SAMPLE_RATE)
         j = min(total, i + len(signal))
-        track[i:j] += signal[: j - i]
+        if replace:
+            track[i:j] = signal[: j - i]
+        else:
+            track[i:j] += signal[: j - i]
 
     plucks = 0
     for bar_index, bar in enumerate(sheet.bars):
@@ -175,9 +180,16 @@ def render(sheet: Sheet, *, bass: bool = True, melody: bool = True, seed: int = 
         for note in bar.notes:
             start, end = seconds(position), seconds(position + note.beats)
             pitch = degree_midi(sheet, note)
-            ref_melody.append([start, end, pitch])
-            if melody and pitch is not None:
-                add(voice, start, 0.3 * melody_tone(pitch, end - start))
+            if note.tied and ref_melody and ref_melody[-1][2] == pitch:
+                # Held over the bar line: one reference note, one longer tone.
+                held_start = float(ref_melody[-1][0])  # type: ignore[arg-type]
+                ref_melody[-1][1] = end
+                if melody and pitch is not None:
+                    add(voice, held_start, 0.3 * melody_tone(pitch, end - held_start), replace=True)
+            else:
+                ref_melody.append([start, end, pitch])
+                if melody and pitch is not None:
+                    add(voice, start, 0.3 * melody_tone(pitch, end - start))
             position += note.beats
 
     if not bass:
