@@ -75,8 +75,10 @@ def test_guitarset_loader(tmp_path: Path) -> None:
         0.0,
         2.0,
     ]
+    assert first.performed_labels == ["C:maj"]  # the second chord annotation rides along
+    np.testing.assert_allclose(first.performed_intervals, [[0.0, 2.0]])
     performed = eval_chords.guitarset_tracks(root, chords="performed")
-    assert performed[0].chord_labels == ["C:maj"]
+    assert performed[0].chord_labels == ["C:maj"] and performed[0].performed_labels is None
 
 
 def test_jams_dict_of_lists_form() -> None:
@@ -315,6 +317,7 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         },
     ]
     rows[0]["track"] = "00_BN1-129-Eb_comp"
+    rows[0]["majmin_performed"], rows[0]["root_performed"] = 0.9, 1.0
     rows[1]["track"] = "03_Rock1-130-A_solo"
     rows[1]["key_relation"] = "relative"
     rows[2]["key_relation"], rows[2]["key_share"] = "other", 0.6  # a modulating piece
@@ -329,6 +332,8 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         summary["aam"]["key_exact_single_key"] == 1.0 and summary["aam"]["single_key_tracks"] == 1
     )
     assert "key_exact_single_key" not in summary["guitarset_report"]
+    assert summary["guitarset_tune_comp"]["majmin_performed"] == 0.9
+    assert "majmin_performed" not in summary["aam"]  # no performed annotation there
     assert summary["aam"]["key_hit_major_modulating"] == 1.0
     assert summary["aam"]["modulating_tracks"] == 1 and summary["aam"]["key_exact"] == 0.5
     assert summary["guitarset_tune"]["majmin"] == 0.8 and summary["guitarset_tune"]["tracks"] == 1
@@ -345,6 +350,7 @@ def test_summarize_splits_by_dataset_and_group() -> None:
     assert "| committee (tuned) | 0.600 |" in text and "- note" in text
     assert "| aam | 1 | 0 | 0 | 0 | 1 | 0 | 1.000" in text and text.count("1 首") >= 2
     assert "转调曲目命中任一主要调" in text
+    assert "对实奏和弦" in text and "| committee (tuned) | 0.900 | 1.000 |" in text
     assert "| 2.00 s | 参考 |" in text  # the solo-only and mixed GuitarSet rows are reference
     assert "| 3.00 s | 通过 |" in text  # gated on the single-key piece although key_exact is 0.5
     solo_row = (

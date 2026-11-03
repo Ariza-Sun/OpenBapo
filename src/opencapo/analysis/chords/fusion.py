@@ -75,6 +75,9 @@ class FusionParams:
     no_chord_bias: float = 0.0  # added to the log score of "N"
     foreign_bass_penalty: float = 0.7  # confidence multiplier when the bass is not a chord tone
     min_bass_strength: float = 0.3  # weaker bass evidence is ignored
+    # A lead sheet holds the chord through a rest shorter than a bar; longer
+    # silences (a break, a drum solo) stay "N". Not tuned: notation convention.
+    fill_gaps_under_bar: bool = True
 
 
 def aggregate_to_beats(
@@ -200,6 +203,8 @@ def decode(
     log_scores = np.log(fused + EPS) + key_prior(key, params.key_prior)
     log_scores[:, NO_CHORD] += params.no_chord_bias
     labels = viterbi(log_scores, [b.is_downbeat for b in beats], params)
+    if params.fill_gaps_under_bar:
+        labels = fill_gaps(labels, beats_per_bar(beats))
     agree = agreement(labels, [beat_probs[name] for name in model_names if name in beat_probs])
     confidence = fused[np.arange(n), labels] * agree
 
@@ -234,6 +239,37 @@ def decode(
             )
         start = end + 1
     return FusionResult(tuple(chords), labels, confidence)
+
+
+def beats_per_bar(beats: Sequence[Beat]) -> int:
+    """Median beats between downbeats; 4 when the grid has fewer than two downbeats."""
+    downbeats = [i for i, b in enumerate(beats) if b.is_downbeat]
+    if len(downbeats) < 2:
+        return 4
+    return int(np.median(np.diff(downbeats)))
+
+
+def fill_gaps(labels: NDArray[np.int64], max_gap: int) -> NDArray[np.int64]:
+    """Replace runs of N shorter than `max_gap` beats that sit between chords with the chord before.
+
+    Leading and trailing N stay: nothing precedes a leading gap, and a tail
+    that fades to silence is not a rest inside a phrase.
+    """
+    out = labels.copy()
+    n = len(out)
+    i = 0
+    while i < n:
+        if out[i] != NO_CHORD:
+            i += 1
+            continue
+        j = i
+        while j < n and out[j] == NO_CHORD:
+            j += 1
+        interior = i > 0 and j < n
+        if interior and j - i < max_gap:
+            out[i:j] = out[i - 1]
+        i = j
+    return out
 
 
 def _segment_bass(

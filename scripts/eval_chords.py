@@ -64,6 +64,10 @@ class Track:
     downbeats: np.ndarray  # seconds
     key_share: float = 1.0  # fraction of the piece the reference key covers (AAM modulates)
     key_times: dict[str, float] = field(default_factory=dict)  # "F major" -> seconds, per key
+    # GuitarSet's second chord annotation: what the player actually sounded
+    # (substitutions and all), scored alongside the lead sheet as a reference.
+    performed_intervals: np.ndarray | None = None
+    performed_labels: list[str] | None = None
 
 
 def read_jams(path: Path) -> dict:
@@ -97,6 +101,13 @@ def guitarset_tracks(root: Path, *, chords: str = "instructed", audio: str = "mi
         obs = jams_observations(ann)
         intervals = np.array([[o["time"], o["time"] + o["duration"]] for o in obs], dtype=float)
         labels = [str(o["value"]) for o in obs]
+        performed_intervals = performed_labels = None
+        if chords == "instructed" and len(chord_anns) > 1:
+            performed = jams_observations(chord_anns[1])
+            performed_intervals = np.array(
+                [[o["time"], o["time"] + o["duration"]] for o in performed], dtype=float
+            )
+            performed_labels = [str(o["value"]) for o in performed]
         key = None
         if by_ns.get("key_mode"):
             key = parse_key(str(jams_observations(by_ns["key_mode"][0])[0]["value"]))
@@ -125,6 +136,8 @@ def guitarset_tracks(root: Path, *, chords: str = "instructed", audio: str = "mi
                 key=key,
                 beats=np.array(beats, dtype=float),
                 downbeats=np.array(downbeats, dtype=float),
+                performed_intervals=performed_intervals,
+                performed_labels=performed_labels,
             )
         )
     return tracks
@@ -657,6 +670,12 @@ def score_system(
             "group": track.group,
         }
         row.update(chord_scores(track.chord_intervals, track.chord_labels, intervals, labels))
+        row["majmin_performed"] = row["root_performed"] = float("nan")
+        if track.performed_intervals is not None and track.performed_labels is not None:
+            performed = chord_scores(
+                track.performed_intervals, track.performed_labels, intervals, labels
+            )
+            row["majmin_performed"], row["root_performed"] = performed["majmin"], performed["root"]
         row.update(key_scores(track.key, key))
         row["key_share"] = track.key_share
         row["key_hit_major"] = key_hit_major(track, key)
@@ -694,6 +713,9 @@ def summarize(system: dict) -> dict:
             m: mean_of(subset_rows, m)
             for m in (*CHORD_METRICS, "key_exact", "key_weighted", "seconds")
         }
+        if any(not np.isnan(r.get("majmin_performed", float("nan"))) for r in subset_rows):
+            summary[subset]["majmin_performed"] = mean_of(subset_rows, "majmin_performed")
+            summary[subset]["root_performed"] = mean_of(subset_rows, "root_performed")
         summary[subset]["tracks"] = len(subset_rows)
         relations = [r["key_relation"] for r in subset_rows if r.get("key_relation")]
         summary[subset]["key_relations"] = {k: relations.count(k) for k in KEY_RELATION_NAMES}
@@ -720,21 +742,24 @@ def tune(tracks: list[Track], outputs: dict[str, TrackOutputs], expert_names, mo
     """Grid search FusionParams on the tuning tracks, maximising majmin."""
     from opencapo.analysis.chords.fusion import FusionParams
 
-    weight_grid = [0.5, 1.0, 2.0]
+    # Model experts weigh 0.5-2; the rule-based chroma expert may also be dropped (0).
+    weight_grids = [[0.5, 1.0, 2.0] if n in model_names else [0.0, 0.5, 1.0] for n in expert_names]
     grids = {
-        "key_prior": [0.0, 0.5, 1.0],
+        "key_prior": [0.5, 1.0],
         "change_cost_downbeat": [0.1, 0.3, 1.0],
         "change_cost_beat": [0.5, 1.5, 3.0],
+        "no_chord_bias": [0.0, -1.0, -2.0],
     }
     best, best_score = None, -1.0
-    weight_combos = list(itertools.product(weight_grid, repeat=len(expert_names)))
+    weight_combos = list(itertools.product(*weight_grids))
     for weights in weight_combos:
-        for key_prior, cost_db, cost_b in itertools.product(*grids.values()):
+        for key_prior, cost_db, cost_b, bias in itertools.product(*grids.values()):
             params = FusionParams(
                 weights=dict(zip(expert_names, weights, strict=True)),
                 key_prior=key_prior,
                 change_cost_downbeat=cost_db,
                 change_cost_beat=cost_b,
+                no_chord_bias=bias,
             )
             rows = score_system("tune", tracks, outputs, expert_names, model_names, params)["rows"]
             score = mean_of(rows, "majmin")
@@ -836,6 +861,35 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
                 verdict,
             ]
             lines.append("| " + " | ".join(cells) + " |")
+        lines.append("")
+    performed_subsets = [
+        (sub, title)
+        for sub, title in (
+            ("guitarset_report_comp", "报数半伴奏"),
+            ("guitarset_tune_comp", "调参半伴奏"),
+        )
+        if any("majmin_performed" in s["summary"].get(sub, {}) for s in systems)
+    ]
+    if performed_subsets:
+        lines += [
+            "## GuitarSet 对实奏和弦（参考）",
+            "",
+            "谱面（lead sheet）是吉他手该弹什么，实奏是从音符转录出的他实际弹了什么"
+            "（爵士里常有替代和弦）。"
+            '对实奏的分数衡量"听得准不准"，对谱面的分数衡量"能不能还原谱子"；门槛只看谱面。',
+            "",
+            "| 系统 | " + " | ".join(f"{t} majmin | {t} root" for _, t in performed_subsets) + " |",
+            "|---|" + "---|---|" * len(performed_subsets),
+        ]
+        for s in systems:
+            cells = [s["system"]]
+            for sub, _ in performed_subsets:
+                m = s["summary"].get(sub, {})
+                cells += [
+                    fmt(m.get("majmin_performed", float("nan"))),
+                    fmt(m.get("root_performed", float("nan"))),
+                ]
+            lines.append("| " + " | ".join(cells) + " |")  # fmt: skip
         lines.append("")
     final = next((s for s in systems if s["system"] == "committee (tuned)"), None)
     if final is not None:

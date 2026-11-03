@@ -7,7 +7,9 @@ from opencapo.analysis.chords.fusion import (
     FusionParams,
     aggregate_to_beats,
     agreement,
+    beats_per_bar,
     decode,
+    fill_gaps,
     fuse,
     key_prior,
     viterbi,
@@ -126,7 +128,9 @@ def test_decode_builds_chords_on_beats_with_gaps_for_no_chord() -> None:
         {"m": probs_for(labels), "r": probs_for(labels, p=0.5)},
         ["m"],
         duration=4.25,
-        params=FusionParams(change_cost_beat=0.0, change_cost_downbeat=0.0),
+        params=FusionParams(
+            change_cost_beat=0.0, change_cost_downbeat=0.0, fill_gaps_under_bar=False
+        ),
     )
     chords = result.chords
     assert [(c.start, c.end) for c in chords] == [(0.0, 2.0), (3.0, 4.25)]
@@ -136,6 +140,24 @@ def test_decode_builds_chords_on_beats_with_gaps_for_no_chord() -> None:
     assert all(c.end in beat_times or c.end == 4.25 for c in chords)
     assert all(0.0 < c.confidence <= 1.0 for c in chords)
     Analysis(beats=tuple(beats), chords=chords)  # satisfies the data model
+
+
+def test_short_gaps_are_held_like_a_lead_sheet() -> None:
+    beats = beat_grid(12)  # 3 bars of 4
+    labels = [NO_CHORD, C, C, NO_CHORD, NO_CHORD, NO_CHORD, G, G, G, G, NO_CHORD, NO_CHORD]
+    filled = fill_gaps(np.array(labels), beats_per_bar(beats))
+    assert filled.tolist() == [NO_CHORD, C, C, C, C, C, G, G, G, G, NO_CHORD, NO_CHORD]
+    long_gap = [C, *([NO_CHORD] * 4), G]  # a whole bar of silence stays N
+    assert fill_gaps(np.array(long_gap), 4).tolist() == long_gap
+    assert beats_per_bar(beat_grid(9, per_bar=3)) == 3 and beats_per_bar(beat_grid(2)) == 4
+    result = decode(
+        beats,
+        {"m": probs_for(labels)},
+        ["m"],
+        duration=6.0,
+        params=FusionParams(change_cost_beat=0.0, change_cost_downbeat=0.0),
+    )
+    assert [(c.start, c.end, c.root) for c in result.chords] == [(0.5, 3.0, 0), (3.0, 5.0, 7)]
 
 
 def test_decode_confidence_is_posterior_times_agreement() -> None:
