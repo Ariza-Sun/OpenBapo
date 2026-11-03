@@ -144,6 +144,21 @@ def test_decode_builds_chords_on_beats_with_gaps_for_no_chord() -> None:
     Analysis(beats=tuple(beats), chords=chords)  # satisfies the data model
 
 
+def test_voiced_pooling_reads_the_struck_frames() -> None:
+    # Four frames in one beat: the chord sounds on the first, the rest is near silence.
+    probs = np.full((4, N_LABELS), 0.001)
+    probs[0, C] = 0.9
+    probs[1:, NO_CHORD] = 0.95
+    probs /= probs.sum(axis=1, keepdims=True)
+    post = ChordPosteriors(times=np.array([0.0, 0.1, 0.2, 0.3]), probs=probs)
+    plain = aggregate_to_beats(post, [0.0], 0.5)
+    voiced = aggregate_to_beats(post, [0.0], 0.5, voiced=True)
+    assert int(np.argmax(plain[0])) == NO_CHORD and int(np.argmax(voiced[0])) == C
+    assert voiced.sum() == pytest.approx(1.0)
+    silent = ChordPosteriors(times=np.array([0.0]), probs=probs[1:2])
+    np.testing.assert_allclose(aggregate_to_beats(silent, [0.0], 0.5, voiced=True), probs[1:2])
+
+
 def test_short_gaps_are_held_like_a_lead_sheet() -> None:
     beats = beat_grid(12)  # 3 bars of 4
     labels = [NO_CHORD, C, C, NO_CHORD, NO_CHORD, NO_CHORD, G, G, G, G, NO_CHORD, NO_CHORD]

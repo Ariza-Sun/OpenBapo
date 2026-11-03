@@ -489,10 +489,33 @@ class TrackOutputs:
 
     beats: list  # opencapo Beat objects
     duration: float
-    beat_probs: dict[str, np.ndarray]
+    beat_probs: dict[str, np.ndarray]  # plain per-beat means, as the stage computed them
     bass: object | None
     chroma_scores: np.ndarray
     seconds: dict[str, float] = field(default_factory=dict)
+    # Frame-level posteriors (times, float16 probs) per expert, so the beat
+    # pooling itself can be varied at scoring time; older caches lack them.
+    frame_probs: dict[str, tuple[np.ndarray, np.ndarray]] = field(default_factory=dict)
+
+    def pooled(self, names: Sequence[str], voiced: bool) -> dict[str, np.ndarray]:
+        """Per-beat posteriors for these experts; voiced pooling needs frame_probs."""
+        if not voiced:
+            return {n: self.beat_probs[n] for n in names}
+        from opencapo.analysis.chords.fusion import ChordPosteriors, aggregate_to_beats
+
+        cache = self.__dict__.setdefault("_voiced", {})
+        frames = getattr(self, "frame_probs", {})  # objects pickled before the field existed
+        beat_times = [b.time for b in self.beats]
+        for n in names:
+            if n in cache:
+                continue
+            if n in frames:
+                times, probs = frames[n]
+                post = ChordPosteriors(times=times, probs=probs.astype(np.float64))
+                cache[n] = aggregate_to_beats(post, beat_times, self.duration, voiced=True)
+            else:
+                cache[n] = self.beat_probs[n]  # no frames cached: same as plain pooling
+        return {n: cache[n] for n in names}
 
 
 def build_experts(names: Sequence[str], device: str) -> list:
@@ -509,8 +532,8 @@ def build_experts(names: Sequence[str], device: str) -> list:
 
 
 def compute_outputs(track: Track, experts: list, separator, device: str) -> TrackOutputs:  # type: ignore[no-untyped-def]
-    from opencapo.analysis.audio import Audio, decode
-    from opencapo.analysis.chords.bassline import BassLineDetector
+    from opencapo.analysis.audio import decode
+    from opencapo.analysis.chords.bassline import BassLineDetector, bass_source
     from opencapo.analysis.chords.chroma import ChromaTemplateExpert, chromagram, mean_chroma
     from opencapo.analysis.chords.fusion import aggregate_to_beats
     from opencapo.analysis.chords.key import scores_from_chroma
@@ -529,6 +552,7 @@ def compute_outputs(track: Track, experts: list, separator, device: str) -> Trac
     harmonic = stems.mix("bass", "other", "vocals") if stems is not None else audio
     gram = chromagram(harmonic)
     beat_probs = {}
+    frame_probs = {}
     for expert in experts:
         start = time.perf_counter()
         post = (
@@ -537,12 +561,12 @@ def compute_outputs(track: Track, experts: list, separator, device: str) -> Trac
             else expert.estimate(audio, stems)
         )
         beat_probs[expert.name] = aggregate_to_beats(post, beat_times, audio.duration)
-        seconds[expert.name] = time.perf_counter() - start
-    bass = None
-    if stems is not None:
-        bass = BassLineDetector().detect(
-            Audio(samples=stems.bass, sample_rate=stems.sample_rate), beat_times, audio.duration
+        frame_probs[expert.name] = (
+            np.asarray(post.times),
+            np.asarray(post.probs, dtype=np.float16),
         )
+        seconds[expert.name] = time.perf_counter() - start
+    bass = BassLineDetector().detect(bass_source(audio, stems), beat_times, audio.duration)
     return TrackOutputs(
         beats=beats,
         duration=audio.duration,
@@ -550,6 +574,7 @@ def compute_outputs(track: Track, experts: list, separator, device: str) -> Trac
         bass=bass,
         chroma_scores=scores_from_chroma(mean_chroma(gram)),
         seconds=seconds,
+        frame_probs=frame_probs,
     )
 
 
@@ -559,7 +584,7 @@ def preliminary_chords(
     """The chords decoded without a key prior; the key is estimated from these."""
     from opencapo.analysis.chords.fusion import decode
 
-    probs = {n: outputs.beat_probs[n] for n in expert_names}
+    probs = outputs.pooled(expert_names, params.voiced_aggregation)
     models = [n for n in model_names if n in probs]
     return list(
         decode(
@@ -624,7 +649,7 @@ def run_fusion(
     from opencapo.analysis.chords.key import estimate_key, scores_from_chords
     from opencapo.analysis.chords.vocab import format_label
 
-    probs = {n: outputs.beat_probs[n] for n in expert_names}
+    probs = outputs.pooled(expert_names, params.voiced_aggregation)
     models = [n for n in model_names if n in probs]
     preliminary = preliminary_chords(outputs, expert_names, model_names, params)
     key = estimate_key(outputs.chroma_scores, scores_from_chords(preliminary), preliminary)
@@ -749,11 +774,12 @@ def tune(tracks: list[Track], outputs: dict[str, TrackOutputs], expert_names, mo
         "change_cost_beat": [0.5, 1.5, 3.0],
         "no_chord_bias": [0.0, -1.0, -2.0],
         "bass_weight": [0.0, 1.0, 2.0],
+        "voiced_aggregation": [False, True],
     }
     best, best_score = None, -1.0
     weight_combos = list(itertools.product(*weight_grids))
     for weights in weight_combos:
-        for cost_b, bias, bass_weight in itertools.product(*grids.values()):
+        for cost_b, bias, bass_weight, voiced in itertools.product(*grids.values()):
             params = FusionParams(
                 weights=dict(zip(expert_names, weights, strict=True)),
                 key_prior=0.5,
@@ -761,6 +787,7 @@ def tune(tracks: list[Track], outputs: dict[str, TrackOutputs], expert_names, mo
                 change_cost_beat=cost_b,
                 no_chord_bias=bias,
                 bass_weight=bass_weight,
+                voiced_aggregation=voiced,
             )
             rows = score_system("tune", tracks, outputs, expert_names, model_names, params)["rows"]
             score = mean_of(rows, "majmin")
@@ -1045,6 +1072,13 @@ def main(argv: list[str] | None = None) -> int:
         if cache_file:
             cache_file.write_bytes(pickle.dumps(outputs[track.name]))
 
+    without_frames = sum(1 for o in outputs.values() if not getattr(o, "frame_probs", None))
+    if without_frames:
+        print(
+            f"note: {without_frames} cached tracks have no frame posteriors; "
+            "voiced pooling falls back to plain means there",
+            file=sys.stderr,
+        )
     # Self-check: the annotations against themselves must score 1.0.
     self_rows = []
     for t in tracks:

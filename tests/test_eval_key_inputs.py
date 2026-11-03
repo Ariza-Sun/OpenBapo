@@ -105,3 +105,22 @@ def test_relation_names() -> None:
     assert eval_key_inputs.relation("C major", "C minor") == "parallel"
     assert eval_key_inputs.relation("C major", "F major") == "other"
     assert eval_key_inputs.relation("C major", None) == "none"
+
+
+def test_voiced_pooling_uses_cached_frames_and_falls_back_without_them() -> None:
+    from opencapo.analysis.chords.fusion import FusionParams
+
+    out = outputs_for([(0, ChordQuality.MAJ)], beats_per_chord=2)
+    probs = np.full((4, N_LABELS), 0.001)
+    probs[0, label_index(7, ChordQuality.MAJ)] = 0.9  # G struck on the first frame of beat 1
+    probs[1:, N_LABELS - 1] = 0.95
+    probs /= probs.sum(axis=1, keepdims=True)
+    out.frame_probs = {"fake": (np.array([0.0, 0.1, 0.2, 0.3]), probs.astype(np.float16))}
+    plain = out.pooled(["fake"], voiced=False)["fake"]
+    voiced = out.pooled(["fake"], voiced=True)["fake"]
+    assert int(np.argmax(plain[0])) == label_index(0, ChordQuality.MAJ)  # the stage's own means
+    assert int(np.argmax(voiced[0])) == label_index(7, ChordQuality.MAJ)
+    assert out.pooled(["fake"], voiced=True)["fake"] is voiced  # cached
+    fresh = outputs_for([(0, ChordQuality.MAJ)], beats_per_chord=2)  # no frames cached
+    np.testing.assert_array_equal(fresh.pooled(["fake"], True)["fake"], fresh.beat_probs["fake"])
+    assert FusionParams().voiced_aggregation is False

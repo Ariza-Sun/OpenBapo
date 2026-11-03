@@ -3,7 +3,12 @@ import pytest
 from synth import SR, progression, to_stereo, voicing
 
 from opencapo.analysis.audio import Audio
-from opencapo.analysis.chords.bassline import BassLineDetector, bass_pitch_classes, pool_per_beat
+from opencapo.analysis.chords.bassline import (
+    BassLineDetector,
+    bass_pitch_classes,
+    bass_source,
+    pool_per_beat,
+)
 from opencapo.analysis.chords.chroma import (
     Chromagram,
     ChromaTemplateExpert,
@@ -243,3 +248,14 @@ def test_end_to_end_key_from_synthetic_audio(tonic: int) -> None:
     chroma_scores = scores_from_chroma(mean_chroma(chromagram(audio)))
     key = estimate_key(chroma_scores, np.zeros(24))
     assert key is not None and (key.tonic, key.mode) == (tonic, Mode.MAJOR)
+
+
+def test_bass_source_falls_back_to_the_mix_when_the_stem_is_silent() -> None:
+    mix = to_stereo(progression([(voicing([0, 4, 7]), 1.0)]))
+    quiet = np.zeros_like(mix.samples)
+    quiet[:, :100] = 0.001
+    stems = Stems(sample_rate=SR, vocals=quiet, drums=quiet, bass=quiet, other=mix.samples)
+    assert bass_source(mix, stems) is mix
+    loud = Stems(sample_rate=SR, vocals=quiet, drums=quiet, bass=mix.samples, other=quiet)
+    assert bass_source(mix, loud) is not mix  # the stem itself
+    assert bass_source(mix, None) is mix

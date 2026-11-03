@@ -14,6 +14,7 @@ from numpy.typing import NDArray
 
 from opencapo.analysis.audio import Audio
 from opencapo.analysis.chords.fusion import BassEstimate
+from opencapo.analysis.separate import Stems
 
 SAMPLE_RATE = 22050
 HOP = 2048
@@ -91,6 +92,24 @@ def pool_per_beat(
         out_pc[i] = winner
         out_strength[i] = float(votes[winner] / mask.sum())
     return BassEstimate(out_pc, out_strength)
+
+
+MIN_STEM_RATIO = 0.1  # the bass stem must hold at least -20 dB of the mix's RMS to be trusted
+
+
+def bass_source(audio: Audio, stems: Stems | None, min_ratio: float = MIN_STEM_RATIO) -> Audio:
+    """The bass stem when the separator found a bass; otherwise the mix itself.
+
+    A solo guitar or a piano piece has no bass part for Demucs to extract:
+    its bass stem is near silence, and the lowest strong note of the whole
+    mix is the bass line a transcriber would follow.
+    """
+    if stems is None:
+        return audio
+    stem = Audio(samples=stems.bass, sample_rate=stems.sample_rate)
+    mix_rms = float(np.sqrt(np.mean(np.square(audio.mono()))))
+    stem_rms = float(np.sqrt(np.mean(np.square(stem.mono()))))
+    return stem if mix_rms <= 0 or stem_rms >= min_ratio * mix_rms else audio
 
 
 class BassLineDetector:

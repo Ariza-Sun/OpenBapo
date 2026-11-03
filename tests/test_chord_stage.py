@@ -88,11 +88,12 @@ def test_stage_reports_an_inversion_from_the_bass_stem() -> None:
     assert chord.root == 0 and chord.bass in (None, 7)
 
 
-def test_stage_without_stems_skips_the_bass() -> None:
+def test_stage_without_stems_reads_the_bass_from_the_mix() -> None:
     audio = progression([(voicing([0, 4, 7]), 2.0)])
     stage = ChordStage([FakeChordExpert([(C, 2.0)])])
     result = stage.run(audio, None, beats(4), 2.0)
-    assert result.bass is None and len(result.chords) == 1
+    assert result.bass is not None and set(result.bass.pitch_class.tolist()) == {0}
+    assert len(result.chords) == 1
 
 
 def test_stage_needs_an_expert() -> None:

@@ -88,15 +88,25 @@ class FusionParams:
     # move): log-score bonus, scaled by the detection strength, for chords
     # whose root is the bass note; half of it when the bass is another chord tone.
     bass_weight: float = 0.0
+    # Weight frames by 1 - P(N) when pooling an expert's output per beat (see
+    # aggregate_to_beats); applied before decode by whoever aggregates.
+    voiced_aggregation: bool = False
 
 
 def aggregate_to_beats(
-    posteriors: ChordPosteriors, beat_times: Sequence[float], end_time: float
+    posteriors: ChordPosteriors,
+    beat_times: Sequence[float],
+    end_time: float,
+    *,
+    voiced: bool = False,
 ) -> NDArray[np.float64]:
     """Average frame posteriors inside each beat interval [t_i, t_{i+1}).
 
-    A beat that contains no frame takes the nearest frame, so short beats at
-    coarse hop sizes still get a distribution.
+    With `voiced`, each frame is weighted by how sure the expert is that a
+    chord sounds there (1 - P(N)), so a sparse, syncopated accompaniment is
+    read from the frames where the chord is struck rather than diluted by
+    the rests in between. A beat that contains no frame takes the nearest
+    frame, so short beats at coarse hop sizes still get a distribution.
     """
     n_beats = len(beat_times)
     out = np.zeros((n_beats, N_LABELS))
@@ -109,7 +119,11 @@ def aggregate_to_beats(
         if len(rows) == 0:
             nearest = int(np.argmin(np.abs(posteriors.times - beat_times[i])))
             rows = posteriors.probs[nearest : nearest + 1]
-        out[i] = rows.mean(axis=0)
+        if voiced:
+            weights = 1.0 - rows[:, NO_CHORD] + EPS
+            out[i] = weights @ rows / weights.sum()
+        else:
+            out[i] = rows.mean(axis=0)
     return out
 
 

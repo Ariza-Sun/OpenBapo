@@ -17,7 +17,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from opencapo.analysis.audio import Audio
-from opencapo.analysis.chords.bassline import BassLineDetector
+from opencapo.analysis.chords.bassline import BassLineDetector, bass_source
 from opencapo.analysis.chords.chroma import ChromaTemplateExpert, chromagram, mean_chroma
 from opencapo.analysis.chords.fusion import (
     BassEstimate,
@@ -76,15 +76,14 @@ class ChordStage:
                 posteriors = expert.from_chromagram(gram)
             else:
                 posteriors = expert.estimate(audio, stems)
-            beat_probs[expert.name] = aggregate_to_beats(posteriors, beat_times, duration)
+            beat_probs[expert.name] = aggregate_to_beats(
+                posteriors, beat_times, duration, voiced=self.params.voiced_aggregation
+            )
             timings[expert.name] = time.perf_counter() - start
 
-        bass = None
-        if stems is not None:
-            start = time.perf_counter()
-            bass_audio = Audio(samples=stems.bass, sample_rate=stems.sample_rate)
-            bass = self.bass_detector.detect(bass_audio, beat_times, duration)
-            timings["bass"] = time.perf_counter() - start
+        start = time.perf_counter()
+        bass = self.bass_detector.detect(bass_source(audio, stems), beat_times, duration)
+        timings["bass"] = time.perf_counter() - start
 
         start = time.perf_counter()
         preliminary = decode(
