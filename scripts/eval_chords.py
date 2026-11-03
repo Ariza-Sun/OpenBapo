@@ -63,6 +63,7 @@ class Track:
     beats: np.ndarray  # seconds
     downbeats: np.ndarray  # seconds
     key_share: float = 1.0  # fraction of the piece the reference key covers (AAM modulates)
+    key_times: dict[str, float] = field(default_factory=dict)  # "F major" -> seconds, per key
 
 
 def read_jams(path: Path) -> dict:
@@ -270,6 +271,7 @@ def aam_track(track_id: str, audio: Path, beatinfo: Path, segments: Path) -> Tra
         beats=beats,
         downbeats=downbeats,
         key_share=share,
+        key_times=aam_key_times(sections, end),
     )
 
 
@@ -297,16 +299,31 @@ def aam_key(
     AAM pieces may modulate between sections; the share tells modulating
     pieces (share < 1) from single-key ones.
     """
-    time_by_key: dict[str, float] = {}
-    bounds = [*(s[0] for s in sections[1:]), end]
-    for (start, _, key), next_start in zip(sections, bounds, strict=True):
-        if key.strip():
-            time_by_key[key] = time_by_key.get(key, 0.0) + max(0.0, next_start - start)
+    time_by_key = aam_key_times(sections, end)
     if not time_by_key:
         return None, 1.0
     best = max(time_by_key, key=lambda k: time_by_key[k])
     total = sum(time_by_key.values())
     return parse_key(best), (time_by_key[best] / total if total > 0 else 1.0)
+
+
+def aam_key_times(sections: Sequence[tuple[float, float, str]], end: float) -> dict[str, float]:
+    """Seconds spent in each key, keyed by the canonical "F major" spelling."""
+    time_by_key: dict[str, float] = {}
+    bounds = [*(s[0] for s in sections[1:]), end]
+    for (start, _, key), next_start in zip(sections, bounds, strict=True):
+        parsed = parse_key(key) if key.strip() else None
+        if parsed is not None:
+            name = key_name(parsed)
+            time_by_key[name] = time_by_key.get(name, 0.0) + max(0.0, next_start - start)
+    return time_by_key
+
+
+def key_name(key: tuple[int, str]) -> str:
+    return f"{KEY_NAMES[key[0]]} {key[1]}"
+
+
+KEY_NAMES = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
 
 
 def aam_beat_grid(
@@ -418,11 +435,10 @@ def key_scores(
 ) -> dict[str, float]:
     import mir_eval
 
-    names = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
-    est = None if estimate is None else f"{names[estimate[0]]} {estimate[1]}"
+    est = None if estimate is None else key_name(estimate)
     if reference is None:
         return {"key_exact": float("nan"), "key_weighted": float("nan"), "key_est": est}
-    ref = f"{names[reference[0]]} {reference[1]}"
+    ref = key_name(reference)
     if estimate is None:
         return {"key_exact": 0.0, "key_weighted": 0.0, "key_ref": ref, "key_relation": "none"}
     weighted = float(mir_eval.key.weighted_score(ref, est))
@@ -515,6 +531,69 @@ def compute_outputs(track: Track, experts: list, separator, device: str) -> Trac
     )
 
 
+def preliminary_chords(
+    outputs: TrackOutputs, expert_names: Sequence[str], model_names: Sequence[str], params
+) -> list:  # type: ignore[no-untyped-def]
+    """The chords decoded without a key prior; the key is estimated from these."""
+    from opencapo.analysis.chords.fusion import decode
+
+    probs = {n: outputs.beat_probs[n] for n in expert_names}
+    models = [n for n in model_names if n in probs]
+    return list(
+        decode(
+            outputs.beats,
+            probs,
+            models,
+            duration=outputs.duration,
+            bass=outputs.bass,
+            params=params,
+        ).chords
+    )
+
+
+def dump_key_inputs(
+    path: Path,
+    tracks: list[Track],
+    outputs: dict[str, TrackOutputs],
+    expert_names: Sequence[str],
+    model_names: Sequence[str],
+    params,  # type: ignore[no-untyped-def]
+) -> None:
+    """Write what the key estimator sees per track, so its rules can be tuned on a CPU.
+
+    Chords are the committee's own output (not annotations); the reference
+    key per track is the only annotation-derived field. gzip when the name
+    ends in .gz; read back with scripts/eval_key_inputs.py.
+    """
+    import gzip
+
+    records = []
+    for t in tracks:
+        out = outputs[t.name]
+        chords = preliminary_chords(out, expert_names, model_names, params)
+        records.append(
+            {
+                "dataset": t.dataset,
+                "split": t.split,
+                "name": t.name,
+                "group": t.group,
+                "key_ref": None if t.key is None else key_name(t.key),
+                "key_share": t.key_share,
+                "key_times": t.key_times,
+                "chroma_scores": [round(float(x), 6) for x in out.chroma_scores],
+                "chords": [
+                    [round(c.start, 3), round(c.end, 3), c.root, c.quality.value] for c in chords
+                ],
+            }
+        )
+    text = json.dumps({"params": params.__dict__ | {"weights": dict(params.weights)},
+                       "tracks": records}, ensure_ascii=False)  # fmt: skip
+    if path.suffix == ".gz":
+        path.write_bytes(gzip.compress(text.encode("utf-8")))
+    else:
+        path.write_text(text + "\n", encoding="utf-8")
+
+
 def run_fusion(
     outputs: TrackOutputs, expert_names: Sequence[str], model_names: Sequence[str], params
 ):  # type: ignore[no-untyped-def]
@@ -525,12 +604,8 @@ def run_fusion(
 
     probs = {n: outputs.beat_probs[n] for n in expert_names}
     models = [n for n in model_names if n in probs]
-    preliminary = decode(
-        outputs.beats, probs, models, duration=outputs.duration, bass=outputs.bass, params=params
-    )
-    key = estimate_key(
-        outputs.chroma_scores, scores_from_chords(preliminary.chords), preliminary.chords
-    )
+    preliminary = preliminary_chords(outputs, expert_names, model_names, params)
+    key = estimate_key(outputs.chroma_scores, scores_from_chords(preliminary), preliminary)
     final = decode(
         outputs.beats,
         probs,
@@ -842,6 +917,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cache", type=Path, help="directory to cache expert outputs between runs")
     parser.add_argument("--inspect", action="store_true", help="print dataset formats and exit")
     parser.add_argument("--out", default="docs/benchmarks/step-2-chords")
+    parser.add_argument(
+        "--dump-key-inputs",
+        type=Path,
+        help="also write the key estimator's inputs per track (JSON, gzip if .gz)",
+    )
     args = parser.parse_args(argv)
 
     tracks: list[Track] = []
@@ -925,12 +1005,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     notes = []
     tune_tracks = [t for t in tracks if t.split == "tune"]
+    final_params = default
     if not args.no_tune and tune_tracks:
         tuned, tuned_score = tune(tune_tracks, outputs, expert_names, model_names)
         systems.append(
             score_system("committee (tuned)", tracks, outputs, expert_names, model_names, tuned)
         )
         notes.append(f"调参集上的最佳 majmin：{tuned_score:.3f}（{len(tune_tracks)} 段）")
+        final_params = tuned
+    if args.dump_key_inputs:
+        dump_key_inputs(
+            args.dump_key_inputs, tracks, outputs, expert_names, model_names, final_params
+        )
     for s in systems:
         s["summary"] = summarize(s)
 
