@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from PIL import Image
 
 DPI = 300
-INK_THRESHOLD = 110  # grey level below which a pixel is ink (the watermark is lighter)
+INK_THRESHOLD = 130  # ink is darker than this; thin bar lines render ~115, the watermark >150
 
 
 @dataclass(frozen=True)
