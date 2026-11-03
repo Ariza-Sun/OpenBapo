@@ -14,6 +14,7 @@ import json
 import struct
 import wave
 from dataclasses import dataclass
+from fractions import Fraction
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -121,6 +122,9 @@ def render(sheet: Sheet, *, bass: bool = True, melody: bool = True, seed: int = 
         (float(b), True) for b in range(sheet.beats_per_bar)
     )
 
+    def seconds(beat_position: Fraction) -> float:
+        return round(float(beat_position) * spb, 6)
+
     def add(track: NDArray[np.float64], start: float, signal: NDArray[np.float64]) -> None:
         i = int(start * SAMPLE_RATE)
         j = min(total, i + len(signal))
@@ -128,25 +132,26 @@ def render(sheet: Sheet, *, bass: bool = True, melody: bool = True, seed: int = 
 
     plucks = 0
     for bar_index, bar in enumerate(sheet.bars):
-        bar_start = bar_index * sheet.beats_per_bar * spb
+        bar_start = seconds(Fraction(bar_index * sheet.beats_per_bar))
         for b in range(sheet.beats_per_bar):
-            beats.append(bar_start + b * spb)
+            beats.append(seconds(Fraction(bar_index * sheet.beats_per_bar + b)))
         downbeats.append(bar_start)
 
-        # Chords: each span sounds the capo-transposed shape.
-        cursor = bar_start
+        # Chords: each span sounds the capo-transposed shape. Times are derived
+        # from exact beat positions so consecutive spans never overlap.
+        position = Fraction(bar_index * sheet.beats_per_bar)
         spans = []
         for span in bar.chords:
-            length = float(span.beats) * spb
+            start, end = seconds(position), seconds(position + span.beats)
             root = (span.root + sheet.capo) % 12
             chord_bass = None if span.bass is None else (span.bass + sheet.capo) % 12
-            spans.append((cursor, cursor + length, root, span.quality, chord_bass))
+            spans.append((start, end, root, span.quality, chord_bass))
             label = format_label(root, span.quality, chord_bass if chord_bass != root else None)
-            if ref_chords and ref_chords[-1][2] == label and ref_chords[-1][1] == cursor:
-                ref_chords[-1][1] = cursor + length
+            if ref_chords and ref_chords[-1][2] == label and ref_chords[-1][1] == start:
+                ref_chords[-1][1] = end
             else:
-                ref_chords.append([cursor, cursor + length, label])
-            cursor += length
+                ref_chords.append([start, end, label])
+            position += span.beats
         for offset, down in pattern:
             t = bar_start + offset * spb
             hit = next((s for s in spans if s[0] - 1e-9 <= t < s[1]), None)
@@ -166,14 +171,14 @@ def render(sheet: Sheet, *, bass: bool = True, melody: bool = True, seed: int = 
                 add(bass_track, t, 0.5 * bass_tone(low, min(2 * spb, end - t)))
 
         # Melody: degrees in the sung key.
-        cursor = bar_start
+        position = Fraction(bar_index * sheet.beats_per_bar)
         for note in bar.notes:
-            length = float(note.beats) * spb
+            start, end = seconds(position), seconds(position + note.beats)
             pitch = degree_midi(sheet, note)
-            ref_melody.append([cursor, cursor + length, pitch])
+            ref_melody.append([start, end, pitch])
             if melody and pitch is not None:
-                add(voice, cursor, 0.3 * melody_tone(pitch, length))
-            cursor += length
+                add(voice, start, 0.3 * melody_tone(pitch, end - start))
+            position += note.beats
 
     if not bass:
         bass_track[:] = 0.0
