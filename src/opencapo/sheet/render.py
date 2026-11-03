@@ -61,17 +61,23 @@ def pluck(midi: float, seconds: float, *, seed: int, decay: float = 0.998) -> ND
     period = max(2, round(SAMPLE_RATE / midi_hz(midi)))
     rng = np.random.default_rng(seed)
     burst = rng.uniform(-1.0, 1.0, period)
-    kernel = np.ones(5) / 5
-    block = np.convolve(np.concatenate([burst, burst[:4]]), kernel, mode="valid")[:period]
+    kernel = np.hanning(11)
+    kernel /= kernel.sum()
+    block = np.convolve(np.concatenate([burst, burst[:10]]), kernel, mode="valid")[:period]
     block = block / (np.abs(block).max() or 1.0)
     blocks = [block]
     while sum(len(b) for b in blocks) < n:
         prev = blocks[-1]
-        nxt = np.empty(period)
-        nxt[:-1] = 0.5 * decay * (prev[:-1] + prev[1:])
-        nxt[-1] = 0.5 * decay * (prev[-1] + nxt[0])
+        # A three-point loop filter damps the upper partials faster than the
+        # fundamental: the string mellows as it rings instead of jangling.
+        left = np.roll(prev, 1)
+        right = np.roll(prev, -1)
+        nxt = decay * (0.25 * left + 0.5 * prev + 0.25 * right)
         blocks.append(nxt)
-    return np.asarray(np.concatenate(blocks)[:n])
+    out = np.concatenate(blocks)[:n]
+    body = np.hanning(33)
+    body /= body.sum()
+    return np.asarray(np.convolve(out, body, mode="same"))
 
 
 def voicing(root: int, quality_tones: frozenset[int], bass: int | None) -> list[int]:
