@@ -33,7 +33,7 @@ An open-source Discord bot that turns a song's audio into a guitar play-along sh
 |---|---|---|
 | 和弦 majmin（GuitarSet 伴奏曲目，报数半 90 段） | **0.776** | ≥ 0.80，未达 |
 | 和弦 majmin（AAM 500 首） | **0.947** | ≥ 0.80 |
-| 调性正确率（GuitarSet 伴奏 / AAM） | **0.711 / 0.634** | ≥ 0.85，未达 |
+| 调性正确率（GuitarSet 伴奏 / AAM 500 首 / AAM 单一调性 72 首） | **0.789 / 0.696 / 0.931** | ≥ 0.85，前两项未达 |
 | 4 分钟歌曲和弦 + 调性（单卡，热启动） | **6.1 秒**（整条流水线 13.4 秒） | ≤ 30 秒 |
 
 调性估计是当前最大缺口，正在改进。编配、渲染与 Discord Bot 尚未开始。
