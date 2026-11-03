@@ -197,8 +197,13 @@ def diagram_boxes(
     return [(left, right) for left, right in merged if right - left >= 0.012 * width]
 
 
-def analyze_page(image: Image.Image, page_index: int, out_dir: Path, stem: str) -> list[SystemBox]:
-    """Split one page into systems and bars, writing bar and chord-name crops into out_dir."""
+def analyze_page(
+    image: Image.Image, page_index: int, out_dir: Path, stem: str, start: int = 0
+) -> list[SystemBox]:
+    """Split one page into systems and bars, writing bar and chord-name crops into out_dir.
+
+    Bars are numbered from `start` so indices run on across pages.
+    """
     from PIL import Image
 
     mask = ink_mask(image)
@@ -206,7 +211,7 @@ def analyze_page(image: Image.Image, page_index: int, out_dir: Path, stem: str) 
     systems = find_systems(mask)
     margin_y = int(0.012 * height)
     margin_x = int(0.004 * width)
-    counter = 0
+    counter = start
     for system in systems:
         lines = bar_lines(mask, system.notation, width)
         if len(lines) < 2:
@@ -257,11 +262,13 @@ def worksheet(source: Path, out_dir: Path, dpi: int = DPI) -> dict[str, object]:
     stem = source.stem
     pages_out: list[dict[str, object]] = []
     sheet: dict[str, object] = {"source": str(source), "dpi": dpi, "pages": pages_out}
+    next_index = 0
     for p, image in enumerate(pages):
         header = image.crop((0, 0, image.width, int(0.1 * image.height)))
         header_path = out_dir / f"{stem}-p{p + 1}-header.png"
         header.save(header_path)
-        systems = analyze_page(image, p, out_dir, stem)
+        systems = analyze_page(image, p, out_dir, stem, start=next_index)
+        next_index += sum(len(s.bars) for s in systems)
         pages_out.append(
             {
                 "index": p + 1,
