@@ -1,6 +1,6 @@
 # 和弦 / 调性错误分析：report_comp
 
-融合参数：`FusionParams(weights={'btc': 0.5, 'lvchordia': 0.5, 'chroma': 0.5}, key_prior=0.5, change_cost_downbeat=0.1, change_cost_beat=3.0, no_chord_bias=-1.0, foreign_bass_penalty=0.7, min_bass_strength=0.3, fill_gaps_under_bar=True)`
+融合参数：`FusionParams(weights={'btc': 0.5, 'lvchordia': 0.5, 'chroma': 0.5}, key_prior=0.5, change_cost_downbeat=0.1, change_cost_beat=3.0, no_chord_bias=-1.0, foreign_bass_penalty=0.7, min_bass_strength=0.3, fill_gaps_under_bar=True, bass_weight=1.0)`
 
 ## 错误分解（90 首，按帧，0.05 s 一帧）
 
@@ -8,8 +8,8 @@
 |---|---|---|---|---|---|---|---|---|
 | btc | 76.4% | 0.0% | 1.5% | 2.2% | 6.7% | 3.9% | 9.3% | 40% |
 | lvchordia | 80.0% | 0.0% | 2.4% | 2.2% | 4.7% | 4.0% | 6.7% | 40% |
-| chroma | 65.3% | 0.0% | 0.7% | 1.5% | 6.3% | 11.4% | 14.7% | 41% |
-| committee | 79.0% | 0.0% | 2.0% | 2.4% | 5.6% | 4.1% | 7.0% | 42% |
+| chroma | 65.5% | 0.0% | 0.7% | 1.5% | 6.2% | 11.4% | 14.7% | 41% |
+| committee | 79.0% | 0.0% | 2.0% | 2.4% | 5.6% | 4.1% | 6.9% | 42% |
 
 任一模型专家正确（融合的上限）：84.5%
 
@@ -17,7 +17,7 @@
 
 | 风格 | correct | ref_N | est_N | third | relative | fourth_fifth | other_root |
 |---|---|---|---|---|---|---|---|
-| BN | 86.7% | 0.0% | 0.0% | 2.3% | 3.1% | 3.3% | 4.6% |
+| BN | 86.9% | 0.0% | 0.0% | 2.3% | 3.1% | 3.3% | 4.5% |
 | Fu | 48.9% | 0.0% | 8.0% | 2.5% | 15.4% | 9.3% | 15.9% |
 | Ja | 64.8% | 0.0% | 1.4% | 1.2% | 10.0% | 7.9% | 14.6% |
 | Ro | 91.9% | 0.0% | 0.2% | 5.7% | 0.3% | 1.0% | 1.0% |
@@ -94,16 +94,16 @@
 - `05_Rock2-85-F_comp` 参考 F minor，估计 G# major；和弦：A#:min7(2.8) D#:7(2.8) G#:maj(2.8) C#:maj(2.8) G:hdim7(2.8) C:7(2.8) F:min7(2.8) F:7(2.8) A#:min7(2.8) D#:7(2.8) G#:maj(2.8) C#:maj(2.8) G:min7(2.8) C:7(2.8) F:maj(5.6)
 # 和弦 / 调性错误分析：tune_comp
 
-融合参数：`FusionParams(weights={'btc': 0.5, 'lvchordia': 0.5, 'chroma': 0.5}, key_prior=0.5, change_cost_downbeat=0.1, change_cost_beat=3.0, no_chord_bias=-1.0, foreign_bass_penalty=0.7, min_bass_strength=0.3, fill_gaps_under_bar=True)`
+融合参数：`FusionParams(weights={'btc': 0.5, 'lvchordia': 0.5, 'chroma': 0.5}, key_prior=0.5, change_cost_downbeat=0.1, change_cost_beat=3.0, no_chord_bias=-1.0, foreign_bass_penalty=0.7, min_bass_strength=0.3, fill_gaps_under_bar=True, bass_weight=1.0)`
 
 ## 错误分解（90 首，按帧，0.05 s 一帧）
 
 | 系统 | correct | ref_N | est_N | third | relative | fourth_fifth | other_root | 错误中在参考边界一拍内 |
 |---|---|---|---|---|---|---|---|---|
-| btc | 87.3% | 0.0% | 0.1% | 7.9% | 1.0% | 1.2% | 2.4% | 42% |
-| lvchordia | 88.7% | 0.0% | 0.0% | 7.8% | 0.8% | 1.2% | 1.4% | 43% |
-| chroma | 77.1% | 0.0% | 0.1% | 3.2% | 3.6% | 7.7% | 8.2% | 43% |
-| committee | 88.7% | 0.0% | 0.1% | 7.8% | 0.9% | 0.9% | 1.6% | 44% |
+| btc | 87.3% | 0.0% | 0.1% | 7.9% | 1.0% | 1.2% | 2.5% | 42% |
+| lvchordia | 88.8% | 0.0% | 0.0% | 7.8% | 0.8% | 1.2% | 1.4% | 43% |
+| chroma | 77.6% | 0.0% | 0.1% | 3.2% | 3.3% | 7.6% | 8.2% | 43% |
+| committee | 88.7% | 0.0% | 0.1% | 7.8% | 0.9% | 0.9% | 1.6% | 45% |
 
 任一模型专家正确（融合的上限）：91.8%
 
@@ -111,7 +111,7 @@
 
 | 风格 | correct | ref_N | est_N | third | relative | fourth_fifth | other_root |
 |---|---|---|---|---|---|---|---|
-| BN | 87.7% | 0.0% | 0.0% | 5.9% | 2.5% | 2.3% | 1.5% |
+| BN | 88.1% | 0.0% | 0.0% | 5.9% | 2.1% | 2.3% | 1.5% |
 | Fu | 84.6% | 0.0% | 0.5% | 11.7% | 0.4% | 0.5% | 2.4% |
 | Ja | 87.4% | 0.0% | 0.1% | 4.9% | 2.4% | 1.7% | 3.4% |
 | Ro | 91.6% | 0.0% | 0.0% | 7.5% | 0.0% | 0.8% | 0.1% |
@@ -144,18 +144,18 @@
 - `02_SS2-88-F_comp` 参考 F minor，估计 G# major；和弦：A#:min(2.7) D#:maj(2.7) G#:maj(2.7) C#:maj(2.7) G:min(1.4) A#:maj(1.4) C:maj(2.7) F:maj(5.5) E:maj(0.7) A#:maj(2.0) D#:maj(2.7) G#:maj(2.7) C#:maj(2.7) G:min(2.7) C:maj(2.7) F:maj(5.4)
 # 和弦 / 调性错误分析：aam_single
 
-融合参数：`FusionParams(weights={'btc': 0.5, 'lvchordia': 0.5, 'chroma': 0.5}, key_prior=0.5, change_cost_downbeat=0.1, change_cost_beat=3.0, no_chord_bias=-1.0, foreign_bass_penalty=0.7, min_bass_strength=0.3, fill_gaps_under_bar=True)`
+融合参数：`FusionParams(weights={'btc': 0.5, 'lvchordia': 0.5, 'chroma': 0.5}, key_prior=0.5, change_cost_downbeat=0.1, change_cost_beat=3.0, no_chord_bias=-1.0, foreign_bass_penalty=0.7, min_bass_strength=0.3, fill_gaps_under_bar=True, bass_weight=1.0)`
 
 ## 错误分解（72 首，按帧，0.05 s 一帧）
 
 | 系统 | correct | ref_N | est_N | third | relative | fourth_fifth | other_root | 错误中在参考边界一拍内 |
 |---|---|---|---|---|---|---|---|---|
-| btc | 91.1% | 2.3% | 0.0% | 1.8% | 1.1% | 1.5% | 2.2% | 54% |
-| lvchordia | 93.9% | 2.1% | 0.0% | 1.0% | 1.1% | 0.9% | 1.0% | 49% |
-| chroma | 85.7% | 2.7% | 0.0% | 0.2% | 3.1% | 5.0% | 3.3% | 46% |
+| btc | 91.9% | 2.3% | 0.0% | 1.9% | 1.0% | 1.2% | 1.8% | 51% |
+| lvchordia | 94.3% | 2.1% | 0.0% | 1.0% | 1.0% | 0.7% | 0.9% | 46% |
+| chroma | 87.3% | 2.7% | 0.0% | 0.2% | 2.8% | 3.8% | 3.0% | 44% |
 | committee | 94.9% | 2.3% | 0.0% | 1.5% | 0.5% | 0.3% | 0.4% | 34% |
 
-任一模型专家正确（融合的上限）：95.3%
+任一模型专家正确（融合的上限）：95.6%
 
 ## 按风格（committee）
 
@@ -170,7 +170,7 @@
   - 估计：E:min(2.0) B:maj(2.0) C:maj(2.0) A:maj(2.0) G:maj(1.0) D:maj(1.0) E:min(2.0) E:min7(2.0) D:maj(2.0) A:min(1.0) D:maj(3.0) B:min(2.0) A:min(2.0) G:maj(2.0) A:min(2.0) D:maj(2.0) A:min(2.0) B:min(2.0) E:min(4.0) A:min(2.0) E:min(2.0) G:maj(2.0) D:maj(2.0) E:min(4.0) B:min(2.0) C:maj(2.0) A:maj(2.0) G:maj(1.0) D:maj(1.0) E:min(4.0) B:min(2.0) C:maj(2.0) A:maj(2.0) G:maj(1.0) D:maj(1.0) E:maj(4.0) B:maj(2.0) C:maj(2.0) A:maj(2.0) G:maj(1.0) D:maj(1.0) E:min(4.0) B:min(2.0) C:maj(2.0) A:maj(2.0) G:maj(1.0) D:maj(1.0) E:min(4.0) B:maj(2.0) C:maj(2.0) A:maj(2.0) G:maj(1.0) D:maj(1.0) E:min(2.0) E:min7(2.0) D:maj(2.0) A:min(1.0) D:maj(3.0) B:min(2.0) A:min(2.0) G:maj(2.0) A:min(2.0) D:maj(2.0) A:min(2.0) B:min(2.0) E:min(6.0) C:maj(2.0) A:maj(2.0) G:maj(1.0) D:maj(1.0) E:min(1.5)
 - `0285` 0.59
   - 参考：F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(1.5) N(17.8) F:maj(4.4) A:min(1.5) F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(1.5) F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(1.5) F:maj(4.4) A:min(1.5) F:maj(4.4) A:min(1.5) F:maj(4.4) A:min(1.5) N(53.3) F:maj(4.4) A:min(1.5)
-  - 估计：F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(3.0) E:maj(1.5) F:maj(1.5) D:min(1.5) A:min(1.5) G:maj(1.5) C:maj(1.5) F:maj(1.5) G:maj(1.5) C:maj(0.7) F:maj(0.7) D:maj(1.5) A:min(1.5) F:maj(4.4) A:min(1.5) F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(1.5) F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(1.5) F:maj(4.4) A:min(1.5) F:maj(4.4) A:min(1.5) F:maj(4.4) A:min(3.0) E:maj(1.5) F:maj(1.5) D:min(1.5) A:maj(1.5) G:maj(1.5) C:maj(1.5) F:maj(1.5) G:maj(1.5) C:maj(0.7) F:maj(0.7) D:maj(1.9) A:maj(2.6) E:maj(1.5) F:maj(1.5) D:min(1.5) A:maj(1.5) G:maj(1.5) C:maj(1.5) F:maj(1.5) G:maj(1.5) C:maj(0.7) F:maj(0.7) D:maj(1.9) A:maj(2.6) E:maj(1.5) F:maj(1.5) D:min(1.5) A:min(1.5) G:maj(1.5) C:maj(1.5) F:maj(1.5) G:maj(1.5) C:maj(0.7) F:maj(0.7) D:maj(1.9) A:maj(1.1) F:maj(4.4) A:min(4.2)
+  - 估计：F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(3.0) E:maj(1.5) F:maj(1.5) D:min(1.5) A:min(1.5) G:maj(1.5) C:maj(1.5) F:maj(1.5) G:maj(1.5) C:maj(0.7) F:maj(0.7) D:maj(1.5) A:min(1.5) F:maj(4.4) A:min(1.5) F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(1.5) F:maj(1.5) E:min(1.5) G:maj(1.5) E:min(3.7) D:min(2.2) F:maj(3.0) G:maj(3.0) A:min(1.5) D:min(1.5) G:maj(1.5) E:min(1.5) A:min(1.5) F:maj(4.4) A:min(1.5) F:maj(4.4) A:min(1.5) F:maj(4.4) A:min(3.0) E:maj(1.5) F:maj(1.5) D:min(1.5) A:maj(1.5) G:maj(1.5) C:maj(1.5) F:maj(1.5) G:maj(1.5) C:maj(0.7) F:maj(0.7) D:maj(1.5) A:maj(3.0) E:maj(1.5) F:maj(1.5) D:min(1.5) A:maj(1.5) G:maj(1.5) C:maj(1.5) F:maj(1.5) G:maj(1.5) C:maj(0.7) F:maj(0.7) D:maj(1.5) A:maj(3.0) E:maj(1.5) F:maj(1.5) D:min(1.5) A:min(1.5) G:maj(1.5) C:maj(1.5) F:maj(1.5) G:maj(1.5) C:maj(0.7) F:maj(0.7) D:maj(1.9) A:maj(1.1) F:maj(4.4) A:min(4.2)
 - `0473` 0.67
   - 参考：A:maj(1.5) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) N(11.9) A:maj(1.5) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) N(11.9) A:maj(1.5) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) E:maj(1.5) B:min(1.5) D:maj(1.5) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) N(35.8) A:maj(1.5) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) E:maj(1.5) B:min(1.5) D:maj(1.5) A:maj(1.5)
   - 估计：A:maj(1.5) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) E:maj(1.5) B:maj(1.5) E:maj(1.5) D:maj(1.5) F#:min(1.5) F#:maj(3.0) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) E:maj(1.5) B:maj(1.5) E:maj(1.5) D:maj(1.5) F#:min(4.5) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) E:maj(1.5) B:min(1.5) D:maj(1.5) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) E:maj(1.5) B:maj(1.5) E:maj(1.5) D:maj(1.5) F#:maj(4.5) A:maj(1.5) E:maj(1.5) B:maj(1.5) E:maj(1.5) D:maj(1.5) F#:maj(4.5) A:maj(1.5) E:maj(1.5) B:maj(1.5) E:maj(1.5) D:maj(1.5) F#:maj(1.5) F#:min(3.0) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(3.0) B:min(1.5) F#:min(1.5) E:maj(1.5) A:maj(0.7) E:maj(0.7) A:maj(1.5) E:maj(1.5) B:min(1.5) D:maj(1.5) A:maj(4.2)
