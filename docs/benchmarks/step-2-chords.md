@@ -1,6 +1,6 @@
 # 第 2 步：和弦与调性评测（GuitarSet + AAM）
 
-由 `scripts/eval_chords.py` 生成于 2026-11-02。
+由 `scripts/eval_chords.py` 生成于 2026-11-03。
 设备：NVIDIA GeForce RTX 3090；Python 3.12.13；opencapo 0.0.1、torch 2.5.1+cu121、lv-chordia 1.1.0、librosa 1.0.0、mir_eval 0.8.2、demucs 4.1.0、numpy 2.5.4
 
 拍网格来自数据集自带的拍点标注；分轨来自 Demucs（低音线用）。指标：mir_eval `chord`（按时长加权）与调性精确匹配。验收门槛：GuitarSet（报数半，仅伴奏曲目）与 AAM 上 majmin ≥ 80%、调性 ≥ 85%（`docs/plans/step-2.md` 决定 7）。GuitarSet 的独奏曲目是单音旋律、标注的是隐含和弦，只报数。调参只用 GuitarSet 吉他手 00–02。
@@ -92,6 +92,14 @@
 | Ja | 0.137 | 0.167 |
 | Ro | 0.185 | 0.000 |
 | SS | 0.275 | 0.444 |
+
+## 调性错误类型（committee (tuned)，按曲目数）
+
+| 子集 | 正确 | 差五度 | 关系大小调 | 同名大小调 | 其它 | 无估计 | 单一调性曲目的正确率 |
+|---|---|---|---|---|---|---|---|
+| guitarset_report_comp | 64 | 2 | 14 | 0 | 10 | 0 | 全部单一调性 |
+| guitarset_report_solo | 28 | 14 | 13 | 9 | 26 | 0 | 全部单一调性 |
+| aam | 317 | 24 | 66 | 13 | 80 | 0 | 0.833（72 首） |
 
 ## 调参结果
 
