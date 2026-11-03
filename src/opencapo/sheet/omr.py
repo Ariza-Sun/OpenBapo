@@ -55,6 +55,13 @@ READING_PROMPT = """你在读一张中文吉他谱的一个小节。图片上半
 """
 
 
+HEADER_PROMPT = """这是一张中文吉他谱第一页的页眉。请只输出一个 JSON 对象，不要解释：
+
+{"title": "<歌名>", "key": "<1= 后面的音名，如 E 或 bB 写成 Bb>", "capo": <变调夹品数，没有写 0>,
+ "time": "<拍号，如 4/4>", "bpm": <速度数字，没有写 null>}
+"""
+
+
 @dataclass
 class BarReading:
     index: int

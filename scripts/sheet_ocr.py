@@ -3,12 +3,13 @@
 Usage:
     python scripts/sheet_ocr.py prepare SHEET.pdf --out WORK_DIR
     python scripts/sheet_ocr.py assemble WORK_DIR --readings READINGS.json \
-        --title 曾经的你 --key E --capo 4 --bpm 76 --time 4/4 --out SONG.sheet
+        --header HEADER.json [--bpm 76] --out SONG.sheet
 
 `prepare` rasterizes the pages, finds systems and bars, and writes crops
-plus WORK_DIR/worksheet.json and WORK_DIR/reading_prompt.txt. The reading
-of each bar's stacked crop is done by an agent with vision following that
-prompt; it writes READINGS.json as a list of {"index", "chords", "melody"}.
+plus WORK_DIR/worksheet.json and the two prompts. An agent with vision
+reads the page-1 header crop into HEADER.json (title, key, capo, time,
+bpm) and each bar's stacked crop into READINGS.json, a list of
+{"index", "chords", "melody"}, following those prompts.
 `assemble` checks the readings (bars must fill the metre, chords must
 parse, ties must continue, repeated passages should match), writes the
 .sheet file and a review list (WORK_DIR/review.md) of bars to look at again.
@@ -33,20 +34,22 @@ def main(argv: list[str] | None = None) -> int:
     assemble.add_argument("work_dir", type=Path)
     assemble.add_argument("--readings", type=Path, required=True)
     assemble.add_argument("--out", type=Path, required=True)
+    assemble.add_argument("--header", type=Path, help="JSON from the header reading")
     assemble.add_argument("--title", default="")
-    assemble.add_argument("--key", required=True, help="the sheet's 1=, e.g. E")
-    assemble.add_argument("--capo", type=int, default=0)
-    assemble.add_argument("--bpm", type=float, default=90.0)
-    assemble.add_argument("--time", default="4/4")
+    assemble.add_argument("--key", help="the sheet's 1=, e.g. E (overrides --header)")
+    assemble.add_argument("--capo", type=int)
+    assemble.add_argument("--bpm", type=float)
+    assemble.add_argument("--time")
     assemble.add_argument("--mode", default="major")
     args = parser.parse_args(argv)
 
     if args.command == "prepare":
         from opencapo.sheet.layout import worksheet
-        from opencapo.sheet.omr import READING_PROMPT
+        from opencapo.sheet.omr import HEADER_PROMPT, READING_PROMPT
 
         sheet = worksheet(args.source, args.out, args.dpi)
         (args.out / "reading_prompt.txt").write_text(READING_PROMPT, encoding="utf-8")
+        (args.out / "header_prompt.txt").write_text(HEADER_PROMPT, encoding="utf-8")
         bars = sum(len(s["bars"]) for p in sheet["pages"] for s in p["systems"])  # type: ignore[index, union-attr]
         print(f"{len(sheet['pages'])} pages, {bars} bars; crops and worksheet.json in {args.out}")  # type: ignore[arg-type]
         return 0
@@ -76,15 +79,22 @@ def main(argv: list[str] | None = None) -> int:
     if missing:
         print(f"no reading for bars {missing}", file=sys.stderr)
         return 1
+    read = json.loads(args.header.read_text(encoding="utf-8")) if args.header else {}
+    key = args.key or read.get("key")
+    if not key:
+        print("no key: pass --key or --header", file=sys.stderr)
+        return 1
+    bpm = args.bpm if args.bpm is not None else read.get("bpm") or 90.0
+    time_sig = args.time or read.get("time") or "4/4"
     header = {
-        "title": args.title,
-        "key": args.key,
+        "title": args.title or str(read.get("title", "")),
+        "key": str(key),
         "mode": args.mode,
-        "capo": str(args.capo),
-        "bpm": f"{args.bpm:g}",
-        "time": args.time,
+        "capo": str(args.capo if args.capo is not None else read.get("capo") or 0),
+        "bpm": f"{float(bpm):g}",
+        "time": str(time_sig),
     }
-    result = assemble_sheet(header, readings, int(args.time.split("/")[0]))
+    result = assemble_sheet(header, readings, int(header["time"].split("/")[0]))
     args.out.write_text(result.text, encoding="utf-8")
     write_review(args.work_dir / "review.md", result.problems, readings)
     print(f"{len(readings)} bars -> {args.out}; {len(result.problems)} bars to review")

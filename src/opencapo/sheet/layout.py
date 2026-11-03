@@ -264,7 +264,10 @@ def worksheet(source: Path, out_dir: Path, dpi: int = DPI) -> dict[str, object]:
     sheet: dict[str, object] = {"source": str(source), "dpi": dpi, "pages": pages_out}
     next_index = 0
     for p, image in enumerate(pages):
-        header = image.crop((0, 0, image.width, int(0.1 * image.height)))
+        # Everything above the first staff: title, 1=, capo, tempo if printed.
+        first_staff = find_staves(ink_mask(image))
+        header_bottom = first_staff[0].top if first_staff else int(0.2 * image.height)
+        header = image.crop((0, 0, image.width, header_bottom))
         header_path = out_dir / f"{stem}-p{p + 1}-header.png"
         header.save(header_path)
         systems = analyze_page(image, p, out_dir, stem, start=next_index)
