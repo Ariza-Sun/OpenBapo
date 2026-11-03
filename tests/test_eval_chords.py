@@ -350,9 +350,16 @@ def test_summarize_splits_by_dataset_and_group() -> None:
     assert "| committee (tuned) | 0.600 |" in text and "- note" in text
     assert "| aam | 1 | 0 | 0 | 0 | 1 | 0 | 1.000" in text and text.count("1 首") >= 2
     assert "转调曲目命中任一主要调" in text
+    rows.append(dict(rows[2], track="s", dataset="sheets", group="s", key_exact=1.0, key_share=1.0))
+    system = {"system": "committee (tuned)", "params": {}, "rows": rows}
+    system["summary"] = eval_chords.summarize(system)
+    gated = eval_chords.markdown(
+        [system], {"date": "2026-01-01", "python": "3", "device": "cpu", "packages": {}}, []
+    )
+    assert "曲库合成" in gated and gated.count("| 通过 |") == 1  # only the song-book row is gated
     assert "对实奏和弦" in text and "| committee (tuned) | 0.900 | 1.000 |" in text
     assert "| 2.00 s | 参考 |" in text  # the solo-only and mixed GuitarSet rows are reference
-    assert "| 3.00 s | 通过 |" in text  # gated on the single-key piece although key_exact is 0.5
+    assert "| 3.00 s | 参考 |" in text  # public datasets are reference since decision 11
     solo_row = (
         "| committee (tuned) | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s"
     )

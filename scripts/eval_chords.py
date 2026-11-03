@@ -876,23 +876,25 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
         "",
         "拍网格来自数据集自带的拍点标注；分轨来自 Demucs（低音线用）。"
         "指标：mir_eval `chord`（按时长加权）与调性精确匹配。"
-        f"验收门槛：GuitarSet（报数半，仅伴奏曲目）与 AAM 上 majmin ≥ {ACCEPTANCE_MAJMIN:.0%}、"
-        f"调性 ≥ {ACCEPTANCE_KEY:.0%}（`docs/plans/step-2.md` 决定 7、8）。"
-        "GuitarSet 的独奏曲目是单音旋律、标注的是隐含和弦，只报数。"
-        "AAM 的调性门槛只按全曲单一调性的曲目算（中途转调的曲目没有唯一真值），"
-        '转调曲目另报"估计落在任一占时 ≥ 1/3 的调上"的命中率。'
+        f"验收门槛：负责人曲库谱子渲染的样本集（曲库合成）上 majmin ≥ {ACCEPTANCE_MAJMIN:.0%}、"
+        f"调性 ≥ {ACCEPTANCE_KEY:.0%}（`docs/plans/step-2.md` 决定 11）；合成音频没有人声和混音，"
+        "分数是真录音的上限。GuitarSet 与 AAM 作公开数据集参考（决定 7、8：GuitarSet 只看伴奏曲目，"
+        "独奏曲目是单音旋律；AAM 的调性只看全曲单一调性的曲目，转调曲目另报命中率）。"
         "调参只用 GuitarSet 吉他手 00–02。",
         "",
     ]
     for subset, title in (
-        ("guitarset_report_comp", "GuitarSet 报数半（吉他手 03–05），仅伴奏（comp）曲目——验收依据"),
+        ("sheets", "曲库合成（负责人谱子渲染的样本集）——验收依据"),
+        (
+            "guitarset_report_comp",
+            "GuitarSet 报数半（吉他手 03–05），仅伴奏（comp）曲目（公开数据集参考）",
+        ),
         ("guitarset_report", "GuitarSet 报数半，伴奏 + 独奏（参考）"),
         (
             "guitarset_report_solo",
             "GuitarSet 报数半，仅独奏（solo）曲目：单音旋律，标注是隐含的和弦",
         ),
-        ("aam", "AAM（500 首）"),
-        ("sheets", "曲库合成（谱子渲染的音频，参考，不设门槛）"),
+        ("aam", "AAM（500 首，公开数据集参考）"),
         ("guitarset_tune", "GuitarSet 调参半（吉他手 00–02，仅供对照）"),
         ("guitarset_tune_comp", "GuitarSet 调参半，仅伴奏（comp）曲目"),
     ):
@@ -921,7 +923,7 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
             )
             if subset.startswith("guitarset_tune"):
                 verdict = "对照"
-            elif subset in ("guitarset_report", "guitarset_report_solo", "sheets"):
+            elif subset != "sheets":
                 verdict = "参考"
             cells = [
                 s["system"],
