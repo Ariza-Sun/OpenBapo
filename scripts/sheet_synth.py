@@ -23,7 +23,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--no-bass", action="store_true")
     parser.add_argument("--no-melody", action="store_true")
-    parser.add_argument("--accompaniment", choices=("piano", "strum"), default="piano")
+    parser.add_argument("--accompaniment", choices=("piano", "strum"), default="strum")
     parser.add_argument("--melody-voice", choices=("piano", "voice"), default="piano")
     args = parser.parse_args(argv)
 

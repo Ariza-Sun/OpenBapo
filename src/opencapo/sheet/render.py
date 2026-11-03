@@ -1,11 +1,10 @@
 """Render a Sheet to audio plus a timed reference, for testing the analysis on a song book.
 
-Two accompaniments: "piano" (default) strikes each chord as a block of
-decaying harmonic tones on the strong beats, with the root an octave below;
-"strum" plays a Karplus-Strong plucked string per chord tone in a fixed
-strumming pattern, closer to the guitar the sheet is written for. The
-melody is a piano tone too (a sustained vibrato tone is available as
-"voice"). An optional bass plays roots on the strong beats. Nothing is
+Two accompaniments: "strum" (default) plays a Karplus-Strong plucked
+string per chord tone in a fixed strumming pattern, the guitar the sheet is
+written for; "piano" strikes each chord as a block of decaying harmonic
+tones on the strong beats. The melody is a piano tone (a sustained vibrato
+tone is available as "voice"). An optional bass plays roots on the strong beats. Nothing is
 sampled or downloaded, so the output is deterministic. The reference
 carries the sounding chords (shapes transposed by the capo), the sung key,
 the beat grid and the melody, in the sheet's own timing.
@@ -50,14 +49,21 @@ def midi_hz(midi: float) -> float:
     return 440.0 * 2 ** ((midi - 69) / 12)
 
 
-def pluck(midi: float, seconds: float, *, seed: int, decay: float = 0.996) -> NDArray[np.float64]:
-    """Karplus-Strong: a noise burst circulating through a short averaging loop."""
+def pluck(midi: float, seconds: float, *, seed: int, decay: float = 0.998) -> NDArray[np.float64]:
+    """Karplus-Strong: a softened noise burst circulating through a short averaging loop.
+
+    The burst is low-passed first so the attack is a nylon-string thump
+    rather than a click, and the loop decays slowly enough to ring for a bar.
+    """
     import numpy as np
 
     n = max(1, int(seconds * SAMPLE_RATE))
     period = max(2, round(SAMPLE_RATE / midi_hz(midi)))
     rng = np.random.default_rng(seed)
-    block = rng.uniform(-1.0, 1.0, period)
+    burst = rng.uniform(-1.0, 1.0, period)
+    kernel = np.ones(5) / 5
+    block = np.convolve(np.concatenate([burst, burst[:4]]), kernel, mode="valid")[:period]
+    block = block / (np.abs(block).max() or 1.0)
     blocks = [block]
     while sum(len(b) for b in blocks) < n:
         prev = blocks[-1]
@@ -105,16 +111,18 @@ def piano_tone(midi: float, seconds: float) -> NDArray[np.float64]:
     t = np.arange(n) / SAMPLE_RATE
     f = midi_hz(midi)
     tone = np.zeros(n)
-    for k in range(1, 9):
-        partial = k * f * (1 + 0.0004 * k * k)  # slight inharmonicity
-        if partial > SAMPLE_RATE / 2:
-            break
-        amplitude = 1.0 / k**1.3
-        decay = 1.2 + 0.0008 * partial + 0.4 * k
-        tone += amplitude * np.exp(-decay * t) * np.sin(2 * np.pi * partial * t)
-    attack = np.minimum(1.0, t / 0.004)
-    release = np.clip((seconds - t) / 0.03, 0.0, 1.0)
-    return np.asarray(tone * attack * release / 2.2)
+    # Two slightly detuned strings per note, as a piano's unison strings beat.
+    for detune in (-0.0008, 0.0008):
+        for k in range(1, 10):
+            partial = k * f * (1 + detune) * (1 + 0.0003 * k * k)  # slight inharmonicity
+            if partial > SAMPLE_RATE / 2:
+                break
+            amplitude = 1.0 / k**1.5
+            decay = 0.5 + 0.0005 * partial + 0.25 * k
+            tone += amplitude * np.exp(-decay * t) * np.sin(2 * np.pi * partial * t)
+    attack = np.minimum(1.0, t / 0.003)
+    release = np.clip((seconds - t) / 0.08, 0.0, 1.0)
+    return np.asarray(tone * attack * release / 4.0)
 
 
 def bass_tone(midi: float, seconds: float) -> NDArray[np.float64]:
@@ -132,7 +140,7 @@ def render(
     *,
     bass: bool = True,
     melody: bool = True,
-    accompaniment: str = "piano",
+    accompaniment: str = "strum",
     melody_voice: str = "piano",
     seed: int = 0,
 ) -> Rendered:
@@ -213,10 +221,11 @@ def render(
             if accompaniment == "strum":
                 if not down:
                     pitches = pitches[::-1][:4]
+                gain = 0.3 if down else 0.22
                 for k, midi in enumerate(pitches):
                     plucks += 1
                     add(
-                        guitar, t + k * STRING_STAGGER, 0.35 * pluck(midi, ring, seed=seed + plucks)
+                        guitar, t + k * STRING_STAGGER, gain * pluck(midi, ring, seed=seed + plucks)
                     )
             else:
                 for midi in pitches:
@@ -246,7 +255,7 @@ def render(
         bass_track[:] = 0.0
     left = 0.6 * guitar + 0.5 * bass_track + 0.55 * voice
     right = 0.4 * guitar + 0.5 * bass_track + 0.55 * voice
-    stereo = np.stack([left, right])
+    stereo = np.stack([room(left), room(right)])
     peak = float(np.abs(stereo).max())
     if peak > 0:
         stereo *= 0.9 / peak
@@ -266,6 +275,17 @@ def render(
         "melody": ref_melody,
     }
     return Rendered(samples=stereo.astype(np.float32), sample_rate=SAMPLE_RATE, reference=reference)
+
+
+def room(signal: NDArray[np.float64]) -> NDArray[np.float64]:
+    """A few early reflections so the dry tones do not sit in a vacuum."""
+    import numpy as np
+
+    out = signal.copy()
+    for delay_ms, gain in ((23.0, 0.25), (37.0, 0.18), (53.0, 0.12), (79.0, 0.08)):
+        d = int(delay_ms * SAMPLE_RATE / 1000)
+        out[d:] += gain * signal[:-d]
+    return np.asarray(out)
 
 
 def write_wav(path: Path, samples: NDArray[np.float32], sample_rate: int) -> None:
