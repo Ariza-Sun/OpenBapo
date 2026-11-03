@@ -91,6 +91,10 @@ class FusionParams:
     # Weight frames by 1 - P(N) when pooling an expert's output per beat (see
     # aggregate_to_beats); applied before decode by whoever aggregates.
     voiced_aggregation: bool = False
+    # Per beat, scale each expert's weight by its own confidence (the top
+    # posterior) to this power: 0 trusts all experts equally, higher values
+    # let the surer expert decide that beat.
+    confidence_power: float = 0.0
 
 
 def aggregate_to_beats(
@@ -135,7 +139,10 @@ def fuse(
         raise ValueError("no experts to fuse")
     log_score = None
     for name, probs in beat_probs.items():
-        weighted = params.weights.get(name, 1.0) * np.log(probs + EPS)
+        weight = params.weights.get(name, 1.0) * np.ones((len(probs), 1))
+        if params.confidence_power > 0:
+            weight = weight * probs.max(axis=1, keepdims=True) ** params.confidence_power
+        weighted = weight * np.log(probs + EPS)
         log_score = weighted if log_score is None else log_score + weighted
     assert log_score is not None
     log_score -= log_score.max(axis=1, keepdims=True)

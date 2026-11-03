@@ -177,7 +177,23 @@ def test_short_gaps_are_held_like_a_lead_sheet() -> None:
     assert [(c.start, c.end, c.root) for c in result.chords] == [(0.5, 3.0, 0), (3.0, 5.0, 7)]
 
 
-def test_bass_line_can_tip_a_relative_chord_decision() -> None:
+def test_confidence_power_lets_the_surer_expert_decide() -> None:
+    sure = np.full((1, N_LABELS), 0.001)
+    sure[0, C] = 0.9
+    hedging = np.full((1, N_LABELS), 0.003)
+    hedging[0, G] = 0.3
+    hedging[0, C] = 0.2
+    sure /= sure.sum()
+    hedging /= hedging.sum()
+    equal = fuse({"a": sure, "b": hedging}, FusionParams())
+    gated = fuse({"a": sure, "b": hedging}, FusionParams(confidence_power=2.0))
+    assert int(np.argmax(equal[0])) == C and int(np.argmax(gated[0])) == C
+    # Each expert's weight is its top posterior to the power: about 0.71 vs
+    # 0.09 here, so the hedging expert's say shrinks from equal to an eighth.
+    expected = np.exp(sure.max() ** 2 * np.log(sure) + hedging.max() ** 2 * np.log(hedging))
+    np.testing.assert_allclose(gated, expected / expected.sum(), rtol=1e-2)
+    np.testing.assert_allclose(equal, sure * hedging / (sure * hedging).sum(), rtol=1e-2)
+
     # The expert hears C major and A minor as equally likely; the bass plays A.
     beats = beat_grid(4)
     c, am = label_index(0, ChordQuality.MAJ), label_index(9, ChordQuality.MIN)

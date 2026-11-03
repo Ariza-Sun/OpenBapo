@@ -250,12 +250,9 @@ def test_end_to_end_key_from_synthetic_audio(tonic: int) -> None:
     assert key is not None and (key.tonic, key.mode) == (tonic, Mode.MAJOR)
 
 
-def test_bass_source_falls_back_to_the_mix_when_the_stem_is_silent() -> None:
+def test_bass_source_is_the_stem_when_there_are_stems() -> None:
     mix = to_stereo(progression([(voicing([0, 4, 7]), 1.0)]))
     quiet = np.zeros_like(mix.samples)
-    quiet[:, :100] = 0.001
     stems = Stems(sample_rate=SR, vocals=quiet, drums=quiet, bass=quiet, other=mix.samples)
-    assert bass_source(mix, stems) is mix
-    loud = Stems(sample_rate=SR, vocals=quiet, drums=quiet, bass=mix.samples, other=quiet)
-    assert bass_source(mix, loud) is not mix  # the stem itself
+    assert np.array_equal(bass_source(mix, stems).samples, quiet)  # even a silent stem
     assert bass_source(mix, None) is mix
