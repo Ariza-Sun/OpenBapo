@@ -1,11 +1,14 @@
 """Render a Sheet to audio plus a timed reference, for testing the analysis on a song book.
 
-The guitar is a Karplus-Strong plucked string per chord tone, strummed in a
-fixed pattern; the melody is a sustained harmonic tone with vibrato (a
-stand-in for the voice); an optional bass plays roots on the strong beats.
-Nothing is sampled or downloaded, so the output is deterministic. The
-reference carries the sounding chords (shapes transposed by the capo), the
-sung key, the beat grid and the melody, in the sheet's own timing.
+Two accompaniments: "piano" (default) strikes each chord as a block of
+decaying harmonic tones on the strong beats, with the root an octave below;
+"strum" plays a Karplus-Strong plucked string per chord tone in a fixed
+strumming pattern, closer to the guitar the sheet is written for. The
+melody is a piano tone too (a sustained vibrato tone is available as
+"voice"). An optional bass plays roots on the strong beats. Nothing is
+sampled or downloaded, so the output is deterministic. The reference
+carries the sounding chords (shapes transposed by the capo), the sung key,
+the beat grid and the melody, in the sheet's own timing.
 """
 
 from __future__ import annotations
@@ -94,6 +97,26 @@ def melody_tone(midi: float, seconds: float) -> NDArray[np.float64]:
     return np.asarray(tone * attack * np.clip(release, 0.0, 1.0) / 1.9)
 
 
+def piano_tone(midi: float, seconds: float) -> NDArray[np.float64]:
+    """A struck string: harmonics that decay faster the higher they are, a quick attack."""
+    import numpy as np
+
+    n = max(1, int(seconds * SAMPLE_RATE))
+    t = np.arange(n) / SAMPLE_RATE
+    f = midi_hz(midi)
+    tone = np.zeros(n)
+    for k in range(1, 9):
+        partial = k * f * (1 + 0.0004 * k * k)  # slight inharmonicity
+        if partial > SAMPLE_RATE / 2:
+            break
+        amplitude = 1.0 / k**1.3
+        decay = 1.2 + 0.0008 * partial + 0.4 * k
+        tone += amplitude * np.exp(-decay * t) * np.sin(2 * np.pi * partial * t)
+    attack = np.minimum(1.0, t / 0.004)
+    release = np.clip((seconds - t) / 0.03, 0.0, 1.0)
+    return np.asarray(tone * attack * release / 2.2)
+
+
 def bass_tone(midi: float, seconds: float) -> NDArray[np.float64]:
     import numpy as np
 
@@ -104,10 +127,24 @@ def bass_tone(midi: float, seconds: float) -> NDArray[np.float64]:
     return np.asarray((np.sin(2 * np.pi * f * t) + 0.3 * np.sin(4 * np.pi * f * t)) * env)
 
 
-def render(sheet: Sheet, *, bass: bool = True, melody: bool = True, seed: int = 0) -> Rendered:
+def render(
+    sheet: Sheet,
+    *,
+    bass: bool = True,
+    melody: bool = True,
+    accompaniment: str = "piano",
+    melody_voice: str = "piano",
+    seed: int = 0,
+) -> Rendered:
     import numpy as np
 
     from opencapo.analysis.chords.vocab import chord_tones
+
+    if accompaniment not in ("piano", "strum"):
+        raise ValueError("accompaniment must be 'piano' or 'strum'")
+    if melody_voice not in ("piano", "voice"):
+        raise ValueError("melody_voice must be 'piano' or 'voice'")
+    melody_fn = piano_tone if melody_voice == "piano" else melody_tone
 
     spb = sheet.seconds_per_beat
     total = int(sheet.duration * SAMPLE_RATE) + SAMPLE_RATE  # a second of tail
@@ -157,20 +194,33 @@ def render(sheet: Sheet, *, bass: bool = True, melody: bool = True, seed: int = 
             else:
                 ref_chords.append([start, end, label])
             position += span.beats
-        for offset, down in pattern:
+        if accompaniment == "strum":
+            hits = pattern
+        else:
+            # Block chords on the strong beats and wherever the chord changes.
+            strong = {0.0, 2.0} if sheet.beats_per_bar == 4 else {0.0}
+            changes = {round((s[0] - bar_start) / spb, 6) for s in spans}
+            hits = tuple((offset, True) for offset in sorted(strong | changes))
+        for offset, down in hits:
             t = bar_start + offset * spb
             hit = next((s for s in spans if s[0] - 1e-9 <= t < s[1]), None)
             if hit is None:
                 continue
             _, end, root, quality, chord_bass = hit
             pitches = voicing(root, chord_tones(root, quality), chord_bass)
-            if not down:
-                pitches = pitches[::-1][:4]
-            # ring until the next strum of this chord, at most a bar
-            ring = min(end - t, sheet.beats_per_bar * spb)
-            for k, midi in enumerate(pitches):
-                plucks += 1
-                add(guitar, t + k * STRING_STAGGER, 0.35 * pluck(midi, ring, seed=seed + plucks))
+            next_hit = next((bar_start + o * spb for o, _ in hits if o > offset), end)
+            ring = min(end - t, sheet.beats_per_bar * spb, next_hit - t + 0.05)
+            if accompaniment == "strum":
+                if not down:
+                    pitches = pitches[::-1][:4]
+                for k, midi in enumerate(pitches):
+                    plucks += 1
+                    add(
+                        guitar, t + k * STRING_STAGGER, 0.35 * pluck(midi, ring, seed=seed + plucks)
+                    )
+            else:
+                for midi in pitches:
+                    add(guitar, t, 0.22 * piano_tone(midi, ring))
             if bass and down and offset in (0.0, 2.0):
                 low = LOWEST_MIDI - 12 + (root - LOWEST_MIDI) % 12
                 add(bass_track, t, 0.5 * bass_tone(low, min(2 * spb, end - t)))
@@ -185,17 +235,17 @@ def render(sheet: Sheet, *, bass: bool = True, melody: bool = True, seed: int = 
                 held_start = float(ref_melody[-1][0])  # type: ignore[arg-type]
                 ref_melody[-1][1] = end
                 if melody and pitch is not None:
-                    add(voice, held_start, 0.3 * melody_tone(pitch, end - held_start), replace=True)
+                    add(voice, held_start, 0.3 * melody_fn(pitch, end - held_start), replace=True)
             else:
                 ref_melody.append([start, end, pitch])
                 if melody and pitch is not None:
-                    add(voice, start, 0.3 * melody_tone(pitch, end - start))
+                    add(voice, start, 0.3 * melody_fn(pitch, end - start))
             position += note.beats
 
     if not bass:
         bass_track[:] = 0.0
-    left = 0.6 * guitar + 0.5 * bass_track + 0.45 * voice
-    right = 0.4 * guitar + 0.5 * bass_track + 0.45 * voice
+    left = 0.6 * guitar + 0.5 * bass_track + 0.55 * voice
+    right = 0.4 * guitar + 0.5 * bass_track + 0.55 * voice
     stereo = np.stack([left, right])
     peak = float(np.abs(stereo).max())
     if peak > 0:

@@ -140,9 +140,14 @@ def test_render_reference_and_wav(tmp_path: Path) -> None:
 def test_render_without_bass_or_melody_is_quieter() -> None:
     sheet = parse_sheet("key: C\n---\nC | 1 - - -\nG | 5 - - -\n")
     full = render(sheet)
-    guitar_only = render(sheet, bass=False, melody=False)
-    assert float(np.abs(guitar_only.samples).sum()) < float(np.abs(full.samples).sum())
+    chords_only = render(sheet, bass=False, melody=False)
+    assert float(np.abs(chords_only.samples).sum()) < float(np.abs(full.samples).sum())
     assert render(sheet, melody=False).reference["melody"] == full.reference["melody"]
+    strummed = render(sheet, accompaniment="strum", melody_voice="voice")
+    assert strummed.reference == full.reference  # the reference does not depend on the sound
+    assert not np.array_equal(strummed.samples, full.samples)
+    with pytest.raises(ValueError):
+        render(sheet, accompaniment="organ")
 
 
 def test_chroma_expert_hears_the_rendered_sheet() -> None:
