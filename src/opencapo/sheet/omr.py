@@ -127,32 +127,34 @@ def check_readings(readings: list[BarReading], beats_per_bar: int) -> list[Check
     return problems
 
 
-def repeated_passage_mismatches(readings: list[BarReading], window: int = 4) -> list[Check]:
-    """Bars whose chords repeat an earlier run of `window` bars but whose melody differs.
+def repeated_passage_mismatches(readings: list[BarReading], window: int = 8) -> list[Check]:
+    """Bars in a repeated passage whose melody differs from the earlier printing.
 
-    A verse sung twice is printed twice; a melody that differs under the
-    same chords is more often a misread than a variation, so it is flagged
-    for a second look (not rejected).
+    A verse sung twice is printed twice. Where a run of `window` bars has the
+    same chords as an earlier run, both runs carry a melody, and they agree
+    on most bars, the few bars that differ are flagged for a second look
+    (not rejected): a misread is more likely than a variation. Runs that
+    differ in many bars are different passages and are left alone.
     """
-    problems: list[Check] = []
-    seen: dict[tuple[str, ...], list[str]] = {}
-    for i in range(len(readings) - window + 1):
-        run = readings[i : i + window]
+    problems: dict[int, Check] = {}
+    melodic = [r for r in readings if any(ch in "1234567" for ch in r.melody)]
+    seen: dict[tuple[str, ...], list[BarReading]] = {}
+    for i in range(len(melodic) - window + 1):
+        run = melodic[i : i + window]
         key = tuple(r.chords for r in run)
         if not all(key):
             continue
-        melody = [r.melody for r in run]
-        if key in seen and seen[key] != melody:
-            for r, earlier in zip(run, seen[key], strict=True):
-                if r.melody != earlier:
-                    problems.append(
-                        Check(
-                            r.index,
-                            f"differs from an earlier bar with the same chords: {earlier!r}",
-                        )
-                    )
-        seen.setdefault(key, melody)
-    return problems
+        earlier = seen.setdefault(key, run)
+        if earlier is run:
+            continue
+        differing = [(r, e) for r, e in zip(run, earlier, strict=True) if r.melody != e.melody]
+        if 0 < len(differing) <= max(1, window // 4):
+            for r, e in differing:
+                problems.setdefault(
+                    r.index,
+                    Check(r.index, f"differs from bar {e.index}, same chords: {e.melody!r}"),
+                )
+    return list(problems.values())
 
 
 def assemble(header: dict[str, str], readings: list[BarReading], beats_per_bar: int) -> Assembled:

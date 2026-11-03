@@ -86,14 +86,23 @@ def test_repeated_passages_and_assembly(tmp_path: Path) -> None:
     verse = [("C", "1 1 5 5"), ("F", "6 6 5 -"), ("C", "4 4 3 3"), ("G", "2 2 1 -")]
     readings = [omr.BarReading(i, c, m) for i, (c, m) in enumerate(verse + verse)]
     readings[6] = omr.BarReading(6, "C", "4 4 3, 3")  # the repeat differs in one bar
-    flagged = omr.repeated_passage_mismatches(readings)
-    assert [p.index for p in flagged] == [6]
+    flagged = omr.repeated_passage_mismatches(readings, window=4)
+    assert [(p.index, p.problem.split(",")[0]) for p in flagged] == [(6, "differs from bar 2")]
+    # a passage that differs in most bars is another passage, not a misread
+    other = [omr.BarReading(i, c, "5 5 5 5") for i, (c, _) in enumerate(verse, start=8)]
+    assert omr.repeated_passage_mismatches(readings + other, window=4) == flagged
+    # bars of rests carry no melody and never take part
+    rests = [omr.BarReading(i, c, "0 0 0 0") for i, (c, _) in enumerate(verse, start=12)]
+    assert omr.repeated_passage_mismatches(readings + rests, window=4) == flagged
     header = {"title": "t", "key": "D", "mode": "major", "capo": "2", "bpm": "100", "time": "4/4"}
+    long_verse = [*verse, ("Am", "6 6 6 6"), ("F", "4 4 4 4"), ("C", "1 1 1 1"), ("G", "5 5 5 5")]
+    readings = [omr.BarReading(i, c, m) for i, (c, m) in enumerate(long_verse + long_verse)]
+    readings[10] = omr.BarReading(10, "C", "4 4 3, 3")  # the repeat differs in one bar of eight
     result = omr.assemble(header, readings, 4)
     assert result.text.startswith("title: t\nkey: D\n") and "C          | 1 1 5 5" in result.text
-    assert [p.index for p in result.problems] == [6]
+    assert [p.index for p in result.problems] == [10]
     omr.write_review(tmp_path / "review.md", result.problems, readings)
-    assert "小节 6" in (tmp_path / "review.md").read_text(encoding="utf-8")
+    assert "小节 10" in (tmp_path / "review.md").read_text(encoding="utf-8")
     # chords carry over bars that have none
     carried = omr.assemble(
         header, [omr.BarReading(0, "Am", "6 6 6 6"), omr.BarReading(1, "", "1 - - -")], 4
