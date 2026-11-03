@@ -193,8 +193,8 @@ DL 专家进 `analysis` 可选组；crema 依赖 TensorFlow / Keras，与 torch 
 
 | 验收项（ROADMAP 第 2 步，已按决定 2 修订） | 如何证明 | 状态 |
 |---|---|---|
-| GuitarSet 伴奏曲目与 AAM（500 首）上 majmin ≥ 80%；sevenths / 转位级别与独奏曲目报数（决定 7） | `scripts/eval_chords.py` → `docs/benchmarks/step-2-chords.md` | 待实现 |
-| 每个和弦都落在拍上 | 融合层按拍决策，模型层测试断言每个 `Chord.start` / `end` 都等于某个 `Beat.time`（或曲末） | 待实现 |
-| 置信度有定义，阈值可配置 | 本文档 2.4 节 + 代码注释；阈值为配置项并有测试 | 待实现 |
-| GuitarSet 伴奏曲目与 AAM 上调性 ≥ 85% | 同一脚本的调性表 | 待实现 |
-| 4 分钟歌曲：和弦 + 调性 ≤ 30 秒 | `scripts/time_pipeline.py` 扩展 → `docs/benchmarks/step-2-timing.md` | 待实现 |
+| GuitarSet 伴奏曲目与 AAM（500 首）上 majmin ≥ 80%；sevenths / 转位级别与独奏曲目报数（决定 7） | `scripts/eval_chords.py` → `docs/benchmarks/step-2-chords.md` | 首轮实测：GuitarSet 伴奏 **0.776（未达）**、AAM **0.947**；sevenths 0.499 / 0.917，转位级别 0.764 / 0.945 |
+| 每个和弦都落在拍上 | 融合层按拍决策，模型层测试断言每个 `Chord.start` / `end` 都等于某个 `Beat.time`（或曲末） | 已实现，`tests/test_chord_stage.py` |
+| 置信度有定义，阈值可配置 | 本文档 2.4 节 + 代码注释；阈值为配置项并有测试 | 已实现，`fusion.py` 与 `FusionParams` |
+| GuitarSet 伴奏曲目与 AAM 上调性 ≥ 85% | 同一脚本的调性表 | 首轮实测：**0.711 / 0.634（未达）**，是最大缺口 |
+| 4 分钟歌曲：和弦 + 调性 ≤ 30 秒 | `scripts/time_pipeline.py` 扩展 → `docs/benchmarks/step-2-timing.md` | **6.1 秒**（RTX 3090，热启动；整条流水线 13.4 秒），通过 |

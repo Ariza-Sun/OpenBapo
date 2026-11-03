@@ -27,7 +27,16 @@ An open-source Discord bot that turns a song's audio into a guitar play-along sh
 | 节拍 F-measure（GTZAN，998 首） | 拍点 **0.891**，强拍 0.786 | 拍点 ≥ 0.85 |
 | 4 分钟歌曲分轨 + 节拍（单卡，热启动） | **7.1 秒**（冷启动 13.7 秒） | ≤ 90 秒 |
 
-和弦、调性、编配、渲染与 Discord Bot 尚未开始。
+第 2 步（和弦 + 调性）代码已完成，首轮实测（`docs/benchmarks/step-2-chords.md`）：
+
+| 指标 | 实测（多专家融合） | 验收 |
+|---|---|---|
+| 和弦 majmin（GuitarSet 伴奏曲目，报数半 90 段） | **0.776** | ≥ 0.80，未达 |
+| 和弦 majmin（AAM 500 首） | **0.947** | ≥ 0.80 |
+| 调性正确率（GuitarSet 伴奏 / AAM） | **0.711 / 0.634** | ≥ 0.85，未达 |
+| 4 分钟歌曲和弦 + 调性（单卡，热启动） | **6.1 秒**（整条流水线 13.4 秒） | ≤ 30 秒 |
+
+调性估计是当前最大缺口，正在改进。编配、渲染与 Discord Bot 尚未开始。
 
 ## 开发
 

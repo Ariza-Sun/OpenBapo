@@ -139,6 +139,7 @@ def test_aam_loader_reads_the_v110_layout(tmp_path: Path) -> None:
     assert t.chord_labels == ["F:maj", "A#:maj", "A:min", "D:min", "C:maj"]
     np.testing.assert_allclose(t.chord_intervals, [[0, 2], [2, 4], [4, 5], [5, 8], [8, 10]])
     assert t.key == (5, "major")  # F major lasts 6 s, G minor 4 s
+    assert t.key_share == pytest.approx(0.6)
     np.testing.assert_allclose(t.beats, np.arange(0, 10, 0.5))
     np.testing.assert_allclose(t.downbeats, [0, 2, 4, 6, 8])
     assert eval_chords.aam_tracks(root, count=1)[0].name == "0001"
@@ -182,8 +183,10 @@ def test_aam_meter_and_key_fallbacks() -> None:
     beats, downbeats = eval_chords.aam_beat_grid(sections, 4.5, anchors)
     np.testing.assert_allclose(beats, np.arange(0, 4.5, 0.5))
     np.testing.assert_allclose(downbeats, [0, 1.5, 3.0])
-    assert eval_chords.aam_key([(0.0, 120.0, ""), (2.0, 120.0, "Amin")], 4.0) == (9, "minor")
-    assert eval_chords.aam_key([(0.0, 120.0, "")], 4.0) is None
+    assert eval_chords.aam_key([(0.0, 120.0, ""), (2.0, 120.0, "Amin")], 4.0) == ((9, "minor"), 1.0)
+    assert eval_chords.aam_key([(0.0, 120.0, "")], 4.0) == (None, 1.0)
+    key, share = eval_chords.aam_key([(0.0, 120.0, "Fmaj"), (6.0, 120.0, "Gmin")], 10.0)
+    assert key == (5, "major") and share == pytest.approx(0.6)
     intervals, labels = eval_chords.aam_chord_segments([(0.0, 1, 1, "N"), (2.0, 2, 1, "G7")], 2.0)
     assert labels == ["N"] and intervals.tolist() == [[0.0, 2.0]]
 
@@ -243,10 +246,22 @@ def test_key_scores() -> None:
     assert eval_chords.key_scores((0, "major"), (0, "major")) == {
         "key_exact": 1.0,
         "key_weighted": 1.0,
+        "key_ref": "C major",
+        "key_est": "C major",
+        "key_relation": "exact",
     }
     relative = eval_chords.key_scores((0, "major"), (9, "minor"))
     assert relative["key_exact"] == 0.0 and 0.0 < relative["key_weighted"] < 1.0
-    assert eval_chords.key_scores((0, "major"), None) == {"key_exact": 0.0, "key_weighted": 0.0}
+    assert relative["key_relation"] == "relative"
+    assert relative["key_ref"] == "C major" and relative["key_est"] == "A minor"
+    assert eval_chords.key_scores((0, "major"), (7, "major"))["key_relation"] == "fifth"
+    assert eval_chords.key_scores((0, "major"), (0, "minor"))["key_relation"] == "parallel"
+    assert eval_chords.key_scores((0, "major"), (1, "major"))["key_relation"] == "other"
+    assert eval_chords.key_scores((0, "major"), (0, "major"))["key_relation"] == "exact"
+    none = eval_chords.key_scores((0, "major"), None)
+    assert (
+        none["key_exact"] == 0.0 and none["key_weighted"] == 0.0 and none["key_relation"] == "none"
+    )
     assert np.isnan(eval_chords.key_scores(None, (0, "major"))["key_exact"])
 
 
@@ -297,22 +312,35 @@ def test_summarize_splits_by_dataset_and_group() -> None:
     ]
     rows[0]["track"] = "00_BN1-129-Eb_comp"
     rows[1]["track"] = "03_Rock1-130-A_solo"
+    rows[1]["key_relation"] = "relative"
+    rows[2]["key_relation"], rows[2]["key_share"] = "other", 0.6  # a modulating piece
+    rows.append(dict(rows[2], track="d", key_relation="exact", key_share=1.0))
     summary = eval_chords.summarize({"rows": rows})
+    assert summary["guitarset_report"]["key_relations"]["relative"] == 1
+    assert summary["aam"]["key_relations"] == {
+        "exact": 1, "fifth": 0, "relative": 0, "parallel": 0, "other": 1, "none": 0
+    }  # fmt: skip
+    assert (
+        summary["aam"]["key_exact_single_key"] == 1.0 and summary["aam"]["single_key_tracks"] == 1
+    )
+    assert "key_exact_single_key" not in summary["guitarset_report"]
     assert summary["guitarset_tune"]["majmin"] == 0.8 and summary["guitarset_tune"]["tracks"] == 1
     assert summary["guitarset_tune_comp"]["tracks"] == 1 and "guitarset_tune_solo" not in summary
     assert summary["guitarset_report_solo"]["majmin"] == 0.6
     assert "guitarset_report_comp" not in summary
     assert summary["guitarset_report"]["key_exact"] == 0.0
-    assert summary["aam"]["seconds"] == 3.0
+    assert summary["aam"]["seconds"] == 3.0 and summary["aam"]["tracks"] == 2
     text = eval_chords.markdown(
-        [{"system": "x", "summary": summary, "params": {}, "rows": rows}],
+        [{"system": "committee (tuned)", "summary": summary, "params": {}, "rows": rows}],
         {"date": "2026-01-01", "python": "3", "device": "cpu", "packages": {}},
         ["note"],
     )
-    assert "| x | 0.600 |" in text and "- note" in text
+    assert "| committee (tuned) | 0.600 |" in text and "- note" in text
+    assert "| aam | 1 | 0 | 0 | 0 | 1 | 0 | 1.000" in text
     assert "| 2.00 s | 参考 |" in text  # the solo-only and mixed GuitarSet rows are reference
     assert "| 3.00 s | 通过 |" in text  # the AAM row is gated and clears both thresholds
     assert (
         "仅独奏" in text
-        and "| x | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s | 参考 |" in text
+        and "| committee (tuned) | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s | 参考 |"
+        in text
     )

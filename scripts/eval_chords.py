@@ -62,6 +62,7 @@ class Track:
     key: tuple[int, str] | None  # (tonic pitch class, "major" | "minor")
     beats: np.ndarray  # seconds
     downbeats: np.ndarray  # seconds
+    key_share: float = 1.0  # fraction of the piece the reference key covers (AAM modulates)
 
 
 def read_jams(path: Path) -> dict:
@@ -256,6 +257,7 @@ def aam_track(track_id: str, audio: Path, beatinfo: Path, segments: Path) -> Tra
         end = anchors[-1][0] + 60.0 / sections[-1][1]
     intervals, labels = aam_chord_segments(anchors, end)
     beats, downbeats = aam_beat_grid(sections, end, anchors)
+    key, share = aam_key(sections, end)
     return Track(
         dataset="aam",
         split="report",
@@ -264,9 +266,10 @@ def aam_track(track_id: str, audio: Path, beatinfo: Path, segments: Path) -> Tra
         audio=audio,
         chord_intervals=intervals,
         chord_labels=labels,
-        key=aam_key(sections, end),
+        key=key,
         beats=beats,
         downbeats=downbeats,
+        key_share=share,
     )
 
 
@@ -286,16 +289,24 @@ def aam_chord_segments(
     return intervals, [merged[i][1] for i in keep]
 
 
-def aam_key(sections: Sequence[tuple[float, float, str]], end: float) -> tuple[int, str] | None:
-    """The key that covers the most time (AAM pieces may modulate between sections)."""
+def aam_key(
+    sections: Sequence[tuple[float, float, str]], end: float
+) -> tuple[tuple[int, str] | None, float]:
+    """The key that covers the most time and its share of the keyed time.
+
+    AAM pieces may modulate between sections; the share tells modulating
+    pieces (share < 1) from single-key ones.
+    """
     time_by_key: dict[str, float] = {}
     bounds = [*(s[0] for s in sections[1:]), end]
     for (start, _, key), next_start in zip(sections, bounds, strict=True):
         if key.strip():
             time_by_key[key] = time_by_key.get(key, 0.0) + max(0.0, next_start - start)
     if not time_by_key:
-        return None
-    return parse_key(max(time_by_key, key=lambda k: time_by_key[k]))
+        return None, 1.0
+    best = max(time_by_key, key=lambda k: time_by_key[k])
+    total = sum(time_by_key.values())
+    return parse_key(best), (time_by_key[best] / total if total > 0 else 1.0)
 
 
 def aam_beat_grid(
@@ -407,17 +418,28 @@ def key_scores(
 ) -> dict[str, float]:
     import mir_eval
 
-    if reference is None:
-        return {"key_exact": float("nan"), "key_weighted": float("nan")}
-    if estimate is None:
-        return {"key_exact": 0.0, "key_weighted": 0.0}
     names = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+    est = None if estimate is None else f"{names[estimate[0]]} {estimate[1]}"
+    if reference is None:
+        return {"key_exact": float("nan"), "key_weighted": float("nan"), "key_est": est}
     ref = f"{names[reference[0]]} {reference[1]}"
-    est = f"{names[estimate[0]]} {estimate[1]}"
+    if estimate is None:
+        return {"key_exact": 0.0, "key_weighted": 0.0, "key_ref": ref, "key_relation": "none"}
+    weighted = float(mir_eval.key.weighted_score(ref, est))
+    relation = KEY_RELATIONS.get(round(weighted, 1), "other")
     return {
         "key_exact": float(reference == estimate),
-        "key_weighted": float(mir_eval.key.weighted_score(ref, est)),
+        "key_weighted": weighted,
+        "key_ref": ref,
+        "key_est": est,
+        "key_relation": relation,
     }
+
+
+# mir_eval's weighted key score names the mistake: 0.5 = a fifth away, 0.3 =
+# the relative key, 0.2 = the parallel key.
+KEY_RELATIONS = {1.0: "exact", 0.5: "fifth", 0.3: "relative", 0.2: "parallel", 0.0: "other"}
+KEY_RELATION_NAMES = ("exact", "fifth", "relative", "parallel", "other", "none")
 
 
 # --- running the experts ----------------------------------------------------------
@@ -552,6 +574,7 @@ def score_system(
         }
         row.update(chord_scores(track.chord_intervals, track.chord_labels, intervals, labels))
         row.update(key_scores(track.key, key))
+        row["key_share"] = track.key_share
         row["seconds"] = sum(out.seconds.get(n, 0.0) for n in expert_names)
         rows.append(row)
     return {
@@ -587,6 +610,12 @@ def summarize(system: dict) -> dict:
             for m in (*CHORD_METRICS, "key_exact", "key_weighted", "seconds")
         }
         summary[subset]["tracks"] = len(subset_rows)
+        relations = [r["key_relation"] for r in subset_rows if r.get("key_relation")]
+        summary[subset]["key_relations"] = {k: relations.count(k) for k in KEY_RELATION_NAMES}
+        single = [r for r in subset_rows if r.get("key_share", 1.0) >= 0.999]
+        if len(single) != len(subset_rows):
+            summary[subset]["key_exact_single_key"] = mean_of(single, "key_exact")
+            summary[subset]["single_key_tracks"] = len(single)
         groups = sorted({r["group"] for r in subset_rows})
         if len(groups) > 1:
             summary[subset]["by_group"] = {
@@ -728,6 +757,25 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
                 for g, v in groups.items():
                     lines.append(f"| {g} | {fmt(v['majmin'])} | {fmt(v['key_exact'])} |")
                 lines.append("")
+        lines += ["## 调性错误类型（committee (tuned)，按曲目数）", ""]
+        lines.append(
+            "| 子集 | 正确 | 差五度 | 关系大小调 | 同名大小调 | 其它 | 无估计 "
+            "| 单一调性曲目的正确率 |"
+        )
+        lines.append("|---|---|---|---|---|---|---|---|")
+        for subset in ("guitarset_report_comp", "guitarset_report_solo", "aam"):
+            m = final["summary"].get(subset)
+            if not m or "key_relations" not in m:
+                continue
+            rel = m["key_relations"]
+            single = (
+                f"{fmt(m['key_exact_single_key'])}（{m['single_key_tracks']} 首）"
+                if "key_exact_single_key" in m
+                else "全部单一调性"
+            )
+            cells = [subset, *(str(rel[k]) for k in KEY_RELATION_NAMES), single]
+            lines.append("| " + " | ".join(cells) + " |")  # fmt: skip
+        lines.append("")
         lines += ["## 调参结果", "", "```json", json.dumps(final["params"], indent=2), "```", ""]
     if notes:
         lines += ["## 备注", ""] + [f"- {n}" for n in notes]
