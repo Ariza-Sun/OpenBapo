@@ -34,7 +34,7 @@ API 层
 | 分轨 | 混音 | vocals / drums / bass / other | **已定：Demucs `htdemucs`**（第 1 步）；备选 BS-RoFormer |
 | 节拍 / 强拍 / BPM | 混音（实测 drums + bass 重混更差：拍点 F1 0.770 对 0.891） | `Beat`、`Tempo`、`TimeSignature` | **已定：Beat This!**（第 1 步，GTZAN 拍点 F1 0.891）；备选 madmom、all-in-one |
 | 和弦 | 混音去鼓（bass + other）+ 拍网格 | `Chord`（含转位、置信度） | BTC、ChordFormer、autochord |
-| 调性 | `Chord` 序列 + 音频 | `Key` | 和弦统计规则法 + essentia key extractor 互校 |
+| 调性 | `Chord` 序列 + 音频 | `Key` | **已定：规则法**（第 2 步）：色度模板（Krumhansl 轮廓）与分窗和弦统计互校，关系大小调按主和弦时长与首尾和弦投票；不依赖 essentia |
 | 人声旋律 | vocals | 音高曲线 → 切分 → 量化到拍网格 → `Note` | RMVPE / CREPE 提取音高；音符切分与量化自写 |
 | 歌词识别 | vocals | 文本（用户提供歌词时跳过） | faster-whisper |
 | 歌词对齐 | vocals + 文本 | `LyricSyllable` | WhisperX 的 wav2vec2 强制对齐；中文对齐模型需单独评估；英文音节切分 pyphen / CMUdict；音节挂到 `Note` 用时间最近匹配 + 单调约束 |

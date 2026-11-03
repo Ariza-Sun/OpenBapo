@@ -193,6 +193,47 @@ def test_settled_relative_tie_never_yields_negative_confidence() -> None:
     assert key is not None and key.confidence >= 0.0
 
 
+def test_chord_scores_vote_window_by_window() -> None:
+    # 40 s in C major then 20 s in F# major: pooled, the union of both scales
+    # fits neither key well; windowed, C wins two thirds of the windows.
+    c_major = [
+        chord(t, t + 2, [0, 5, 7][i % 3], ChordQuality.MAJ) for i, t in enumerate(range(0, 40, 2))
+    ]
+    fs_major = [
+        chord(t, t + 2, [6, 11, 1][i % 3], ChordQuality.MAJ) for i, t in enumerate(range(40, 60, 2))
+    ]
+    windowed = scores_from_chords([*c_major, *fs_major])
+    assert int(np.argmax(windowed)) == key_index(0, Mode.MAJOR)
+    assert windowed.sum() == pytest.approx(1.0)  # a mean of per-window distributions
+    pooled = scores_from_chords([*c_major, *fs_major], window=0)
+    assert pooled.sum() == pytest.approx(1.0)
+    assert scores_from_chords(c_major, window=0).argmax() == key_index(0, Mode.MAJOR)
+
+
+def test_opening_and_closing_chords_settle_a_relative_tie() -> None:
+    # C, F, Am, G7 over and over: the same chords read as C major or A minor
+    # and Am gets as much time as C, so only the phrase boundaries decide.
+    def cycle(first: ChordQuality, first_root: int) -> list[Chord]:
+        plan = [
+            (first_root, first),
+            (5, ChordQuality.MAJ),
+            (9, ChordQuality.MIN),
+            (7, ChordQuality.DOM7),
+        ]
+        return [chord(i, i + 1, r, q) for i, (r, q) in enumerate(plan * 4)]
+
+    opens_on_c = cycle(ChordQuality.MAJ, 0)  # C ... G7: tonic opens, dominant closes
+    key = estimate_key(np.zeros(24), scores_from_chords(opens_on_c), opens_on_c)
+    assert key is not None and (key.tonic, key.mode) == (0, Mode.MAJOR)
+    opens_on_am = [
+        chord(0, 1, 9, ChordQuality.MIN),
+        *opens_on_c[1:-1],
+        chord(15, 16, 4, ChordQuality.MAJ),
+    ]
+    key = estimate_key(np.zeros(24), scores_from_chords(opens_on_am), opens_on_am)
+    assert key is not None and (key.tonic, key.mode) == (9, Mode.MINOR)  # opens on Am, closes on E
+
+
 @pytest.mark.parametrize("tonic", [0, 4, 7])
 def test_end_to_end_key_from_synthetic_audio(tonic: int) -> None:
     i = voicing([(tonic + d) % 12 for d in (0, 4, 7)])
