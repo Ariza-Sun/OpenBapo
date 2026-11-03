@@ -140,6 +140,10 @@ def test_aam_loader_reads_the_v110_layout(tmp_path: Path) -> None:
     np.testing.assert_allclose(t.chord_intervals, [[0, 2], [2, 4], [4, 5], [5, 8], [8, 10]])
     assert t.key == (5, "major")  # F major lasts 6 s, G minor 4 s
     assert t.key_share == pytest.approx(0.6)
+    assert t.key_times == {"F major": pytest.approx(6.0), "G minor": pytest.approx(4.0)}
+    assert eval_chords.key_hit_major(t, (7, "minor")) == 1.0  # G minor holds 40% of the piece
+    assert eval_chords.key_hit_major(t, (0, "major")) == 0.0
+    assert eval_chords.key_hit_major(t, None) == 0.0
     np.testing.assert_allclose(t.beats, np.arange(0, 10, 0.5))
     np.testing.assert_allclose(t.downbeats, [0, 2, 4, 6, 8])
     assert eval_chords.aam_tracks(root, count=1)[0].name == "0001"
@@ -314,7 +318,8 @@ def test_summarize_splits_by_dataset_and_group() -> None:
     rows[1]["track"] = "03_Rock1-130-A_solo"
     rows[1]["key_relation"] = "relative"
     rows[2]["key_relation"], rows[2]["key_share"] = "other", 0.6  # a modulating piece
-    rows.append(dict(rows[2], track="d", key_relation="exact", key_share=1.0))
+    rows[2]["key_exact"], rows[2]["key_hit_major"] = 0.0, 1.0  # ...that hit its second key
+    rows.append(dict(rows[2], track="d", key_relation="exact", key_share=1.0, key_exact=1.0))
     summary = eval_chords.summarize({"rows": rows})
     assert summary["guitarset_report"]["key_relations"]["relative"] == 1
     assert summary["aam"]["key_relations"] == {
@@ -324,6 +329,8 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         summary["aam"]["key_exact_single_key"] == 1.0 and summary["aam"]["single_key_tracks"] == 1
     )
     assert "key_exact_single_key" not in summary["guitarset_report"]
+    assert summary["aam"]["key_hit_major_modulating"] == 1.0
+    assert summary["aam"]["modulating_tracks"] == 1 and summary["aam"]["key_exact"] == 0.5
     assert summary["guitarset_tune"]["majmin"] == 0.8 and summary["guitarset_tune"]["tracks"] == 1
     assert summary["guitarset_tune_comp"]["tracks"] == 1 and "guitarset_tune_solo" not in summary
     assert summary["guitarset_report_solo"]["majmin"] == 0.6
@@ -336,9 +343,10 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         ["note"],
     )
     assert "| committee (tuned) | 0.600 |" in text and "- note" in text
-    assert "| aam | 1 | 0 | 0 | 0 | 1 | 0 | 1.000" in text
+    assert "| aam | 1 | 0 | 0 | 0 | 1 | 0 | 1.000" in text and text.count("1 首") >= 2
+    assert "转调曲目命中任一主要调" in text
     assert "| 2.00 s | 参考 |" in text  # the solo-only and mixed GuitarSet rows are reference
-    assert "| 3.00 s | 通过 |" in text  # the AAM row is gated and clears both thresholds
+    assert "| 3.00 s | 通过 |" in text  # gated on the single-key piece although key_exact is 0.5
     solo_row = (
         "| committee (tuned) | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s"
     )

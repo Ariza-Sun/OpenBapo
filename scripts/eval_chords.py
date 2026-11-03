@@ -430,6 +430,15 @@ def chord_scores(
     return {m: float(scores[m]) for m in CHORD_METRICS}
 
 
+def key_hit_major(track: Track, estimate: tuple[int, str] | None) -> float:
+    """1.0 when the estimate is any key holding at least a third of the piece."""
+    if estimate is None or track.key is None:
+        return 0.0 if track.key is not None else float("nan")
+    total = sum(track.key_times.values())
+    major = {k for k, t in track.key_times.items() if t >= total / 3} or {key_name(track.key)}
+    return float(key_name(estimate) in major)
+
+
 def key_scores(
     reference: tuple[int, str] | None, estimate: tuple[int, str] | None
 ) -> dict[str, float]:
@@ -650,6 +659,7 @@ def score_system(
         row.update(chord_scores(track.chord_intervals, track.chord_labels, intervals, labels))
         row.update(key_scores(track.key, key))
         row["key_share"] = track.key_share
+        row["key_hit_major"] = key_hit_major(track, key)
         row["seconds"] = sum(out.seconds.get(n, 0.0) for n in expert_names)
         rows.append(row)
     return {
@@ -689,8 +699,13 @@ def summarize(system: dict) -> dict:
         summary[subset]["key_relations"] = {k: relations.count(k) for k in KEY_RELATION_NAMES}
         single = [r for r in subset_rows if r.get("key_share", 1.0) >= 0.999]
         if len(single) != len(subset_rows):
+            # Modulating pieces have no single true key (decision 8): the gate
+            # uses the single-key pieces; the rest get the relaxed hit rate.
             summary[subset]["key_exact_single_key"] = mean_of(single, "key_exact")
             summary[subset]["single_key_tracks"] = len(single)
+            modulating = [r for r in subset_rows if r not in single]
+            summary[subset]["key_hit_major_modulating"] = mean_of(modulating, "key_hit_major")
+            summary[subset]["modulating_tracks"] = len(modulating)
         groups = sorted({r["group"] for r in subset_rows})
         if len(groups) > 1:
             summary[subset]["by_group"] = {
@@ -769,8 +784,10 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
         "拍网格来自数据集自带的拍点标注；分轨来自 Demucs（低音线用）。"
         "指标：mir_eval `chord`（按时长加权）与调性精确匹配。"
         f"验收门槛：GuitarSet（报数半，仅伴奏曲目）与 AAM 上 majmin ≥ {ACCEPTANCE_MAJMIN:.0%}、"
-        f"调性 ≥ {ACCEPTANCE_KEY:.0%}（`docs/plans/step-2.md` 决定 7）。"
+        f"调性 ≥ {ACCEPTANCE_KEY:.0%}（`docs/plans/step-2.md` 决定 7、8）。"
         "GuitarSet 的独奏曲目是单音旋律、标注的是隐含和弦，只报数。"
+        "AAM 的调性门槛只按全曲单一调性的曲目算（中途转调的曲目没有唯一真值），"
+        '转调曲目另报"估计落在任一占时 ≥ 1/3 的调上"的命中率。'
         "调参只用 GuitarSet 吉他手 00–02。",
         "",
     ]
@@ -798,12 +815,13 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
             if subset not in s["summary"]:
                 continue
             m = s["summary"][subset]
+            gated_key = m.get("key_exact_single_key", m["key_exact"])
             verdict = (
                 "自检"
                 if s["system"] == "annotations"
                 else (
                     "通过"
-                    if m["majmin"] >= ACCEPTANCE_MAJMIN and m["key_exact"] >= ACCEPTANCE_KEY
+                    if m["majmin"] >= ACCEPTANCE_MAJMIN and gated_key >= ACCEPTANCE_KEY
                     else "未通过"
                 )
             )
@@ -835,20 +853,19 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
         lines += ["## 调性错误类型（committee (tuned)，按曲目数）", ""]
         lines.append(
             "| 子集 | 正确 | 差五度 | 关系大小调 | 同名大小调 | 其它 | 无估计 "
-            "| 单一调性曲目的正确率 |"
+            "| 单一调性曲目的正确率（门槛依据） | 转调曲目命中任一主要调 |"
         )
-        lines.append("|---|---|---|---|---|---|---|---|")
+        lines.append("|---|---|---|---|---|---|---|---|---|")
         for subset in ("guitarset_report_comp", "guitarset_report_solo", "aam"):
             m = final["summary"].get(subset)
             if not m or "key_relations" not in m:
                 continue
             rel = m["key_relations"]
-            single = (
-                f"{fmt(m['key_exact_single_key'])}（{m['single_key_tracks']} 首）"
-                if "key_exact_single_key" in m
-                else "全部单一调性"
-            )
-            cells = [subset, *(str(rel[k]) for k in KEY_RELATION_NAMES), single]
+            single, modulating = "全部单一调性", "—"
+            if "key_exact_single_key" in m:
+                single = f"{fmt(m['key_exact_single_key'])}（{m['single_key_tracks']} 首）"
+                modulating = f"{fmt(m['key_hit_major_modulating'])}（{m['modulating_tracks']} 首）"
+            cells = [subset, *(str(rel[k]) for k in KEY_RELATION_NAMES), single, modulating]
             lines.append("| " + " | ".join(cells) + " |")  # fmt: skip
         lines.append("")
         lines += ["## 调参结果", "", "```json", json.dumps(final["params"], indent=2), "```", ""]
