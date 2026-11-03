@@ -25,7 +25,13 @@ import numpy as np
 from numpy.typing import NDArray
 
 from opencapo.analysis.audio import Audio
-from opencapo.analysis.chords.vocab import N_LABELS, NO_CHORD, bass_relation, index_label
+from opencapo.analysis.chords.vocab import (
+    N_LABELS,
+    NO_CHORD,
+    bass_relation,
+    chord_tones,
+    index_label,
+)
 from opencapo.analysis.separate import Stems
 from opencapo.model import Beat, Chord, Key, Mode
 
@@ -78,6 +84,10 @@ class FusionParams:
     # A lead sheet holds the chord through a rest shorter than a bar; longer
     # silences (a break, a drum solo) stay "N". Not tuned: notation convention.
     fill_gaps_under_bar: bool = True
+    # The detected bass note as evidence for the label (a transcriber's first
+    # move): log-score bonus, scaled by the detection strength, for chords
+    # whose root is the bass note; half of it when the bass is another chord tone.
+    bass_weight: float = 0.0
 
 
 def aggregate_to_beats(
@@ -130,6 +140,37 @@ def key_prior(key: Key | None, bonus: float) -> NDArray[np.float64]:
         root, _ = index_label(index)  # type: ignore[misc]
         if root in in_key:
             prior[index] = bonus
+    return prior
+
+
+def bass_relations() -> NDArray[np.float64]:
+    """(N_LABELS, 12): 1 where the pitch class is the label's root, 0.5 another chord tone."""
+    table = np.zeros((N_LABELS, 12))
+    for index in range(NO_CHORD):
+        root, quality = index_label(index)  # type: ignore[misc]
+        for pc in chord_tones(root, quality):
+            table[index, pc] = 1.0 if pc == root else 0.5
+    return table
+
+
+_BASS_RELATIONS: NDArray[np.float64] | None = None
+
+
+def bass_prior(
+    bass: BassEstimate | None, weight: float, min_strength: float
+) -> NDArray[np.float64]:
+    """(n_beats, N_LABELS) log-score bonus from the detected bass line; zero rows where none."""
+    global _BASS_RELATIONS
+    if bass is None or weight == 0.0:
+        return np.zeros((0, N_LABELS))
+    if _BASS_RELATIONS is None:
+        _BASS_RELATIONS = bass_relations()
+    n = len(bass.pitch_class)
+    prior = np.zeros((n, N_LABELS))
+    for i in range(n):
+        pc, strength = int(bass.pitch_class[i]), float(bass.strength[i])
+        if pc >= 0 and strength >= min_strength:
+            prior[i] = weight * strength * _BASS_RELATIONS[:, pc]
     return prior
 
 
@@ -202,6 +243,9 @@ def decode(
     fused = fuse(beat_probs, params)
     log_scores = np.log(fused + EPS) + key_prior(key, params.key_prior)
     log_scores[:, NO_CHORD] += params.no_chord_bias
+    from_bass = bass_prior(bass, params.bass_weight, params.min_bass_strength)
+    if len(from_bass) == n:
+        log_scores += from_bass
     labels = viterbi(log_scores, [b.is_downbeat for b in beats], params)
     if params.fill_gaps_under_bar:
         labels = fill_gaps(labels, beats_per_bar(beats))

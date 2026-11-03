@@ -7,6 +7,8 @@ from opencapo.analysis.chords.fusion import (
     FusionParams,
     aggregate_to_beats,
     agreement,
+    bass_prior,
+    bass_relations,
     beats_per_bar,
     decode,
     fill_gaps,
@@ -158,6 +160,28 @@ def test_short_gaps_are_held_like_a_lead_sheet() -> None:
         params=FusionParams(change_cost_beat=0.0, change_cost_downbeat=0.0),
     )
     assert [(c.start, c.end, c.root) for c in result.chords] == [(0.5, 3.0, 0), (3.0, 5.0, 7)]
+
+
+def test_bass_line_can_tip_a_relative_chord_decision() -> None:
+    # The expert hears C major and A minor as equally likely; the bass plays A.
+    beats = beat_grid(4)
+    c, am = label_index(0, ChordQuality.MAJ), label_index(9, ChordQuality.MIN)
+    probs = np.full((4, N_LABELS), 0.001)
+    probs[:, c] = probs[:, am] = 0.45
+    probs /= probs.sum(axis=1, keepdims=True)
+    bass = BassEstimate(pitch_class=np.array([9, 9, 9, 9]), strength=np.array([0.9] * 4))
+    without = decode(beats, {"m": probs}, ["m"], duration=2.0, bass=bass)
+    with_bass = decode(
+        beats, {"m": probs}, ["m"], duration=2.0, bass=bass, params=FusionParams(bass_weight=1.0)
+    )
+    assert [(ch.root, ch.quality) for ch in with_bass.chords] == [(9, ChordQuality.MIN)]
+    assert len(without.chords) == 1  # a tie resolves somehow, but not by the bass
+    table = bass_relations()
+    assert table[c, 0] == 1.0 and table[c, 4] == 0.5 and table[c, 9] == 0.0
+    assert table[NO_CHORD].sum() == 0.0
+    weak = BassEstimate(pitch_class=np.array([9]), strength=np.array([0.1]))
+    assert bass_prior(weak, 1.0, 0.3).sum() == 0.0  # below min strength: ignored
+    assert bass_prior(None, 1.0, 0.3).shape == (0, N_LABELS)
 
 
 def test_decode_confidence_is_posterior_times_agreement() -> None:

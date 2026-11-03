@@ -744,22 +744,23 @@ def tune(tracks: list[Track], outputs: dict[str, TrackOutputs], expert_names, mo
 
     # Model experts weigh 0.5-2; the rule-based chroma expert may also be dropped (0).
     weight_grids = [[0.5, 1.0, 2.0] if n in model_names else [0.0, 0.5, 1.0] for n in expert_names]
+    # key_prior 0.5 and change_cost_downbeat 0.1 won every earlier search and are fixed.
     grids = {
-        "key_prior": [0.5, 1.0],
-        "change_cost_downbeat": [0.1, 0.3, 1.0],
         "change_cost_beat": [0.5, 1.5, 3.0],
         "no_chord_bias": [0.0, -1.0, -2.0],
+        "bass_weight": [0.0, 1.0, 2.0],
     }
     best, best_score = None, -1.0
     weight_combos = list(itertools.product(*weight_grids))
     for weights in weight_combos:
-        for key_prior, cost_db, cost_b, bias in itertools.product(*grids.values()):
+        for cost_b, bias, bass_weight in itertools.product(*grids.values()):
             params = FusionParams(
                 weights=dict(zip(expert_names, weights, strict=True)),
-                key_prior=key_prior,
-                change_cost_downbeat=cost_db,
+                key_prior=0.5,
+                change_cost_downbeat=0.1,
                 change_cost_beat=cost_b,
                 no_chord_bias=bias,
+                bass_weight=bass_weight,
             )
             rows = score_system("tune", tracks, outputs, expert_names, model_names, params)["rows"]
             score = mean_of(rows, "majmin")
