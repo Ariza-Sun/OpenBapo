@@ -61,7 +61,7 @@ def pluck(midi: float, seconds: float, *, seed: int, decay: float = 0.998) -> ND
     period = max(2, round(SAMPLE_RATE / midi_hz(midi)))
     rng = np.random.default_rng(seed)
     burst = rng.uniform(-1.0, 1.0, period)
-    kernel = np.hanning(11)
+    kernel = np.hanning(7)
     kernel /= kernel.sum()
     block = np.convolve(np.concatenate([burst, burst[:10]]), kernel, mode="valid")[:period]
     block = block / (np.abs(block).max() or 1.0)
@@ -72,10 +72,10 @@ def pluck(midi: float, seconds: float, *, seed: int, decay: float = 0.998) -> ND
         # fundamental: the string mellows as it rings instead of jangling.
         left = np.roll(prev, 1)
         right = np.roll(prev, -1)
-        nxt = decay * (0.25 * left + 0.5 * prev + 0.25 * right)
+        nxt = decay * (0.15 * left + 0.7 * prev + 0.15 * right)
         blocks.append(nxt)
     out = np.concatenate(blocks)[:n]
-    body = np.hanning(33)
+    body = np.hanning(9)
     body /= body.sum()
     return np.asarray(np.convolve(out, body, mode="same"))
 
