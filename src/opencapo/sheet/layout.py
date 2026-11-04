@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 DPI = 300
 INK_THRESHOLD = 130  # ink is darker than this; thin bar lines render ~115, the watermark >150
+PAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff"}
 
 
 @dataclass(frozen=True)
@@ -62,9 +63,14 @@ class SystemBox:
 
 
 def rasterize(path: Path, dpi: int = DPI) -> list[Image.Image]:
-    """Pages of a PDF, or the single image, as greyscale PIL images."""
+    """Pages of a PDF, the images of a folder (in name order), or one image, as greyscale."""
     from PIL import Image
 
+    if path.is_dir():
+        files = sorted(p for p in path.iterdir() if p.suffix.lower() in PAGE_SUFFIXES)
+        if not files:
+            raise FileNotFoundError(f"{path}: no page images")
+        return [Image.open(p).convert("L") for p in files]
     if path.suffix.lower() == ".pdf":
         import pypdfium2
 
