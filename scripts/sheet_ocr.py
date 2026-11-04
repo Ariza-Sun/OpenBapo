@@ -21,11 +21,11 @@ lists; songs missing a file are listed as incomplete. The evaluation
 (`scripts/eval_chords.py --sheets DIR`) reads the sample set through this
 file only.
 
-`prepare` rasterizes the pages, finds systems and bars, and writes crops
-plus WORK_DIR/worksheet.json and the two prompts. An agent with vision
-reads the page-1 header crop into HEADER.json (title, key, capo, time,
-bpm) and each bar's stacked crop into READINGS.json, a list of
-{"index", "chords", "melody"}, following those prompts.
+`prepare` rasterizes the pages, finds the systems, and writes one row
+image per system plus WORK_DIR/worksheet.json and the two prompts. An
+agent with vision reads the page-1 header crop into HEADER.json (title,
+key, capo, time, bpm) and each row image into READINGS.json, a list of
+bars in order, {"row", "chords", "melody"}, following those prompts.
 `assemble` checks the readings (bars must fill the metre, chords must
 parse, ties must continue, repeated passages should match), writes the
 .sheet file and a review list (WORK_DIR/review.md) of bars to look at again.
@@ -127,34 +127,33 @@ def main(argv: list[str] | None = None) -> int:
         sheet = worksheet(args.source, args.out, args.dpi)
         (args.out / "reading_prompt.txt").write_text(READING_PROMPT, encoding="utf-8")
         (args.out / "header_prompt.txt").write_text(HEADER_PROMPT, encoding="utf-8")
-        bars = sum(len(s["bars"]) for p in sheet["pages"] for s in p["systems"])  # type: ignore[index, union-attr]
-        print(f"{len(sheet['pages'])} pages, {bars} bars; crops and worksheet.json in {args.out}")  # type: ignore[arg-type]
+        rows = sum(len(p["systems"]) for p in sheet["pages"])  # type: ignore[index, union-attr]
+        print(
+            f"{len(sheet['pages'])} pages, {rows} rows; row images and worksheet.json in {args.out}"
+        )  # type: ignore[arg-type]
         return 0
 
     from opencapo.sheet.omr import BarReading, write_review
     from opencapo.sheet.omr import assemble as assemble_sheet
 
     worksheet_data = json.loads((args.work_dir / "worksheet.json").read_text(encoding="utf-8"))
-    crops = {
-        b["index"]: b["stacked"]
-        for p in worksheet_data["pages"]
-        for s in p["systems"]
-        for b in s["bars"]
-    }
+    crops = {int(s["index"]): str(s["crop"]) for p in worksheet_data["pages"] for s in p["systems"]}
     raw = json.loads(args.readings.read_text(encoding="utf-8"))
     readings = [
         BarReading(
-            index=int(r["index"]),
+            index=i,
             chords=str(r.get("chords", "")).strip(),
             melody=str(r.get("melody", "")).strip(),
             notes=str(r.get("notes", "")).strip(),
-            crop=crops.get(int(r["index"]), ""),
+            lyrics=str(r.get("lyrics", "")).strip(),
+            row=int(r.get("row", -1)),
+            crop=crops.get(int(r.get("row", -1)), ""),
         )
-        for r in sorted(raw, key=lambda r: int(r["index"]))
+        for i, r in enumerate(raw)
     ]
-    missing = sorted(set(crops) - {r.index for r in readings})
+    missing = sorted(set(crops) - {r.row for r in readings})
     if missing:
-        print(f"no reading for bars {missing}", file=sys.stderr)
+        print(f"no reading for rows {missing}", file=sys.stderr)
         return 1
     read = json.loads(args.header.read_text(encoding="utf-8")) if args.header else {}
     key = args.key or read.get("key")

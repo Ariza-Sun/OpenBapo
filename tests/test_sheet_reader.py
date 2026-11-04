@@ -13,45 +13,61 @@ from opencapo.sheet import reader
 
 
 def test_extract_json_and_prompts() -> None:
-    assert reader.extract_json('x ```json\n[{"index": 1}]\n``` y') == [{"index": 1}]
+    assert reader.extract_json('x ```json\n[{"row": 1}]\n``` y') == [{"row": 1}]
     assert reader.extract_json('{"a": 1} trailing', "object") == {"a": 1}
     with pytest.raises(ValueError):
         reader.extract_json("nothing")
     prompt = reader.batch_prompt([(3, "/a.png"), (4, "/b.png")])
     assert "3\t/a.png" in prompt and "4\t/b.png" in prompt and "JSON 数组" in prompt
     assert "/h.png" in reader.header_prompt("/h.png")
-    parsed = reader.parse_batch('[{"index": 3, "chords": "C", "melody": "1 2 3 4"}]', [3])
-    assert parsed[3].chords == "C"
-    with pytest.raises(ValueError):
-        reader.parse_batch('[{"index": 3, "chords": "C"}]', [3, 4])  # bar 4 missing
+    reply = (
+        '[{"row": 3, "bars": [{"chords": "C", "melody": "1 2 3 4", "lyrics": "la"},'
+        ' {"melody": "5 - - -"}]}]'
+    )
+    parsed = reader.parse_batch(reply, [3])
+    assert [(b.row, b.chords, b.melody, b.lyrics) for b in parsed[3]] == [
+        (3, "C", "1 2 3 4", "la"),
+        (3, "", "5 - - -", ""),
+    ]
+    with pytest.raises(ValueError, match="lacks rows"):
+        reader.parse_batch(reply, [3, 4])  # row 4 missing
+    with pytest.raises(ValueError, match="lacks rows"):
+        reader.parse_batch('[{"row": 3, "bars": []}]', [3])  # a row without bars is no reading
+
+
+def rows_in(prompt: str) -> list[tuple[int, str]]:
+    return [
+        (int(i), p) for i, p in (line.split("\t") for line in prompt.splitlines() if "\t" in line)
+    ]
 
 
 def fake_runner(calls: list[str]) -> reader.Runner:
-    """Answers the header, then every bar.
+    """Answers the header, then every row (three bars each).
 
-    Bar 1 is read without its octave dot in pass 1 (batched with bar 0) and
-    with it in pass 2 (batched with bar 2) and in the deciding x3 reading;
-    bar 2 is read with three beat items in both passes (a check failure)
-    and right from x3.
+    Row 1's middle bar is read without its octave dot in pass 1 (batched
+    with row 0) and with it in pass 2 (alone) and in the deciding x3
+    reading; row 0's last bar is read with three beat items in both passes
+    (a check failure) and right from x3.
     """
 
     def run(prompt: str) -> str:
         calls.append(prompt)
         if "页眉" in prompt:
             return '{"title": "t", "key": "D", "capo": 2, "time": "4/4", "bpm": null}'
-        items = [line.split("\t") for line in prompt.splitlines() if "\t" in line]
-        batch = {int(index) for index, _ in items}
+        items = rows_in(prompt)
+        batch = {i for i, _ in items}
         out = []
-        for index, path in items:
-            i = int(index)
+        for row, path in items:
             deciding = "-x3" in path
-            if i == 1:  # misses the dot only when read in the same batch as bar 0 (pass 1)
-                melody = "1 2 3, 4" if deciding or 0 not in batch else "1 2 3 4"
-            elif i == 2:
-                melody = "1 2 3 4" if deciding else "1 2 3"
-            else:
-                melody = "1 2 3 4"
-            out.append({"index": i, "chords": "C" if i != 1 else "G", "melody": melody})
+            bars = [{"chords": "C", "melody": "1 2 3 4", "lyrics": "a"} for _ in range(3)]
+            if row == 1:  # misses the dot only when read in the same batch as row 0 (pass 1)
+                bars[1] = {
+                    "chords": "G",
+                    "melody": "1 2 3, 4" if deciding or 0 not in batch else "1 2 3 4",
+                }
+            if row == 0:
+                bars[2] = {"chords": "C", "melody": "1 2 3 4" if deciding else "1 2 3"}
+            out.append({"row": row, "bars": bars})
         return json.dumps(out)
 
     return run
@@ -59,50 +75,56 @@ def fake_runner(calls: list[str]) -> reader.Runner:
 
 def test_read_sheet_loop(tmp_path: Path) -> None:
     page = tmp_path / "song.png"
-    drawn_page().save(page)
+    drawn_page(systems=2).save(page)
     calls: list[str] = []
     logs: list[str] = []
     result = reader.read_sheet(
         page, tmp_path / "work", runner=fake_runner(calls), bpm=100, batch_size=2, log=logs.append
     )
     assert result.header["key"] == "D"
-    assert result.reread == [1, 2] and result.unsettled == []
-    assert [r.melody for r in result.readings] == ["1 2 3 4", "1 2 3, 4", "1 2 3 4"]
+    assert result.reread == [0, 1] and result.unsettled == []
+    assert [r.melody for r in result.readings] == ["1 2 3 4"] * 4 + ["1 2 3, 4", "1 2 3 4"]
+    assert [r.index for r in result.readings] == list(range(6))
+    assert [r.row for r in result.readings] == [0, 0, 0, 1, 1, 1]
     assert result.problems == []
     text = result.sheet_path.read_text(encoding="utf-8")
     assert text.startswith("title: t\nkey: D\nmode: major\ncapo: 2\nbpm: 100\ntime: 4/4\n---\n")
     assert "G          | 1 2 3, 4" in text
     assert (tmp_path / "work" / "readings.json").exists()
     assert (tmp_path / "work" / "review.md").exists()
-    # header + pass 1 (batches [0,1],[2]) + pass 2 ([0],[1,2]) + two deciding readings
-    assert len(calls) == 1 + 2 + 2 + 2
-    assert all("-x2.png" in c for c in calls[1:5]) and all("-x3.png" in c for c in calls[5:])
-    big = next(Path(c.split("\t")[1].strip()) for c in calls[-1].splitlines() if "\t" in c)
-    assert Image.open(big).width == 3 * Image.open(result.readings[2].crop).width
+    # header + pass 1 (batch [0,1]) + pass 2 ([0],[1]) + two deciding readings
+    assert len(calls) == 1 + 1 + 2 + 2
+    assert all("-x2.png" in c for c in calls[1:4]) and all("-x3.png" in c for c in calls[4:])
+    big = Path(rows_in(calls[-1])[0][1])
+    assert Image.open(big).width == 3 * Image.open(result.readings[-1].crop).width
 
 
-def test_unsettled_bars_go_to_review(tmp_path: Path) -> None:
+def test_unsettled_rows_go_to_review(tmp_path: Path) -> None:
     page = tmp_path / "song.png"
-    drawn_page().save(page)
-    answers = iter(["1 2 3 4", "1 2 3, 4", "1, 2 3 4"])  # three different readings of bar 0
+    drawn_page(systems=2).save(page)
+    answers = iter(["1 2 3 4", "1 2 3, 4", "1, 2 3 4"])  # three different readings of row 0
 
     def run(prompt: str) -> str:
         if "页眉" in prompt:
             return '{"title": "t", "key": "C", "capo": 0, "time": "4/4"}'
-        items = [line.split("\t") for line in prompt.splitlines() if "\t" in line]
         out = []
-        for index, _ in items:
-            i = int(index)
-            melody = next(answers) if i == 0 else "5 5 5 5"
-            out.append({"index": i, "chords": "C", "melody": melody})
+        for row, _ in rows_in(prompt):
+            melody = next(answers) if row == 0 else "5 5 5 5"
+            out.append(
+                {"row": row, "bars": [{"chords": "C", "melody": melody}, {"melody": "1 1 1 1"}]}
+            )
         return json.dumps(out)
 
     result = reader.read_sheet(
         page, tmp_path / "work", runner=run, batch_size=3, log=lambda _: None
     )
-    assert result.unsettled == [0] and [p.index for p in result.problems] == [0]
-    assert "三次读法不一致" in result.readings[0].notes
-    assert "小节 0" in (tmp_path / "work" / "review.md").read_text(encoding="utf-8")
+    assert result.unsettled == [0] and [p.index for p in result.problems] == [0, 1]
+    assert (
+        "三次读法不一致" in result.readings[0].notes
+        and "1 2 3, 4 | 1 1 1 1" in result.readings[1].notes
+    )
+    review = (tmp_path / "work" / "review.md").read_text(encoding="utf-8")
+    assert "小节 0（第 0 行）" in review and "小节 2" not in review  # noqa: RUF001
 
 
 def test_read_sheet_gives_up_on_a_garbled_batch(tmp_path: Path) -> None:
@@ -114,3 +136,10 @@ def test_read_sheet_gives_up_on_a_garbled_batch(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError, match="unreadable"):
         reader.read_sheet(page, tmp_path / "work", runner=bad, retries=1, log=lambda _: None)
+
+
+def test_read_sheet_needs_a_system(tmp_path: Path) -> None:
+    page = tmp_path / "blank.png"
+    Image.new("L", (1200, 1600), 255).save(page)
+    with pytest.raises(RuntimeError, match="no systems"):
+        reader.read_sheet(page, tmp_path / "work", runner=lambda _: "{}", log=lambda _: None)

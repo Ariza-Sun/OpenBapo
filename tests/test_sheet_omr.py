@@ -11,41 +11,42 @@ from PIL import Image, ImageDraw
 from opencapo.sheet import layout, omr
 
 
-def drawn_page(width: int = 1200, height: int = 1600) -> Image.Image:
-    """A page with one system: a chord grid, a 6-line staff, a notation row with 3 bars."""
+def drawn_page(width: int = 1200, height: int = 1600, systems: int = 1) -> Image.Image:
+    """A page with one or two systems: a chord grid, a 6-line staff, a notation row with 3 bars."""
     image = Image.new("L", (width, height), 255)
     draw = ImageDraw.Draw(image)
-    staff_top = 600
-    for i in range(6):  # staff lines nearly as wide as the page
-        y = staff_top + i * 14
-        draw.line([(60, y), (width - 60, y)], fill=0, width=2)
-    # chord grid above the staff, over the second bar, with a "name" block above it
-    draw.rectangle([520, 560, 580, 590], outline=0, width=2)
-    for x in range(526, 580, 6):
-        draw.line([(x, 560), (x, 590)], fill=0, width=2)
-    draw.rectangle([540, 540, 560, 552], fill=0)
-    # notation row: bar lines (tall) and digit-like blocks (shorter), lyrics below
-    row_top, row_bottom = 760, 810
-    for x in (100, 500, 900, 1100):
-        draw.line([(x, row_top), (x, row_bottom)], fill=0, width=3)
-    for x in (150, 220, 290, 360, 560, 640, 950, 1020):
-        draw.rectangle([x, row_top + 8, x + 18, row_bottom - 8], fill=0)
-    draw.rectangle([150, 830, 400, 850], fill=0)  # a lyric line
+    for n in range(systems):
+        staff_top = 600 + n * 500
+        for i in range(6):  # staff lines nearly as wide as the page
+            y = staff_top + i * 14
+            draw.line([(60, y), (width - 60, y)], fill=0, width=2)
+        # chord grid above the staff, over the second bar, with a "name" block above it
+        draw.rectangle([520, staff_top - 40, 580, staff_top - 10], outline=0, width=2)
+        for x in range(526, 580, 6):
+            draw.line([(x, staff_top - 40), (x, staff_top - 10)], fill=0, width=2)
+        draw.rectangle([540, staff_top - 60, 560, staff_top - 48], fill=0)
+        # notation row: bar lines (tall) and digit-like blocks (shorter), lyrics below
+        row_top, row_bottom = staff_top + 160, staff_top + 210
+        for x in (100, 500, 900, 1100):
+            draw.line([(x, row_top), (x, row_bottom)], fill=0, width=3)
+        for x in (150, 220, 290, 360, 560, 640, 950, 1020):
+            draw.rectangle([x, row_top + 8, x + 18, row_bottom - 8], fill=0)
+        draw.rectangle([150, row_bottom + 20, 400, row_bottom + 40], fill=0)  # a lyric line
     return image
 
 
-def test_layout_finds_system_bars_and_chord(tmp_path: Path) -> None:
-    image = drawn_page()
-    systems = layout.analyze_page(image, 0, tmp_path, "t")
-    assert len(systems) == 1
-    bars = systems[0].bars
-    for bar, (left, right) in zip(bars, [(100, 500), (500, 900), (900, 1100)], strict=True):
-        assert abs(bar.left - left) <= 2 and abs(bar.right - right) <= 2
-    assert [len(b.chords) for b in bars] == [0, 1, 0]
-    assert 0.0 < float(bars[1].chords[0]["x"]) < 0.2  # type: ignore[arg-type]
-    assert all(Path(b.crop).exists() and Path(b.stacked).exists() for b in bars)
-    stacked = Image.open(bars[1].stacked)
-    assert stacked.height > Image.open(bars[1].crop).height
+def test_layout_finds_systems_and_writes_row_images(tmp_path: Path) -> None:
+    image = drawn_page(systems=2)
+    systems = layout.analyze_page(image, 0, tmp_path, "t", start=3)
+    assert [s.index for s in systems] == [3, 4]
+    first, second = systems
+    assert abs(first.staff.top - 600) <= 2 and abs(second.staff.top - 1100) <= 2
+    assert abs(first.notation.top - 768) <= 2 and abs(first.notation.bottom - 802) <= 2
+    assert first.top <= 540 and first.bottom < second.diagram_top  # names, staff, digits, lyrics
+    assert first.bottom > 830 and second.bottom > 1330  # the lyrics are inside the row
+    for s in systems:
+        crop = Image.open(s.crop)
+        assert crop.size == (1200, s.bottom - s.top) and Path(s.crop).name.endswith(".png")
 
 
 def test_worksheet_from_an_image(tmp_path: Path) -> None:
@@ -55,7 +56,9 @@ def test_worksheet_from_an_image(tmp_path: Path) -> None:
     assert (tmp_path / "work" / "worksheet.json").exists()
     pages = sheet["pages"]
     assert isinstance(pages, list) and len(pages) == 1
-    assert len(pages[0]["systems"][0]["bars"]) == 3
+    rows = pages[0]["systems"]
+    assert len(rows) == 1 and rows[0]["index"] == 0 and Path(rows[0]["crop"]).exists()
+    assert Path(pages[0]["header_crop"]).exists()
 
 
 def test_reading_parsing_and_checks() -> None:

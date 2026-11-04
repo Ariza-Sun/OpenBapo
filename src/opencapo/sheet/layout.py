@@ -1,22 +1,24 @@
 """Deterministic layout analysis of a printed guitar sheet (PDF or image).
 
-Finds, on each page, the systems (a chord-diagram strip, a six-line tab
-staff, then the numbered-notation line with its lyrics), splits every
-notation line into bars at the bar lines, and locates the chord diagrams
-above each bar. Nothing here reads a digit: it produces crops and a
-worksheet (JSON) for the reading step, which is done by an agent with
-vision, and the geometry the assembler needs to put chords on beats.
+Finds, on each page, the systems: a chord-diagram strip, a six-line tab
+staff, then the numbered-notation line with its lyrics. Each system is
+cut out as one full-width row image for the reading step, which is done
+by an agent with vision and splits the row into bars itself. Nothing
+here reads a digit or looks for a bar line: bar lines are the same
+height as a "1" in some layouts and as a "0" in others, and brackets or
+repeat signs fool every rule tried, while a vision model reads a whole
+row reliably (decision 15 in docs/plans/step-2.md).
 
-Measurements are relative to the page width, so the same thresholds work
-at any rasterisation resolution. Tuned on the jitahome / 小LV吉他 layout;
-other layouts may need their own thresholds.
+Measurements are relative to the page size, so the same thresholds work
+at any rasterisation resolution and across the layouts of the owner's
+song book (tab staves are the longest horizontal lines on the page; the
+notation line is the first substantial band of ink below a staff).
 """
 
 from __future__ import annotations
 
-import itertools
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -42,24 +44,14 @@ class Band:
 
 
 @dataclass
-class BarBox:
-    index: int  # 0-based within the page
-    left: int
-    right: int
-    top: int  # of the notation crop (with margins)
-    bottom: int
-    chords: list[dict[str, object]] = field(default_factory=list)  # {"x": fraction, "box": [...]}
-    crop: str = ""  # path of the bar image
-    stacked: str = ""  # chord strip over the notation, same x range: what the reader sees
-    chord_crops: list[str] = field(default_factory=list)
-
-
-@dataclass
 class SystemBox:
     staff: Band
     notation: Band
     diagram_top: int
-    bars: list[BarBox]
+    index: int = -1  # row number, running on across pages
+    top: int = 0  # of the row crop
+    bottom: int = 0
+    crop: str = ""  # path of the row image: diagrams, staff, notation and lyrics
 
 
 def rasterize(path: Path, dpi: int = DPI) -> list[Image.Image]:
@@ -155,118 +147,33 @@ def find_systems(mask: NDArray[np.bool_]) -> list[SystemBox]:
             ]
             if names and names[-1].height < 0.015 * height:
                 diagram_top = names[-1].top - int(0.003 * height)
-        systems.append(SystemBox(staff=staff, notation=notation, diagram_top=diagram_top, bars=[]))
+        systems.append(SystemBox(staff=staff, notation=notation, diagram_top=diagram_top))
     return systems
-
-
-def longest_runs(strip: NDArray[np.bool_]) -> NDArray[np.int64]:
-    """Per column, the longest unbroken vertical run of ink."""
-    import numpy as np
-
-    best = np.zeros(strip.shape[1], dtype=np.int64)
-    current = np.zeros(strip.shape[1], dtype=np.int64)
-    for row in strip:
-        current = np.where(row, current + 1, 0)
-        best = np.maximum(best, current)
-    return best
-
-
-def bar_lines(mask: NDArray[np.bool_], top: int, bottom: int, width: int) -> list[int]:
-    """x positions of the bar lines in the notation line between rows top and bottom.
-
-    Bar lines are the tallest unbroken vertical strokes in the line: digits
-    are shorter (a "1" is as tall as the digit row, a bar line overshoots
-    it, which is why the rows should extend a little beyond the digits),
-    tie arcs are thin and curved. The reference height is the eighth
-    tallest column, so a lone taller stroke (a system bracket at the left
-    edge) does not raise the bar; columns within 80% of it count.
-    """
-    import numpy as np
-
-    runs = longest_runs(mask[top:bottom])
-    inked = np.sort(runs[runs > 0])[::-1]
-    if inked.size == 0:
-        return []
-    tallest = float(inked[min(7, inked.size - 1)])
-    xs = np.flatnonzero(runs >= 0.8 * tallest)
-    lines: list[int] = []
-    for x in xs:
-        if lines and x - lines[-1] <= max(3, int(0.004 * width)):
-            continue
-        lines.append(int(x))
-    return lines
-
-
-def diagram_boxes(
-    mask: NDArray[np.bool_], top: int, bottom: int, width: int
-) -> list[tuple[int, int]]:
-    """x ranges of chord diagrams (dense ink blobs) in the strip above a staff."""
-    strip = mask[top:bottom]
-    columns = bands(strip, axis=1, min_ink=2, min_size=2)
-    merged: list[list[int]] = []
-    for c in columns:
-        if merged and c.top - merged[-1][1] <= 0.006 * width:
-            merged[-1][1] = c.bottom
-        else:
-            merged.append([c.top, c.bottom])
-    return [(left, right) for left, right in merged if right - left >= 0.012 * width]
 
 
 def analyze_page(
     image: Image.Image, page_index: int, out_dir: Path, stem: str, start: int = 0
 ) -> list[SystemBox]:
-    """Split one page into systems and bars, writing bar and chord-name crops into out_dir.
+    """Find the systems of one page and write each as a row image into out_dir.
 
-    Bars are numbered from `start` so indices run on across pages.
+    A row runs from the top of its chord-name strip to just above the next
+    system's strip (or a lyrics' height below the notation for the last
+    one), across the full page width. Rows are numbered from `start` so
+    indices run on across pages.
     """
-    from PIL import Image
-
     mask = ink_mask(image)
     height, width = mask.shape
     systems = find_systems(mask)
-    margin_y = int(0.012 * height)
-    margin_x = int(0.004 * width)
-    counter = start
-    for system in systems:
-        top = max(0, system.notation.top - margin_y)
-        bottom = min(height, system.notation.bottom + margin_y)
-        lines = bar_lines(mask, top, bottom, width)
-        if len(lines) < 2:
-            continue
-        diagrams = diagram_boxes(mask, system.diagram_top, system.staff.top, width)
-        for left, right in itertools.pairwise(lines):
-            if right - left < 0.03 * width:
-                continue
-            bar = BarBox(index=counter, left=left, right=right, top=top, bottom=bottom)
-            box_x = (max(0, left - margin_x), min(width, right + margin_x))
-            crop = image.crop((box_x[0], top, box_x[1], bottom))
-            bar.crop = str(out_dir / f"{stem}-p{page_index + 1}-b{counter:03d}.png")
-            crop.save(bar.crop)
-            strip = image.crop((box_x[0], system.diagram_top, box_x[1], system.staff.top))
-            stacked = Image.new("L", (crop.width, strip.height + crop.height + 8), 255)
-            stacked.paste(strip, (0, 0))
-            stacked.paste(crop, (0, strip.height + 8))
-            bar.stacked = str(out_dir / f"{stem}-p{page_index + 1}-b{counter:03d}-stacked.png")
-            stacked.save(bar.stacked)
-            for d_left, d_right in diagrams:
-                centre = (d_left + d_right) / 2
-                if left <= centre < right:
-                    box = [
-                        d_left - margin_x,
-                        system.diagram_top,
-                        d_right + margin_x,
-                        system.staff.top,
-                    ]
-                    bar.chords.append({"x": round((centre - left) / (right - left), 3), "box": box})
-                    name_crop = image.crop((max(0, box[0]), box[1], min(width, box[2]), box[3]))
-                    path = (
-                        out_dir
-                        / f"{stem}-p{page_index + 1}-b{counter:03d}-c{len(bar.chord_crops)}.png"
-                    )
-                    name_crop.save(path)
-                    bar.chord_crops.append(str(path))
-            system.bars.append(bar)
-            counter += 1
+    for i, system in enumerate(systems):
+        if i + 1 < len(systems):
+            bottom = systems[i + 1].diagram_top - int(0.004 * height)
+        else:
+            bottom = min(height, system.notation.bottom + int(0.05 * height))
+        system.index = start + i
+        system.top = max(0, system.diagram_top)
+        system.bottom = max(bottom, system.notation.bottom + int(0.02 * height))
+        system.crop = str(out_dir / f"{stem}-p{page_index + 1}-r{system.index:03d}.png")
+        image.crop((0, system.top, width, system.bottom)).save(system.crop)
     return systems
 
 
@@ -286,7 +193,7 @@ def worksheet(source: Path, out_dir: Path, dpi: int = DPI) -> dict[str, object]:
         header_path = out_dir / f"{stem}-p{p + 1}-header.png"
         header.save(header_path)
         systems = analyze_page(image, p, out_dir, stem, start=next_index)
-        next_index += sum(len(s.bars) for s in systems)
+        next_index += len(systems)
         pages_out.append(
             {
                 "index": p + 1,
@@ -295,9 +202,12 @@ def worksheet(source: Path, out_dir: Path, dpi: int = DPI) -> dict[str, object]:
                 "header_crop": str(header_path),
                 "systems": [
                     {
+                        "index": s.index,
+                        "top": s.top,
+                        "bottom": s.bottom,
+                        "crop": s.crop,
                         "staff": asdict(s.staff),
                         "notation": asdict(s.notation),
-                        "bars": [asdict(b) for b in s.bars],
                     }
                     for s in systems
                 ],

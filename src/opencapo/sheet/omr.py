@@ -1,8 +1,9 @@
 """Reading a printed sheet into the text sheet format: protocol, checks, assembly.
 
-The reading itself is done by an agent with vision, one bar at a time,
-from the stacked crops that `opencapo.sheet.layout` produces. This module
-holds the other three parts of the loop:
+The reading itself is done by an agent with vision, one row (system) at
+a time, from the row images that `opencapo.sheet.layout` produces; the
+agent splits the row into bars. This module holds the other three parts
+of the loop:
 
 - the reading protocol: what the reader is asked and the JSON it returns
   per bar (`READING_PROMPT`, `BarReading`);
@@ -12,8 +13,8 @@ holds the other three parts of the loop:
   should match it;
 - the assembly of the checked readings into a `.sheet` text.
 
-Bars that fail a check go back to the reader once with a larger crop; what
-still fails is listed for review.
+Rows holding a bar that fails a check go back to the reader once on their
+own; what still fails is listed for review.
 """
 
 from __future__ import annotations
@@ -31,14 +32,17 @@ from opencapo.sheet.format import (
     parse_sheet,
 )
 
-READING_PROMPT = """你在读一张中文吉他谱的一个小节。图片上半部分是和弦图（和弦名写在图上方），
-下半部分是这一小节的简谱和歌词。请只输出一个 JSON 对象，不要解释：
+READING_PROMPT = """你在读一张中文吉他谱的一行。图片从上到下是：和弦图（和弦名写在图上方）、六线谱、
+这一行的简谱、歌词。请按小节从左到右，把这一行写成一个 JSON 数组，每个小节一个对象，不要解释：
 
-{"chords": "<和弦>", "melody": "<简谱>", "notes": "<可选：不确定之处>"}
+[{"chords": "<和弦>", "melody": "<简谱>", "lyrics": "<歌词>", "notes": "<可选：不确定之处>"}, ...]
+
+小节：以简谱行上的竖线为界（反复记号 ‖: :‖ 也是小节线）；行首行尾的不完全小节也各算一个小节。
+行首有大括号或谱号时不要把它当小节线。一行通常有 3 到 6 个小节，不要多切也不要漏切。
 
 和弦：按和弦图上方的名字从左到右写，用空格分开；一小节一个和弦就写一个（如 "Am"）；
-两个和弦按它们在小节里的起拍写拍数，如 "C(2) G(2)"；上半部分没有和弦图就写空字符串
-（表示沿用上一小节的和弦）。
+两个和弦按它们在小节里的起拍写拍数，如 "C(2) G(2)"；这一小节上方没有和弦图就写空字符串
+（表示沿用上一小节的和弦）。升降号写在音名前后都行（#F 或 F#）。
 
 简谱：按下面的记法写这一小节的旋律，拍数要凑满拍号（4/4 就是 4 拍）：
 - 数字 1-7 是音，0 是休止；
@@ -47,11 +51,14 @@ READING_PROMPT = """你在读一张中文吉他谱的一个小节。图片上半
 - 数字下面的点表示低八度，写成 "6,"；上面的点是高八度，写成 "1'"；点和横线挨得很近，
   要逐个数字确认有没有点；
 - 数字后面的小圆点是附点，写成 "2."（附点八分加十六分写成 "[2. 5]"）；
-- "-" 是延长上一个音一拍；如果小节开头有从上一小节连过来的弧线（连音线），
+- "-" 是延长上一个音一拍；如果小节开头有从上一小节（或上一行末尾）连过来的弧线（连音线），
   这一小节的第一个音写成 "-" 表示延续；
 - 弧线连着不同的音是连音（滑音），照常写音。
 
-例：{"chords": "G", "melody": "[0 2] [2. 5,] [2 2] [5, 6,]"}
+歌词：这一小节下方的歌词原样抄，没有就写空字符串；两行歌词用 " / " 隔开。
+
+例：[{"chords": "G", "melody": "[0 2] [2. 5,] [2 2] [5, 6,]", "lyrics": "我 匆匆地走入"},
+     {"chords": "Am", "melody": "[1 6,] - 0 0", "lyrics": "森林中"}]
 """
 
 
@@ -68,7 +75,9 @@ class BarReading:
     chords: str
     melody: str
     notes: str = ""
-    crop: str = ""
+    crop: str = ""  # the row image the bar was read from
+    row: int = -1
+    lyrics: str = ""
 
 
 @dataclass
@@ -182,6 +191,7 @@ def write_review(path: Path, problems: list[Check], readings: list[BarReading]) 
     lines = ["# 待复核小节", ""]
     for p in problems:
         r = by_index.get(p.index)
+        where = f"（第 {r.row} 行）" if r and r.row >= 0 else ""
         crop = f" `{r.crop}`" if r and r.crop else ""
-        lines.append(f"- 小节 {p.index}: {p.problem}{crop}")
+        lines.append(f"- 小节 {p.index}{where}: {p.problem}{crop}")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
