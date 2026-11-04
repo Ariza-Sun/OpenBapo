@@ -112,3 +112,17 @@ def test_repeated_passages_and_assembly(tmp_path: Path) -> None:
     )
     assert "Am         | 1 - - -" in carried.text and not carried.problems
     assert json.dumps(header)  # header fields are plain strings
+
+
+def test_reconcile_header_fills_the_sung_key_and_reports_conflicts() -> None:
+    header: dict[str, object] = {"key": None, "play_key": "C", "capo": 4}
+    assert omr.reconcile_header(header) == [] and header["key"] == "E"
+    header = {"key": "E", "play_key": "C", "capo": 4}
+    assert omr.reconcile_header(header) == []
+    header = {"key": "C", "play_key": "C", "capo": 4}  # the fingering key taken for the sung key
+    assert omr.reconcile_header(header) == ["页眉不一致：选调 C + 变调夹 4 品 ≠ 原调 C"]
+    header = {"key": "D", "play_key": "C", "capo": None}  # capo printed as a range: implied
+    assert omr.reconcile_header(header) == [] and header["capo"] == 2
+    header = {"key": "F", "play_key": None, "capo": 5}  # nothing to check against
+    assert omr.reconcile_header(header) == [] and header["key"] == "F"
+    assert omr.reconcile_header({"key": "H"}) == ["页眉的调名读不懂：not a note name: 'H'"]

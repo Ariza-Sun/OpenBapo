@@ -37,6 +37,7 @@ from opencapo.sheet.omr import (
     Check,
     assemble,
     check_readings,
+    reconcile_header,
     write_review,
 )
 
@@ -260,6 +261,7 @@ def read_sheet(
 
     header_json = extract_json(runner(header_prompt(str(pages[0]["header_crop"]))), "object")
     header: dict[str, object] = dict(header_json) if isinstance(header_json, dict) else {}
+    header_problems = reconcile_header(header)
     (out_dir / "header.json").write_text(json.dumps(header, ensure_ascii=False), encoding="utf-8")
     beats_per_bar = int(str(header.get("time") or "4/4").split("/")[0])  # unprinted: assume 4/4
     log(f"header: {header}")
@@ -335,11 +337,15 @@ def read_sheet(
         json.dumps([r.__dict__ for r in ordered], ensure_ascii=False, indent=1), encoding="utf-8"
     )
     open_ids = {id(b) for b in unsettled_bars}
-    problems = built.problems + [
-        Check(b.index, "三次读法不一致，见 readings.json 的 notes")
-        for b in ordered
-        if id(b) in open_ids
-    ]
+    problems = (
+        [Check(-1, p) for p in header_problems]
+        + built.problems
+        + [
+            Check(b.index, "三次读法不一致，见 readings.json 的 notes")
+            for b in ordered
+            if id(b) in open_ids
+        ]
+    )
     write_review(out_dir / "review.md", problems, ordered)
     seconds = time.perf_counter() - started
     log(f"{sheet_path}: {len(ordered)} bars, {len(problems)} to review, {seconds:.0f} s")

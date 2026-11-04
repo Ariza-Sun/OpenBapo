@@ -65,9 +65,45 @@ READING_PROMPT = """你在读一张中文吉他谱的一行。图片从上到下
 
 HEADER_PROMPT = """这是一张中文吉他谱第一页的页眉。请只输出一个 JSON 对象，不要解释：
 
-{"title": "<歌名>", "key": "<1= 后面的音名，如 E 或 bB 写成 Bb>", "capo": <变调夹品数，没有写 0>,
+{"title": "<歌名>", "key": "<演唱调：'原调 1=X' 的 X；页眉只印一个 1=X 时就是它。E 或 bB 写成 Bb>",
+ "play_key": "<指法调：'选调 1=Y'、'用Y调指法'、'Y调和弦编配' 的 Y；没印写 null>",
+ "capo": <变调夹品数；印成范围或男女分开的写 null>,
  "time": "<拍号，如 4/4>", "bpm": <速度数字，没有写 null>}
+
+注意：同时印了原调和选调时，key 填原调，不要填选调；选调加上变调夹品数应等于原调。
 """
+
+
+def reconcile_header(header: dict[str, object]) -> list[str]:
+    """Fill the sung key from the fingering key and capo when it is missing, and report conflicts.
+
+    Sheets print the sung key (原调 1=X), or the fingering key (选调 1=Y)
+    with the capo, or both; both must agree as Y + capo = X. Returns the
+    problems found; the header is updated in place.
+    """
+    from opencapo.sheet.format import pitch_class
+
+    problems: list[str] = []
+    try:
+        play = pitch_class(str(header["play_key"])) if header.get("play_key") else None
+        sung = pitch_class(str(header["key"])) if header.get("key") else None
+    except SheetError as e:
+        return [f"页眉的调名读不懂：{e}"]
+    capo = header.get("capo")
+    capo = int(capo) if isinstance(capo, int | float) else None
+    if sung is None and play is not None and capo is not None:
+        header["key"] = PITCH_NAMES[(play + capo) % 12]
+    elif sung is not None and play is not None and capo is not None:
+        if (play + capo) % 12 != sung:
+            problems.append(
+                f"页眉不一致：选调 {header['play_key']} + 变调夹 {capo} 品 ≠ 原调 {header['key']}"
+            )
+    elif sung is not None and play is not None and capo is None:
+        header["capo"] = (sung - play) % 12  # a capo given as a range: take what the keys imply
+    return problems
+
+
+PITCH_NAMES = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
 
 
 @dataclass

@@ -133,7 +133,7 @@ def main(argv: list[str] | None = None) -> int:
         )  # type: ignore[arg-type]
         return 0
 
-    from opencapo.sheet.omr import BarReading, write_review
+    from opencapo.sheet.omr import BarReading, Check, reconcile_header, write_review
     from opencapo.sheet.omr import assemble as assemble_sheet
 
     worksheet_data = json.loads((args.work_dir / "worksheet.json").read_text(encoding="utf-8"))
@@ -156,6 +156,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"no reading for rows {missing}", file=sys.stderr)
         return 1
     read = json.loads(args.header.read_text(encoding="utf-8")) if args.header else {}
+    for problem in reconcile_header(read):
+        print(f"header: {problem}", file=sys.stderr)
     key = args.key or read.get("key")
     if not key:
         print("no key: pass --key or --header", file=sys.stderr)
@@ -172,7 +174,13 @@ def main(argv: list[str] | None = None) -> int:
     }
     result = assemble_sheet(header, readings, int(header["time"].split("/")[0]))
     args.out.write_text(result.text, encoding="utf-8")
-    write_review(args.work_dir / "review.md", result.problems, readings)
+    # Bars the reading loop left open keep their mark when the sheet is re-assembled.
+    unsettled = [
+        Check(r.index, "三次读法不一致，见 readings.json 的 notes")
+        for r in readings
+        if r.notes.startswith("三次读法")
+    ]
+    write_review(args.work_dir / "review.md", result.problems + unsettled, readings)
     print(f"{len(readings)} bars -> {args.out}; {len(result.problems)} bars to review")
     for p in result.problems:
         print(f"  bar {p.index}: {p.problem}")
