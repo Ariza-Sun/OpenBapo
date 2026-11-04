@@ -169,6 +169,51 @@ def row_checks(rows: dict[int, RowReading], beats_per_bar: int) -> set[int]:
     return {flat[i].row for i in failing}
 
 
+def settle_row(
+    readings: Sequence[RowReading], beats_per_bar: int
+) -> tuple[RowReading, list[BarReading]]:
+    """Three readings of one row -> the row to keep, and the bars no two readings agree on.
+
+    Readings that split the row into the majority number of bars take part;
+    bar by bar, among the readings that pass the checks (or all, when none
+    does) one that another matches as music wins, a lone valid one wins,
+    else the last reading (the deciding one) is kept and the bar is open.
+    When every reading splits the row differently, the whole row is open.
+    """
+    counts = [len(r) for r in readings]
+    majority = max(set(counts), key=lambda n: (counts.count(n), counts.index(n) * -1))
+    aligned = [r for r in readings if len(r) == majority]
+    if len(aligned) < 2:
+        last = list(readings[-1])
+        summary = " / ".join(" | ".join(b.melody for b in r) for r in readings)
+        for bar in last:
+            bar.notes = f"三次读法的小节数不同：{summary}。" + bar.notes
+        return last, last
+    settled: RowReading = []
+    open_bars: list[BarReading] = []
+    for k in range(majority):
+        bars = [r[k] for r in aligned]
+        valid = [b for b in bars if not check_readings([b], beats_per_bar)]
+        pool = valid or bars
+        agreeing = [
+            b
+            for b in reversed(pool)
+            if any(same_reading(b, o, beats_per_bar) for o in pool if o is not b)
+        ]
+        if agreeing:
+            pick = agreeing[0]
+        elif len(pool) == 1:  # the only reading that passes the checks
+            pick = pool[0]
+        else:
+            pick = pool[-1]
+            pick.notes = (
+                "三次读法不一致：" + " / ".join(repr(b.melody) for b in bars) + "。" + pick.notes
+            )
+            open_bars.append(pick)
+        settled.append(pick)
+    return settled, open_bars
+
+
 def flatten(rows: dict[int, RowReading]) -> list[BarReading]:
     """All bars in row order, numbered from 0."""
     out: list[BarReading] = []
@@ -254,6 +299,7 @@ def read_sheet(
     doubtful = sorted(set(disputed) | failing)
     chosen: dict[int, RowReading] = dict(first)
     unsettled: list[int] = []
+    unsettled_bars: list[BarReading] = []
     for index in doubtful:
         big = {index: str(zoomed(Path(crops[index]), ZOOM_AGAIN))}
         try:
@@ -261,22 +307,13 @@ def read_sheet(
         except RuntimeError as e:
             log(f"row {index}: deciding reading failed ({e})")
             unsettled.append(index)
+            unsettled_bars += chosen[index]
             continue
-        chosen[index] = third
-        valid_before = [
-            r for r in (first[index], second[index]) if not row_checks({index: r}, beats_per_bar)
-        ]
-        third_valid = not row_checks({index: third}, beats_per_bar)
-        agrees = [r for r in valid_before if same_row(r, third, beats_per_bar)]
-        # The third reading settles a dispute when it matches one of the two
-        # valid readings, or when the earlier ones were invalid and it is not.
-        if not third_valid or (valid_before and not agrees):
+        settled, open_bars = settle_row([first[index], second[index], third], beats_per_bar)
+        chosen[index] = settled
+        if open_bars:
             unsettled.append(index)
-            summary = " / ".join(
-                " | ".join(b.melody for b in r) for r in (first[index], second[index], third)
-            )
-            for bar in third:
-                bar.notes = f"三次读法不一致：{summary}。" + bar.notes
+            unsettled_bars += open_bars
     ordered = flatten(chosen)
     for bar in ordered:
         bar.crop = crops[bar.row]
@@ -297,10 +334,11 @@ def read_sheet(
     (out_dir / "readings.json").write_text(
         json.dumps([r.__dict__ for r in ordered], ensure_ascii=False, indent=1), encoding="utf-8"
     )
+    open_ids = {id(b) for b in unsettled_bars}
     problems = built.problems + [
         Check(b.index, "三次读法不一致，见 readings.json 的 notes")
         for b in ordered
-        if b.row in unsettled
+        if id(b) in open_ids
     ]
     write_review(out_dir / "review.md", problems, ordered)
     seconds = time.perf_counter() - started

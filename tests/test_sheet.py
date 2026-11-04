@@ -60,8 +60,7 @@ def test_chord_and_melody_splitting() -> None:
     assert [c.beats for c in parse_chords("C(3) G(1)", 4)] == [3, 1]
     assert [c.beats for c in parse_chords("C", 3)] == [3]
     assert parse_chords("", 4) == ()
-    with pytest.raises(SheetError):
-        parse_chords("C(3) G", 4)
+    assert [c.beats for c in parse_chords("C(3) G", 4)] == [3, 1]  # the rest goes to G
     with pytest.raises(SheetError):
         parse_chords("C(2) G(1)", 4)
     with pytest.raises(SheetError):

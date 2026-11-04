@@ -118,13 +118,44 @@ def test_unsettled_rows_go_to_review(tmp_path: Path) -> None:
     result = reader.read_sheet(
         page, tmp_path / "work", runner=run, batch_size=3, log=lambda _: None
     )
-    assert result.unsettled == [0] and [p.index for p in result.problems] == [0, 1]
+    assert result.unsettled == [0] and [p.index for p in result.problems] == [0]
+    assert "三次读法不一致：'1 2 3 4' / '1 2 3, 4' / '1, 2 3 4'" in result.readings[0].notes  # noqa: RUF001
     assert (
-        "三次读法不一致" in result.readings[0].notes
-        and "1 2 3, 4 | 1 1 1 1" in result.readings[1].notes
-    )
+        result.readings[0].melody == "1, 2 3 4" and result.readings[1].notes == ""
+    )  # bar 1 agreed
     review = (tmp_path / "work" / "review.md").read_text(encoding="utf-8")
-    assert "小节 0（第 0 行）" in review and "小节 2" not in review  # noqa: RUF001
+    assert "小节 0（第 0 行）" in review and "小节 1" not in review  # noqa: RUF001
+
+
+def test_settle_row_votes_bar_by_bar() -> None:
+    def row(*melodies: str) -> reader.RowReading:
+        return [reader.BarReading(-1, "C", m) for m in melodies]
+
+    # bar 0 agreed by readings 1 and 3, bar 1 by 1 and 2, bar 2 by nobody
+    settled, open_bars = reader.settle_row(
+        [
+            row("1 2 3 4", "5 5 5 5", "1 1 1 1"),
+            row("1 2 3, 4", "5 5 5 5", "2 2 2 2"),
+            row("1 2 3 4", "5 5 5, 5", "3 3 3 3"),
+        ],
+        4,
+    )
+    assert [b.melody for b in settled] == ["1 2 3 4", "5 5 5 5", "3 3 3 3"]
+    assert [b.melody for b in open_bars] == ["3 3 3 3"] and "三次读法不一致" in open_bars[0].notes
+    # the only reading that passes the checks wins even against two agreeing invalid ones
+    settled, open_bars = reader.settle_row([row("1 2 3"), row("1 2 3"), row("1 2 3 4")], 4)
+    assert [b.melody for b in settled] == ["1 2 3 4"] and open_bars == []
+    # two valid readings that disagree: the deciding one is kept, the bar stays open
+    settled, open_bars = reader.settle_row([row("1 2 3"), row("1 1 1 1"), row("2 2 2 2")], 4)
+    assert [b.melody for b in settled] == ["2 2 2 2"] and len(open_bars) == 1
+    # the majority bar count decides which readings take part
+    settled, open_bars = reader.settle_row(
+        [row("1 1 1 1", "2 2 2 2"), row("1 1 1 1 2 2 2 2"), row("1 1 1 1", "2 2 2 2")], 4
+    )
+    assert [b.melody for b in settled] == ["1 1 1 1", "2 2 2 2"] and open_bars == []
+    # three different bar counts: the deciding reading is kept, the whole row is open
+    settled, open_bars = reader.settle_row([row("1"), row("1", "2"), row("1", "2", "3")], 4)
+    assert len(settled) == 3 and open_bars == settled and "小节数不同" in settled[0].notes
 
 
 def test_read_sheet_gives_up_on_a_garbled_batch(tmp_path: Path) -> None:

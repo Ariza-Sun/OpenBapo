@@ -17,6 +17,7 @@ notation line is the first substantial band of ink below a staff).
 
 from __future__ import annotations
 
+import itertools
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -29,6 +30,9 @@ if TYPE_CHECKING:
 
 DPI = 300
 INK_THRESHOLD = 130  # ink is darker than this; thin bar lines render ~115, the watermark >150
+STAFF_THRESHOLD = (
+    170  # staff lines are thin and print grey; their regular spacing keeps watermarks out
+)
 PAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff"}
 
 
@@ -75,10 +79,10 @@ def rasterize(path: Path, dpi: int = DPI) -> list[Image.Image]:
     return [Image.open(path).convert("L")]
 
 
-def ink_mask(image: Image.Image) -> NDArray[np.bool_]:
+def ink_mask(image: Image.Image, threshold: int = INK_THRESHOLD) -> NDArray[np.bool_]:
     import numpy as np
 
-    return np.asarray(np.array(image) < INK_THRESHOLD)
+    return np.asarray(np.array(image) < threshold)
 
 
 def bands(mask: NDArray[np.bool_], axis: int, min_ink: int, min_size: int) -> list[Band]:
@@ -99,7 +103,13 @@ def bands(mask: NDArray[np.bool_], axis: int, min_ink: int, min_size: int) -> li
 
 
 def find_staves(mask: NDArray[np.bool_]) -> list[Band]:
-    """Tab staves: groups of at least four page-wide ink rows within a few percent of the height."""
+    """Tab staves: four or more page-wide, evenly spaced ink rows a few percent of the height apart.
+
+    The mask should be taken at STAFF_THRESHOLD: staff lines print grey and
+    digits sit on them, so at the ink threshold a busy staff loses lines.
+    Even spacing (every gap within 35% of the median) keeps watermark text
+    and lyrics out.
+    """
     import numpy as np
 
     height, width = mask.shape
@@ -111,27 +121,62 @@ def find_staves(mask: NDArray[np.bool_]) -> list[Band]:
             group.append(y)
             continue
         if group:
-            distinct = 1 + int(np.sum(np.diff(group) > 2))
+            lines: list[list[int]] = []
+            for row in group:
+                if lines and row - lines[-1][-1] <= 2:
+                    lines[-1].append(row)
+                else:
+                    lines.append([row])
+            centres = [sum(line) / len(line) for line in lines]
+            gaps = np.diff(centres)
             span = group[-1] - group[0]
-            if distinct >= 4 and 0.02 * height <= span <= 0.09 * height:
+            even = len(gaps) >= 3 and bool(
+                np.all(np.abs(gaps - np.median(gaps)) <= 0.35 * np.median(gaps))
+            )
+            if even and 0.02 * height <= span <= 0.09 * height:
                 staves.append(Band(group[0], group[-1] + 1, int(width)))
         group = [y] if y is not None else []
     return staves
 
 
-def find_systems(mask: NDArray[np.bool_]) -> list[SystemBox]:
-    """Each tab staff with the notation line below it and the chord-diagram strip above."""
+def widest_gap(mask: NDArray[np.bool_], top: int, bottom: int, min_ink: int) -> int | None:
+    """The middle row of the longest run of blank rows between top and bottom, if any."""
+    if bottom <= top:
+        return None
+    blank = mask[top:bottom].sum(axis=1) <= min_ink
+    best: tuple[int, int] | None = None
+    start = None
+    for i, value in enumerate([*blank.tolist(), False]):
+        if value and start is None:
+            start = i
+        elif not value and start is not None:
+            if best is None or i - start > best[1] - best[0]:
+                best = (start, i)
+            start = None
+    return None if best is None else top + (best[0] + best[1]) // 2
+
+
+def find_systems(
+    mask: NDArray[np.bool_], staff_mask: NDArray[np.bool_] | None = None
+) -> list[SystemBox]:
+    """Each tab staff with the notation line below it and the chord-diagram strip above.
+
+    `staff_mask` is the page at STAFF_THRESHOLD (defaults to `mask`).
+    """
     height, width = mask.shape
     # A row counts as inked when more than a few thin vertical strokes cross
     # it: some layouts run a bracket or the bar lines from the staff down to
     # the notation, which would otherwise fuse staff, digits and lyrics into
     # one band and leave the lyrics as the first band "below the staff".
-    rows = bands(mask, axis=0, min_ink=max(3, int(0.015 * width)), min_size=4)
-    staves = find_staves(mask)
+    min_ink = max(3, int(0.015 * width))
+    rows = bands(mask, axis=0, min_ink=min_ink, min_size=4)
+    staves = find_staves(mask if staff_mask is None else staff_mask)
     systems = []
     for i, staff in enumerate(staves):
         limit = staves[i + 1].top if i + 1 < len(staves) else height
-        below = [b for b in rows if b.top > staff.bottom and b.bottom <= limit]
+        # Strum stems hang right under the staff in some layouts and form a
+        # band of their own; the digits sit further down.
+        below = [b for b in rows if b.top > staff.bottom + 0.006 * height and b.bottom <= limit]
         notation = next((b for b in below if b.height >= 0.008 * height), None)
         if notation is None:
             continue
@@ -163,14 +208,29 @@ def analyze_page(
     """
     mask = ink_mask(image)
     height, width = mask.shape
-    systems = find_systems(mask)
+    systems = find_systems(mask, ink_mask(image, STAFF_THRESHOLD))
+    min_ink = max(3, int(0.015 * width))
+    # Rows meet at the widest blank gap between one system's lyrics and the
+    # next one's chord names; rows cut by a fixed margin lost octave dots and
+    # underlines at the bottom, or chord names at the top, in tight layouts.
+    splits: list[int] = []
+    for a, b in itertools.pairwise(systems):
+        gap = widest_gap(mask, a.notation.bottom, b.staff.top, min_ink)
+        splits.append(gap if gap is not None else b.diagram_top - int(0.004 * height))
     for i, system in enumerate(systems):
-        if i + 1 < len(systems):
-            bottom = systems[i + 1].diagram_top - int(0.004 * height)
+        if i == 0:
+            gap = widest_gap(
+                mask, max(0, system.staff.top - int(0.12 * height)), system.diagram_top, min_ink
+            )
+            top = gap if gap is not None else system.diagram_top - int(0.01 * height)
         else:
-            bottom = min(height, system.notation.bottom + int(0.05 * height))
+            top = splits[i - 1]
+        if i + 1 < len(systems):
+            bottom = splits[i]
+        else:
+            bottom = min(height, system.notation.bottom + int(0.06 * height))
         system.index = start + i
-        system.top = max(0, system.diagram_top)
+        system.top = max(0, min(top, system.diagram_top))
         system.bottom = max(bottom, system.notation.bottom + int(0.02 * height))
         system.crop = str(out_dir / f"{stem}-p{page_index + 1}-r{system.index:03d}.png")
         image.crop((0, system.top, width, system.bottom)).save(system.crop)
@@ -187,7 +247,7 @@ def worksheet(source: Path, out_dir: Path, dpi: int = DPI) -> dict[str, object]:
     next_index = 0
     for p, image in enumerate(pages):
         # Everything above the first staff: title, 1=, capo, tempo if printed.
-        first_staff = find_staves(ink_mask(image))
+        first_staff = find_staves(ink_mask(image, STAFF_THRESHOLD))
         header_bottom = first_staff[0].top if first_staff else int(0.2 * image.height)
         header = image.crop((0, 0, image.width, header_bottom))
         header_path = out_dir / f"{stem}-p{p + 1}-header.png"

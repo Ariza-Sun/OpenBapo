@@ -141,19 +141,25 @@ def parse_chord_name(text: str) -> tuple[int, ChordQuality, int | None]:
 
 
 def parse_chords(text: str, beats_per_bar: int) -> tuple[ChordSpan, ...]:
-    """``C F`` splits the bar evenly; ``C(3) G(1)`` gives beat counts."""
+    """``C F`` splits the bar evenly; ``C(3) G(1)`` gives beat counts.
+
+    ``Bm(2) F`` mixes them: the uncounted chords share what the counted
+    ones leave (readers write it that way for a chord change on a beat).
+    """
     tokens = text.split()
     if not tokens:
         return ()
     explicit = [re.fullmatch(r"(.+)\((\d+(?:\.\d+)?)\)", t) for t in tokens]
-    if any(explicit) and not all(explicit):
-        raise SheetError(f"mix of counted and uncounted chords in {text!r}")
+    counted = sum((Fraction(m.group(2)) for m in explicit if m), Fraction(0))
+    uncounted = sum(1 for m in explicit if not m)
+    if uncounted and counted >= beats_per_bar:
+        raise SheetError(f"counted chords fill the bar, no beats left for the rest: {text!r}")
     spans = []
     for token, match in zip(tokens, explicit, strict=True):
         if match:
             name, count = match.group(1), Fraction(match.group(2))
         else:
-            name, count = token, Fraction(beats_per_bar, len(tokens))
+            name, count = token, (beats_per_bar - counted) / uncounted
         root, quality, bass = parse_chord_name(name)
         spans.append(ChordSpan(root, quality, bass, count))
     total = sum((s.beats for s in spans), Fraction(0))
