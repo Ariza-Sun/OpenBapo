@@ -22,7 +22,7 @@
 | 公开数据集参考数字（`docs/benchmarks/step-2-chords.md`） | GuitarSet 伴奏 majmin 0.775、调性 0.789；AAM 0.947、单一调性 0.931；耗时 6.1 s |
 | 融合层 / 规则层优化 | 四轮，合计 ±0.002，已停（`step-2.md` 8.9）；剩余差距是两模型对木吉他 Funk / 爵士伴奏的能力 |
 | 样本生成器：谱子文本格式、渲染器（按谱上指法扫弦 + 钢琴旋律）、`--sheets` 评测接入 | 完成 |
-| 样本生成器：识谱（PDF / 图片 → 谱子文本）一条命令 | 完成并实测：《曾经的你》60 小节 189 秒，与人工核对版 59/60 一致，待复核 2/60 |
+| 样本生成器：识谱（PDF / 图片 → 谱子文本）一条命令 | 完成；2026-11-04 改为按行读图、模型分小节（决定 15），因按小节切图在曲库的多数版式上失败。《曾经的你》的 59/60 基准是旧协议的数字，新协议待重测 |
 | 样本集 manifest；评测按 manifest 读样本集（`step-2.md` 10.4 第 4 项） | 完成（决定 12）：`sheet_ocr.py manifest DIR`，评测只认清单，报表逐首列出 |
 | 负责人批量提供谱子 → 生成样本集 → 报表"曲库合成"一组出数字（10.4 第 5 项） | 进行中：负责人已提供 238 首的图片（本地 `sheets-input/raw_data/`），按决定 13 先整理、按版式试点，再批量 |
 | 扫弦节奏型 | 固定型（下 下上 上下上），未读谱上的六线谱；负责人知情，暂不做 |
@@ -30,15 +30,17 @@
 ## 3. 接下来按顺序做什么
 
 1. ~~manifest 与评测接入~~（已做，决定 12）。
-2. **整理负责人的曲库图片并按版式试点**（决定 13）：`scripts/sheet_triage.py` 整理 → 每种版式挑约 2 首跑 `sheet_ocr.py read ... --render`，把 `review.md` 里的小节给负责人过目；切图阈值在 `opencapo/sheet/layout.py`（`INK_THRESHOLD`、staff / notation 的相对尺寸）；再批量跑其余曲目。
+2. **整理负责人的曲库图片并按版式试点**（决定 13、14）：整理与页序核定已完成（`sheets-input/triage/`，240 首、237 首有页图、页序全部核定，表在 `triage.md`，核定文件 `review.json`，试点清单 `pilot.json`）。试点 10 首第一轮暴露小节切分问题 → 决定 15 改为按行读图；第二轮试点结果见 `sheets-pilot/run.log`。接下来：看试点各首的 `review.md`，把待复核多的版式再修，然后批量跑其余曲目。
 3. 在 GPU 机器上跑 `eval_chords.py --guitarset ... --aam ... --sheets <样本集> --cache ...`，报表里"曲库合成"一行就是验收依据；更新 `step-2.md` 第 12 节、README。
 4. 若曲库样本集过线：按规则问负责人是否开 PR。若不过线：按错误分析（`scripts/analyze_chords.py --sheets ... --subset sheets`）定位，再一次一个决定地讨论。
 
 ## 4. 怎么跑
 
 ```bash
-# 识谱 + 渲染（一条命令；读图用 Claude Code 无头模式，走当前登录，不用 API key）
-python scripts/sheet_ocr.py read SONG.pdf [MORE.png ...] --out /data/sheets --bpm 76 --render
+# 整理曲库图片（去重、选版本、定页序；--review 读入 agent 看图核定的页序与来源；--apply 写出每首的页图目录）
+python scripts/sheet_triage.py /data/raw --out /data/triage --review /data/triage/review.json --apply
+# 识谱 + 渲染（一条命令；读图用 Claude Code 无头模式，走当前登录，不用 API key；源可以是 PDF、单图或页图目录）
+python scripts/sheet_ocr.py read /data/triage/SONG [SONG2.pdf ...] --out /data/sheets --bpm 76 --render
 # 只渲染手工录入的谱子（结束时重建 manifest.json）
 python scripts/sheet_synth.py docs/examples/xiaoxingxing.sheet --out /tmp/x
 # 重建样本集清单（评测只认清单）
