@@ -495,6 +495,13 @@ def chord_scores(
     est_intervals, est_labels = mir_eval.util.adjust_intervals(
         est_intervals, list(est_labels), ref_intervals.min(), ref_intervals.max(), "N", "N"
     )
+    # An estimate that starts after the reference ends (the rendered song
+    # book carries a second of tail) is trimmed to nothing: drop it.
+    keep = est_intervals[:, 1] - est_intervals[:, 0] > 0
+    est_intervals, est_labels = (
+        est_intervals[keep],
+        [label for label, k in zip(est_labels, keep, strict=True) if k],
+    )
     scores = mir_eval.chord.evaluate(
         ref_intervals, list(ref_labels), est_intervals, list(est_labels)
     )

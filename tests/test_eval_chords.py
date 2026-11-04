@@ -401,3 +401,11 @@ def test_sheet_loader_reads_renders(tmp_path: Path) -> None:
     np.testing.assert_allclose(t.chord_intervals, [[0.0, 2.0], [2.0, 4.0]])
     assert len(t.beats) == 8 and t.downbeats.tolist() == [0.0, 2.0]
     assert t.key_times == {"D major": 4.0} and t.key_share == 1.0
+
+
+def test_chord_scores_drop_estimates_past_the_reference() -> None:
+    pytest.importorskip("mir_eval")
+    ref = np.array([[0.0, 2.0], [2.0, 4.0]])
+    est = np.array([[0.0, 2.0], [2.0, 4.0], [4.2, 5.0]])  # the last one lies in the audio tail
+    scores = eval_chords.chord_scores(ref, ["C:maj", "G:maj"], est, ["C:maj", "G:maj", "N"])
+    assert scores["majmin"] == 1.0
