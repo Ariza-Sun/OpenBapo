@@ -5,12 +5,21 @@ Usage:
     python scripts/sheet_ocr.py prepare SHEET.pdf --out WORK_DIR
     python scripts/sheet_ocr.py assemble WORK_DIR --readings READINGS.json \
         --header HEADER.json [--bpm 76] --out SONG.sheet
+    python scripts/sheet_ocr.py manifest DIR
 
 `read` does everything in one go: layout, reading every bar with the
 Claude Code command-line tool in headless mode (`claude -p`, under your own
 login), the checks, a second larger reading of doubtful bars, assembly,
 and optionally the rendered sample. Each source gets DIR/<stem>/ with the
-.sheet file, readings.json and review.md.
+.sheet file, readings.json and review.md; with `--render`, DIR/manifest.json
+is rebuilt afterwards.
+
+`manifest` rebuilds DIR/manifest.json from the files in DIR: every
+complete song (.sheet + .wav + .json with one stem) with its header, its
+origin (read from print or typed by hand) and how many bars its review.md
+lists; songs missing a file are listed as incomplete. The evaluation
+(`scripts/eval_chords.py --sheets DIR`) reads the sample set through this
+file only.
 
 `prepare` rasterizes the pages, finds systems and bars, and writes crops
 plus WORK_DIR/worksheet.json and the two prompts. An agent with vision
@@ -45,6 +54,8 @@ def main(argv: list[str] | None = None) -> int:
     prepare.add_argument("source", type=Path)
     prepare.add_argument("--out", type=Path, required=True)
     prepare.add_argument("--dpi", type=int, default=300)
+    manifest = commands.add_parser("manifest")
+    manifest.add_argument("root", type=Path)
     assemble = commands.add_parser("assemble")
     assemble.add_argument("work_dir", type=Path)
     assemble.add_argument("--readings", type=Path, required=True)
@@ -58,8 +69,20 @@ def main(argv: list[str] | None = None) -> int:
     assemble.add_argument("--mode", default="major")
     args = parser.parse_args(argv)
 
+    if args.command == "manifest":
+        from opencapo.sheet import write_manifest
+
+        manifest = write_manifest(args.root)
+        songs, incomplete = manifest["songs"], manifest["incomplete"]
+        assert isinstance(songs, list) and isinstance(incomplete, list)
+        to_review = sum(int(s["to_review"]) for s in songs)
+        print(f"{args.root / 'manifest.json'}: {len(songs)} songs, {to_review} bars to review")
+        for item in incomplete:
+            print(f"incomplete: {item['name']}: {item['problem']}", file=sys.stderr)
+        return 0
+
     if args.command == "read":
-        from opencapo.sheet import load_sheet, render, write_reference, write_wav
+        from opencapo.sheet import load_sheet, render, write_manifest, write_reference, write_wav
         from opencapo.sheet.reader import claude_runner, read_sheet
 
         runner = claude_runner(args.model)
@@ -80,6 +103,9 @@ def main(argv: list[str] | None = None) -> int:
                 rendered = render(sheet)
                 write_wav(work / f"{source.stem}.wav", rendered.samples, rendered.sample_rate)
                 write_reference(work / f"{source.stem}.json", rendered.reference)
+        if args.render:
+            manifest = write_manifest(args.out)
+            print(f"manifest: {len(manifest['songs'])} songs")  # type: ignore[arg-type]
         return 1 if failures else 0
 
     if args.command == "prepare":

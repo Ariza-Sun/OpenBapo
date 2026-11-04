@@ -147,7 +147,9 @@ def test_render_without_bass_or_melody_is_quieter() -> None:
     assert not np.array_equal(chords_only.samples, full.samples)
     assert render(sheet, melody=False).reference["melody"] == full.reference["melody"]
     strummed = render(sheet, accompaniment="strum", melody_voice="voice")
-    assert strummed.reference == full.reference  # the reference does not depend on the sound
+    without = lambda ref: {k: v for k, v in ref.items() if k != "render"}  # noqa: E731
+    assert without(strummed.reference) == without(full.reference)  # the timing is sound-independent
+    assert strummed.reference["render"]["melody_voice"] == "voice"  # ... but the settings are kept
     assert not np.array_equal(strummed.samples, full.samples)
     with pytest.raises(ValueError):
         render(sheet, accompaniment="organ")

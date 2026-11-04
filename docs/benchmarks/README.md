@@ -61,11 +61,12 @@
    ```bash
    python scripts/sheet_ocr.py read my-songs/*.pdf --out /data/sheets --render   # 识谱 + 渲染，一条命令
    python scripts/sheet_synth.py my-songs/*.sheet --out /data/sheets             # 或：手工录入的谱子只渲染
+   python scripts/sheet_ocr.py manifest /data/sheets                             # 重建样本集清单（上两条结束时也会自动重建）
    python scripts/eval_chords.py --sheets /data/sheets --device cuda --cache /data/eval-cache --out /tmp/sheets-report
    python scripts/analyze_chords.py --sheets /data/sheets --cache /data/eval-cache --subset sheets
    ```
 
-   报表里这一组标"曲库合成（参考）"，不设门槛：合成音频和弦干净、没有人声，分数是真录音的上限而非估计。你录入的歌谱和渲染结果都不要提交，仓库只保留公有领域的示例曲。
+   评测只读样本集目录里的 `manifest.json`：清单由目录里现有的文件重建（每首 `.sheet` + `.wav` + `.json`，识谱产出附带 `readings.json` / `review.md`），记录格式版本、生成时间、代码提交号、渲染参数，以及每首的头部信息、来源（识谱 / 人工录入）和待复核小节数；缺文件的首列为 incomplete，不计分。报表里这一组是验收依据（`docs/plans/step-2.md` 决定 11），并逐首列出；合成音频和弦干净、没有人声，分数是真录音的上限而非估计。你录入的歌谱和渲染结果都不要提交，仓库只保留公有领域的示例曲。
 
    **torch 提醒**：lv-chordia 的依赖声明是 `torch>=2.13`，在只能用旧 CUDA 驱动（因而只能装旧 torch）的机器上，`pip install -e ".[analysis]"` 会把 torch 换成不匹配驱动的新版本。先装好与驱动匹配的 torch / torchaudio，再用约束文件钉住它们、lv-chordia 用 `--no-deps` 装并手动补其纯 Python 依赖：
 

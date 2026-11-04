@@ -68,6 +68,8 @@ class Track:
     # (substitutions and all), scored alongside the lead sheet as a reference.
     performed_intervals: np.ndarray | None = None
     performed_labels: list[str] | None = None
+    # Song-book samples: the manifest entry (origin, bars to review, capo ...), for the report.
+    info: dict = field(default_factory=dict)
 
 
 def read_jams(path: Path) -> dict:
@@ -144,22 +146,22 @@ def guitarset_tracks(root: Path, *, chords: str = "instructed", audio: str = "mi
 
 
 def sheet_tracks(root: Path) -> list[Track]:
-    """Renders of lead sheets (scripts/sheet_synth.py): <name>.wav + <name>.json side by side.
+    """Renders of lead sheets, read through the sample set's manifest.json.
 
     The reference is the sheet itself in the sheet's timing: sounding chords,
     sung key and beat grid. These test the analysis on a song book without
-    any recording; they are reported, never gated.
+    any recording; they are the acceptance set since decision 11. Only songs
+    the manifest lists are scored (`scripts/sheet_ocr.py manifest DIR`
+    rebuilds it from the files; decision 12).
     """
+    from opencapo.sheet import load_manifest
+
+    manifest = load_manifest(root)
     tracks = []
-    for ref_path in sorted(root.rglob("*.json")):
-        audio = ref_path.with_suffix(".wav")
-        if not audio.exists():
-            print(f"skip: no audio for sheet {ref_path.stem}", file=sys.stderr)
-            continue
+    for song in manifest["songs"]:
+        files = song["files"]
+        ref_path, audio = root / files["reference"], root / files["audio"]
         ref = json.loads(ref_path.read_text(encoding="utf-8"))
-        if "chords" not in ref or "beats" not in ref:
-            print(f"skip: {ref_path.name} is not a sheet reference", file=sys.stderr)
-            continue
         intervals = np.array([[c[0], c[1]] for c in ref["chords"]], dtype=float).reshape(-1, 2)
         labels = [str(c[2]) for c in ref["chords"]]
         key = parse_key(str(ref.get("key", "")).replace(" ", ":"))
@@ -167,8 +169,8 @@ def sheet_tracks(root: Path) -> list[Track]:
             Track(
                 dataset="sheets",
                 split="report",
-                name=ref_path.stem,
-                group=str(ref.get("title", ref_path.stem)),
+                name=str(song["name"]),
+                group=str(song.get("title") or song["name"]),
                 audio=audio,
                 chord_intervals=intervals,
                 chord_labels=labels,
@@ -176,9 +178,27 @@ def sheet_tracks(root: Path) -> list[Track]:
                 beats=np.array(ref["beats"], dtype=float),
                 downbeats=np.array(ref.get("downbeats", []), dtype=float),
                 key_times={} if key is None else {key_name(key): float(ref.get("duration", 0.0))},
+                info=dict(song),
             )
         )
     return tracks
+
+
+def sheet_manifest_note(root: Path) -> str:
+    """One line for the report's notes: which sample set the song-book numbers come from."""
+    from opencapo.sheet import load_manifest
+
+    m = load_manifest(root)
+    songs = m["songs"]
+    code = m.get("code") or {}
+    to_review = sum(int(s.get("to_review", 0)) for s in songs)
+    ocr = sum(1 for s in songs if s.get("source") == "ocr")
+    manual = sum(1 for s in songs if s.get("source") == "manual")
+    return (
+        f"曲库合成样本集：{len(songs)} 首（识谱 {ocr}、人工录入 {manual}），"
+        f"待复核 {to_review} 小节；manifest 生成于 {m.get('generated')}，"
+        f"代码 {code.get('commit') or code.get('opencapo') or '未知'}，渲染参数 {m.get('render')}。"
+    )
 
 
 def read_arff(path: Path) -> tuple[list[str], list[list[str]]]:
@@ -732,6 +752,8 @@ def score_system(
             "split": track.split,
             "group": track.group,
         }
+        if track.info:
+            row["info"] = track.info
         row.update(chord_scores(track.chord_intervals, track.chord_labels, intervals, labels))
         row["majmin_performed"] = row["root_performed"] = float("nan")
         if track.performed_intervals is not None and track.performed_labels is not None:
@@ -933,6 +955,38 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
             ]
             lines.append("| " + " | ".join(cells) + " |")
         lines.append("")
+    # The production system: tuned when a tuning split ran, else the defaults
+    # (which are the last tuning's result, so the two coincide in a full run).
+    final = next(
+        (s for s in systems if s["system"] == "committee (tuned)"),
+        next((s for s in systems if s["system"] == "committee (default)"), None),
+    )
+    sheet_rows = [r for r in (final["rows"] if final else []) if r["dataset"] == "sheets"]
+    if sheet_rows:
+        assert final is not None
+        lines += [
+            f"## 曲库合成：逐首（{final['system']}）",
+            "",
+            "| 样本 | 标题 | 来源 | 变调夹 | 小节 | 待复核 | majmin | sevenths | root "
+            "| 调性：参考 / 估计 | 每曲耗时 |",
+            "|---|---|---|---|---|---|---|---|---|---|---|",
+        ]
+        for r in sorted(sheet_rows, key=lambda r: r["track"]):
+            info = r.get("info") or {}
+            source = {"ocr": "识谱", "manual": "人工录入"}.get(str(info.get("source")), "—")
+            cells = [
+                r["track"],
+                str(info.get("title") or r["group"]),
+                source,
+                str(info.get("capo", "—")),
+                str(info.get("bars", "—")),
+                str(info.get("to_review", "—")),
+                *(fmt(r[k]) for k in ("majmin", "sevenths", "root")),
+                f"{r.get('key_ref', '—')} / {r.get('key_est', '—')}",
+                f"{r['seconds']:.2f} s",
+            ]
+            lines.append("| " + " | ".join(cells) + " |")
+        lines.append("")
     performed_subsets = [
         (sub, title)
         for sub, title in (
@@ -962,7 +1016,6 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
                 ]
             lines.append("| " + " | ".join(cells) + " |")  # fmt: skip
         lines.append("")
-    final = next((s for s in systems if s["system"] == "committee (tuned)"), None)
     if final is not None:
         lines += ["## 按风格 / 流派（committee (tuned) 的 majmin / 调性精确）", ""]
         for subset in ("guitarset_report_comp", "guitarset_report_solo", "aam", "sheets"):
@@ -1046,7 +1099,9 @@ def main(argv: list[str] | None = None) -> int:
         "--guitarset", type=Path, help="GuitarSet root (annotation/ + audio_mono-*/)"
     )
     parser.add_argument("--aam", type=Path, help="AAM root (annotations + mixes)")
-    parser.add_argument("--sheets", type=Path, help="rendered lead sheets (sheet_synth.py --out)")
+    parser.add_argument(
+        "--sheets", type=Path, help="song-book sample set (directory with manifest.json)"
+    )
     parser.add_argument("--aam-count", type=int, default=500)
     parser.add_argument(
         "--guitarset-chords", choices=("instructed", "performed"), default="instructed"
@@ -1156,6 +1211,8 @@ def main(argv: list[str] | None = None) -> int:
         score_system("committee (default)", tracks, outputs, expert_names, model_names, default)
     )
     notes = []
+    if args.sheets:
+        notes.append(sheet_manifest_note(args.sheets))
     tune_tracks = [t for t in tracks if t.split == "tune"]
     final_params = default
     if not args.no_tune and tune_tracks:
@@ -1181,6 +1238,7 @@ def main(argv: list[str] | None = None) -> int:
         "tracks": {
             "guitarset": sum(t.dataset == "guitarset" for t in tracks),
             "aam": sum(t.dataset == "aam" for t in tracks),
+            "sheets": sum(t.dataset == "sheets" for t in tracks),
         },
         "systems": [{k: v for k, v in s.items()} for s in systems],
     }

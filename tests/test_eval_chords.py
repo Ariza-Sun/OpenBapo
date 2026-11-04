@@ -357,6 +357,17 @@ def test_summarize_splits_by_dataset_and_group() -> None:
         [system], {"date": "2026-01-01", "python": "3", "device": "cpu", "packages": {}}, []
     )
     assert "曲库合成" in gated and gated.count("| 通过 |") == 1  # only the song-book row is gated
+    rows[-1]["info"] = {"title": "歌", "source": "ocr", "capo": 3, "bars": 40, "to_review": 2}
+    listed = eval_chords.markdown(
+        [system], {"date": "2026-01-01", "python": "3", "device": "cpu", "packages": {}}, []
+    )
+    assert "## 曲库合成：逐首（committee (tuned)）" in listed  # noqa: RUF001
+    assert "| s | 歌 | 识谱 | 3 | 40 | 2 | " in listed and "| — / — | " in listed
+    untuned = {**system, "system": "committee (default)"}
+    listed = eval_chords.markdown(
+        [untuned], {"date": "2026-01-01", "python": "3", "device": "cpu", "packages": {}}, []
+    )
+    assert "## 曲库合成：逐首（committee (default)）" in listed  # noqa: RUF001
     assert "对实奏和弦" in text and "| committee (tuned) | 0.900 | 1.000 |" in text
     assert "| 2.00 s | 参考 |" in text  # the solo-only and mixed GuitarSet rows are reference
     assert "| 3.00 s | 参考 |" in text  # public datasets are reference since decision 11
@@ -367,17 +378,25 @@ def test_summarize_splits_by_dataset_and_group() -> None:
 
 
 def test_sheet_loader_reads_renders(tmp_path: Path) -> None:
-    from opencapo.sheet import parse_sheet, render, write_reference, write_wav
+    from opencapo.sheet import parse_sheet, render, write_manifest, write_reference, write_wav
 
-    sheet = parse_sheet("title: t\nkey: D\ncapo: 2\nbpm: 120\n---\nC | 1 2 3 4\nG | 5 - - -\n")
+    sheet_text = "title: t\nkey: D\ncapo: 2\nbpm: 120\n---\nC | 1 2 3 4\nG | 5 - - -\n"
+    sheet = parse_sheet(sheet_text)
     rendered = render(sheet, melody=False)
     write_wav(tmp_path / "t.wav", rendered.samples, rendered.sample_rate)
     write_reference(tmp_path / "t.json", rendered.reference)
     (tmp_path / "other.json").write_text("{}", encoding="utf-8")  # not a reference
+    with pytest.raises(FileNotFoundError, match="manifest"):
+        eval_chords.sheet_tracks(tmp_path)  # only what the manifest lists is scored
+    (tmp_path / "t.sheet").write_text(sheet_text, encoding="utf-8")
+    (tmp_path / "u.sheet").write_text(sheet_text, encoding="utf-8")  # never rendered
+    write_manifest(tmp_path)
+    assert eval_chords.sheet_manifest_note(tmp_path).startswith("曲库合成样本集：1 首")  # noqa: RUF001
     tracks = eval_chords.sheet_tracks(tmp_path)
     assert [t.name for t in tracks] == ["t"]
     t = tracks[0]
     assert t.dataset == "sheets" and t.group == "t" and t.key == (2, "major")
+    assert t.info["source"] == "manual" and t.info["bars"] == 2 and t.info["capo"] == 2
     assert t.chord_labels == ["D:maj", "A:maj"]
     np.testing.assert_allclose(t.chord_intervals, [[0.0, 2.0], [2.0, 4.0]])
     assert len(t.beats) == 8 and t.downbeats.tolist() == [0.0, 2.0]

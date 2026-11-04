@@ -4,10 +4,11 @@ Usage:
     python scripts/sheet_synth.py SHEET.sheet [...] --out DIR [--accompaniment piano|strum]
         [--melody-voice piano|voice] [--bass] [--no-melody]
 
-Writes DIR/<stem>.wav and DIR/<stem>.json for each sheet. The JSON holds the
-sounding chords (shapes transposed by the capo), the sung key, the beat grid
-and the melody, so `scripts/eval_chords.py --sheets DIR` can score the
-analysis against the sheet. Transcribed song sheets and their renders stay
+Writes DIR/<stem>.wav and DIR/<stem>.json for each sheet, then rebuilds
+DIR/manifest.json (the index `scripts/eval_chords.py --sheets DIR` reads).
+The JSON holds the sounding chords (shapes transposed by the capo), the
+sung key, the beat grid and the melody, so the analysis can be scored
+against the sheet. Transcribed song sheets and their renders stay
 out of the repository; only the public-domain example is committed.
 """
 
@@ -27,7 +28,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--melody-voice", choices=("piano", "voice"), default="piano")
     args = parser.parse_args(argv)
 
-    from opencapo.sheet import load_sheet, render, write_reference, write_wav
+    from opencapo.sheet import load_sheet, render, write_manifest, write_reference, write_wav
 
     args.out.mkdir(parents=True, exist_ok=True)
     for path in args.sheets:
@@ -45,6 +46,8 @@ def main(argv: list[str] | None = None) -> int:
             f"{path.stem}: {len(sheet.bars)} bars, {sheet.duration:.1f} s, "
             f"key {rendered.reference['key']}, capo {sheet.capo}"
         )
+    manifest = write_manifest(args.out)
+    print(f"manifest: {len(manifest['songs'])} songs, {len(manifest['incomplete'])} incomplete")  # type: ignore[arg-type]
     return 0
 
 

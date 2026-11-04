@@ -338,6 +338,14 @@ def render(
         "downbeats": downbeats,
         "chords": ref_chords,
         "melody": ref_melody,
+        # How the audio was made, so a sample set's manifest can say so.
+        "render": {
+            "accompaniment": accompaniment,
+            "melody_voice": melody_voice,
+            "melody": melody,
+            "bass": bass,
+            "seed": seed,
+        },
     }
     return Rendered(samples=stereo.astype(np.float32), sample_rate=SAMPLE_RATE, reference=reference)
 
