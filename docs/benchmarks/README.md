@@ -56,10 +56,11 @@
 
    `--cache` 把各专家的逐拍输出存下来，调参和复跑不用重算模型。
 
-4. **曲库合成评测（不需要任何录音）**：把谱子录成文本（格式见 `docs/examples/xiaoxingxing.sheet`：头部是 `1=` 调、变调夹、速度、拍号，正文每行一小节，左边和弦指法、右边简谱），用 `scripts/sheet_synth.py` 渲染成音频加带时间戳的参考（扫弦吉他 + 贝斯 + 旋律声部，全部由代码合成），再喂给评测：
+4. **曲库合成评测（不需要任何录音）**：谱子可以从 PDF / 图片自动识谱（`scripts/sheet_ocr.py read`，用 Claude Code 的无头模式读图，走自己的登录；每小节读两遍、第三遍裁决，输出谱子文本与待复核清单），也可以手工录成文本（格式见 `docs/examples/xiaoxingxing.sheet`：头部是 `1=` 调、变调夹、速度、拍号，正文每行一小节，左边和弦指法、右边简谱）。再用 `scripts/sheet_synth.py` 渲染成音频加带时间戳的参考（按谱上指法扫弦的吉他 + 钢琴旋律，全部由代码合成），喂给评测：
 
    ```bash
-   python scripts/sheet_synth.py my-songs/*.sheet --out /data/sheets
+   python scripts/sheet_ocr.py read my-songs/*.pdf --out /data/sheets --render   # 识谱 + 渲染，一条命令
+   python scripts/sheet_synth.py my-songs/*.sheet --out /data/sheets             # 或：手工录入的谱子只渲染
    python scripts/eval_chords.py --sheets /data/sheets --device cuda --cache /data/eval-cache --out /tmp/sheets-report
    python scripts/analyze_chords.py --sheets /data/sheets --cache /data/eval-cache --subset sheets
    ```
