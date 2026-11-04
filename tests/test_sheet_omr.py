@@ -126,3 +126,29 @@ def test_reconcile_header_fills_the_sung_key_and_reports_conflicts() -> None:
     header = {"key": "F", "play_key": None, "capo": 5}  # nothing to check against
     assert omr.reconcile_header(header) == [] and header["key"] == "F"
     assert omr.reconcile_header({"key": "H"}) == ["页眉的调名读不懂：not a note name: 'H'"]
+
+
+def test_split_bars_are_joined_and_a_pickup_is_padded() -> None:
+    bars = [
+        omr.BarReading(0, "", "[0 5,]", row=0),  # pickup: one beat
+        omr.BarReading(1, "C", "1 2 3 4", row=0),
+        omr.BarReading(2, "G", "5 5", row=0),  # cut by the line break ...
+        omr.BarReading(3, "", "6 6", row=1),  # ... and finished on the next row
+        omr.BarReading(4, "F", "4 -", row=1),
+        omr.BarReading(5, "G", "2 2", row=2),  # both halves carry a chord
+        omr.BarReading(6, "C", "1 1 1 1", row=2),
+    ]
+    joined = omr.join_split_bars(bars, 4)
+    assert [(b.index, b.chords, b.melody, b.row) for b in joined] == [
+        (0, "", "0 0 0 [0 5,]", 0),
+        (1, "C", "1 2 3 4", 0),
+        (2, "G", "5 5 6 6", 0),
+        (3, "F(2) G(2)", "4 - 2 2", 1),
+        (4, "C", "1 1 1 1", 2),
+    ]
+    header = {"title": "t", "key": "C", "mode": "major", "capo": "0", "bpm": "90", "time": "4/4"}
+    result = omr.assemble(header, bars, 4)
+    assert result.problems == [] and len(bars) == 5 and "F(2) G(2)  | 4 - 2 2" in result.text
+    # a short bar inside a row, or not completed by the next row, is left for the checks
+    bars = [omr.BarReading(0, "C", "1 2 3 4", row=0), omr.BarReading(1, "C", "1 2", row=0)]
+    assert [b.melody for b in omr.join_split_bars(bars, 4)] == ["1 2 3 4", "1 2"]

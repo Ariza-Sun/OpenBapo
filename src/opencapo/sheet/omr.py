@@ -203,8 +203,68 @@ def repeated_passage_mismatches(readings: list[BarReading], window: int = 8) -> 
     return list(problems.values())
 
 
+def beat_items(melody: str) -> int:
+    """Top-level beat items in a melody as written (a partial bar has fewer than the metre)."""
+    try:
+        return len(_group_tokens(melody))
+    except SheetError:
+        return 0
+
+
+def join_split_bars(readings: list[BarReading], beats_per_bar: int) -> list[BarReading]:
+    """Printed bars that a line break cut in two become one; a short first bar is a pickup.
+
+    A bar left short at the end of a row and the short bar opening the next
+    row are one bar when their beats add up to the metre (the melody is
+    joined, chords are given their beats when both halves carry one). A
+    first bar shorter than the metre is an anacrusis and is padded with
+    rests in front, so every bar of the sheet fills the metre.
+    """
+    out: list[BarReading] = []
+    for r in readings:
+        items = beat_items(r.melody)
+        if out and out[-1].row != r.row and r.melody and out[-1].melody:
+            previous = out[-1]
+            before = beat_items(previous.melody)
+            if 0 < before < beats_per_bar and before + items == beats_per_bar:
+                chords = previous.chords
+                if r.chords and previous.chords and " " not in previous.chords + r.chords:
+                    chords = f"{previous.chords}({before}) {r.chords}({items})"
+                elif r.chords and not previous.chords:
+                    chords = r.chords
+                out[-1] = BarReading(
+                    previous.index,
+                    chords,
+                    f"{previous.melody} {r.melody}",
+                    (previous.notes + " " + r.notes).strip(),
+                    previous.crop,
+                    previous.row,
+                    (previous.lyrics + " " + r.lyrics).strip(),
+                )
+                continue
+        if not out and r.melody and 0 < items < beats_per_bar:
+            r = BarReading(
+                r.index,
+                r.chords,
+                " ".join(["0"] * (beats_per_bar - items)) + " " + r.melody,
+                r.notes,
+                r.crop,
+                r.row,
+                r.lyrics,
+            )
+        out.append(r)
+    for i, r in enumerate(out):
+        r.index = i
+    return out
+
+
 def assemble(header: dict[str, str], readings: list[BarReading], beats_per_bar: int) -> Assembled:
-    """Header fields plus checked readings -> the .sheet text (chords carry over empty bars)."""
+    """Header fields plus checked readings -> the .sheet text (chords carry over empty bars).
+
+    Bars split by a line break are joined and a pickup bar is padded first
+    (`join_split_bars`); the readings list is updated in place.
+    """
+    readings[:] = join_split_bars(readings, beats_per_bar)
     lines = [f"{k}: {v}" for k, v in header.items() if v != ""]
     lines.append("---")
     last_chords = ""

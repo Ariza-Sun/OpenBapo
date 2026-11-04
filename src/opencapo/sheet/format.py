@@ -67,6 +67,12 @@ QUALITIES: dict[str, ChordQuality] = {
     "dim7": ChordQuality.DIM7,
     "m7b5": ChordQuality.HDIM7,
     "hdim7": ChordQuality.HDIM7,
+    # Chinese sheets write a minor chord with a raised fifth as "m/5+" or
+    # "m+5" (E G C, a passing chord); at the triad level it is scored as
+    # minor, and the shapes are strummed as the plain minor chord.
+    "m/5+": ChordQuality.MIN,
+    "m+5": ChordQuality.MIN,
+    "m#5": ChordQuality.MIN,
 }
 
 
@@ -137,7 +143,7 @@ def pitch_class(name: str) -> int:
 
 def parse_chord_name(text: str) -> tuple[int, ChordQuality, int | None]:
     """``Am7``, ``F#m``, ``#Fm``, ``Bb``, ``C/E``, ``D/#F`` -> (root, quality, bass)."""
-    match = re.fullmatch(rf"({NOTE_NAME})([^/]*)(?:/({NOTE_NAME}))?", text.strip())
+    match = re.fullmatch(rf"({NOTE_NAME})(m/5\+|[^/]*)(?:/({NOTE_NAME}))?", text.strip())
     if not match:
         raise SheetError(f"not a chord name: {text!r}")
     root, suffix, bass = match.groups()
