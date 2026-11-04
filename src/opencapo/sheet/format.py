@@ -73,6 +73,41 @@ QUALITIES: dict[str, ChordQuality] = {
     "m/5+": ChordQuality.MIN,
     "m+5": ChordQuality.MIN,
     "m#5": ChordQuality.MIN,
+    # Extensions beyond the 14 qualities fold onto the nearest one: the
+    # ninth, eleventh and thirteenth keep the seventh's quality, an added
+    # ninth or second keeps the triad's, a suspended dominant is scored
+    # as the suspension (its seventh is not in the vocabulary).
+    "9": ChordQuality.DOM7,
+    "11": ChordQuality.DOM7,
+    "13": ChordQuality.DOM7,
+    "maj9": ChordQuality.MAJ7,
+    "M9": ChordQuality.MAJ7,
+    "m9": ChordQuality.MIN7,
+    "min9": ChordQuality.MIN7,
+    "m11": ChordQuality.MIN7,
+    "add9": ChordQuality.MAJ,
+    "add2": ChordQuality.MAJ,
+    "add4": ChordQuality.MAJ,
+    "madd9": ChordQuality.MIN,
+    "madd2": ChordQuality.MIN,
+    "madd4": ChordQuality.MIN,
+    "6/9": ChordQuality.MAJ6,
+    "69": ChordQuality.MAJ6,
+    "7sus4": ChordQuality.SUS4,
+    "7sus2": ChordQuality.SUS2,
+    "7sus": ChordQuality.SUS4,
+    "9sus4": ChordQuality.SUS4,
+    "sus9": ChordQuality.SUS4,
+    "mmaj7": ChordQuality.MIN7,
+    "mM7": ChordQuality.MIN7,
+    "m(maj7)": ChordQuality.MIN7,
+    "7b9": ChordQuality.DOM7,
+    "7#9": ChordQuality.DOM7,
+    "7#5": ChordQuality.DOM7,
+    "7b5": ChordQuality.DOM7,
+    "maj7#11": ChordQuality.MAJ7,
+    "aug7": ChordQuality.DOM7,
+    "+7": ChordQuality.DOM7,
 }
 
 
@@ -143,7 +178,7 @@ def pitch_class(name: str) -> int:
 
 def parse_chord_name(text: str) -> tuple[int, ChordQuality, int | None]:
     """``Am7``, ``F#m``, ``#Fm``, ``Bb``, ``C/E``, ``D/#F`` -> (root, quality, bass)."""
-    match = re.fullmatch(rf"({NOTE_NAME})(m/5\+|[^/]*)(?:/({NOTE_NAME}))?", text.strip())
+    match = re.fullmatch(rf"({NOTE_NAME})(m/5\+|6/9|[^/]*)(?:/({NOTE_NAME}))?", text.strip())
     if not match:
         raise SheetError(f"not a chord name: {text!r}")
     root, suffix, bass = match.groups()

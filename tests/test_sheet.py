@@ -51,6 +51,12 @@ def test_parse_example_sheet() -> None:
         ("D/#F", (2, ChordQuality.MAJ, 6)),
         ("Em/5+", (4, ChordQuality.MIN, None)),  # minor with a raised fifth, scored as minor
         ("Em/5+/G", (4, ChordQuality.MIN, 7)),
+        ("A9sus4", (9, ChordQuality.SUS4, None)),  # extensions fold onto the 14 qualities
+        ("Cadd9", (0, ChordQuality.MAJ, None)),
+        ("Am9", (9, ChordQuality.MIN7, None)),
+        ("G6/9", (7, ChordQuality.MAJ6, None)),
+        ("G6/9/B", (7, ChordQuality.MAJ6, 11)),
+        ("D7sus4", (2, ChordQuality.SUS4, None)),
     ],
 )
 def test_parse_chord_name(text: str, expected: tuple) -> None:  # type: ignore[type-arg]
