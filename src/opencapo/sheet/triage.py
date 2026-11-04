@@ -60,7 +60,8 @@ class SongPlan:
     problems: list[str] = field(default_factory=list)
     # From the review (an agent looking at the pages): who made the sheet,
     # whether it has a numbered-notation line, what the header prints.
-    source: str = ""
+    source: str = ""  # the maker's name, normalised: the layout family
+    source_detail: str = ""  # as the review wrote it
     has_jianpu: bool | None = None
     header: dict[str, object] = field(default_factory=dict)
     review_notes: str = ""
@@ -248,6 +249,26 @@ def plan_library(root: Path) -> list[SongPlan]:
     return plans
 
 
+SOURCE_ALIASES = {
+    "mzyege": "知音琴谱",
+    "纵玩吉他": "吉他吧",
+    "小磊吉他教室": "小磊吉他",
+    "晓涛吉他教室": "晓涛吉他",
+    "老歌大叔吉他教室": "老歌大叔",
+    "葛叔叔制谱": "葛叔叔",
+    "oguitar": "嗡嗡响乐谱",
+    "扫描件": "扫描件",
+}
+
+
+def source_family(text: str) -> str:
+    """The maker's name alone: "小LV吉他（革命吉他制谱）" and "小LV吉他" are one layout family."""
+    head = re.split(r"[（(/;；]", text, maxsplit=1)[0]
+    words = [w for w in head.split() if "." not in w and not w.lower().endswith("app")]
+    family = " ".join(words).strip(" ,，") or "未知"
+    return SOURCE_ALIASES.get(family, family)
+
+
 def apply_review(plans: list[SongPlan], review: list[dict[str, object]]) -> list[str]:
     """Take page order and labels from a review of the pages; returns what did not apply.
 
@@ -266,7 +287,8 @@ def apply_review(plans: list[SongPlan], review: list[dict[str, object]]) -> list
             rejected.append(f"{name}: not in the triage")
             continue
         if entry.get("source"):
-            plan.source = str(entry["source"])
+            plan.source_detail = str(entry["source"])
+            plan.source = source_family(plan.source_detail)
         if entry.get("has_jianpu") is not None:
             plan.has_jianpu = bool(entry["has_jianpu"])
         header = entry.get("header")
@@ -388,6 +410,7 @@ def to_json(plans: list[SongPlan]) -> list[dict[str, object]]:
             "junk": [str(x) for x in p.junk],
             "problems": p.problems,
             "source": p.source,
+            "source_detail": p.source_detail,
             "has_jianpu": p.has_jianpu,
             "header": p.header,
         }

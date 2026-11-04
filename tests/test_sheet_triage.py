@@ -19,6 +19,7 @@ from opencapo.sheet.triage import (
     plan_song,
     probe,
     sample_name,
+    source_family,
     table,
     to_json,
 )
@@ -169,9 +170,20 @@ def test_review_settles_the_order_and_labels_the_source(tmp_path: Path) -> None:
     assert song.source == "山山吉他" and song.has_jianpu is True and song.header == {"capo": 2}
     assert song.problems == ["页序已核定（页码 1/2、2/2）", "核定时去掉 1 页", "第三张是缩略图"]
     other = next(p for p in plans if p.name == "other")
-    assert other.source == "oguitar" and other.has_jianpu is False and other.order_evident
+    assert other.source == "嗡嗡响乐谱" and other.has_jianpu is False and other.order_evident
     text = table(plans)
     assert "| song | song | 2 | 1 | 确定 | — | 1200×1600 | 山山吉他 | 有 | 页序已核定" in text
-    assert "| other | other | 1 | 1 | 确定 | — | 1200×1600 | oguitar | 无 |  |" in text
+    assert "| other | other | 1 | 1 | 确定 | — | 1200×1600 | 嗡嗡响乐谱 | 无 |  |" in text
     assert "## 按来源（版式）分组" in text and "| 山山吉他 | 1 | song |" in text
     assert to_json(plans)[1]["header"] == {"capo": 2}
+
+
+def test_source_family_strips_credits_domains_and_aliases() -> None:
+    assert source_family("小LV吉他（革命吉他制谱）") == "小LV吉他"
+    assert source_family("吉他世界网（guitarworld.com.cn）") == "吉他世界网"
+    assert source_family("oguitar / 嗡嗡响乐谱（buzzmusic.cn）") == "嗡嗡响乐谱"
+    assert source_family("17吉他 (17jita.com 中文吉他音乐社区)") == "17吉他"
+    assert source_family("易谱库 yipuku.com（制谱：二少）") == "易谱库"
+    assert source_family("毛瓜谱APP（知乎 @毛瓜）") == "未知"
+    assert source_family("mzyege（知音琴谱）") == "知音琴谱"
+    assert source_family("小磊吉他教室") == "小磊吉他" and source_family("未知") == "未知"
