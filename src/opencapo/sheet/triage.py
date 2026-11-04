@@ -13,6 +13,10 @@ Per song: open every file as an image (or count a PDF's pages), drop
 exact duplicates, group the rest into *versions* (same type and page
 width), keep the version with the most pages, order its pages by the
 numbers in their names, and remember whether that order was evident.
+Where it was not, an agent looks at the pages (printed page numbers,
+the title block, where the lyrics continue) and its findings come back
+through `apply_review`, which also brings the sheet's maker and whether
+it has a numbered-notation line, the clues the pilot is grouped by.
 """
 
 from __future__ import annotations
@@ -54,6 +58,12 @@ class SongPlan:
     other_versions: list[Path] = field(default_factory=list)
     junk: list[Path] = field(default_factory=list)
     problems: list[str] = field(default_factory=list)
+    # From the review (an agent looking at the pages): who made the sheet,
+    # whether it has a numbered-notation line, what the header prints.
+    source: str = ""
+    has_jianpu: bool | None = None
+    header: dict[str, object] = field(default_factory=dict)
+    review_notes: str = ""
 
 
 def natural_key(text: str) -> list[object]:
@@ -238,6 +248,53 @@ def plan_library(root: Path) -> list[SongPlan]:
     return plans
 
 
+def apply_review(plans: list[SongPlan], review: list[dict[str, object]]) -> list[str]:
+    """Take page order and labels from a review of the pages; returns what did not apply.
+
+    A review entry has the song's `name`, its pages in reading `order`
+    (paths that must all come from the plan's pages), the `evidence`,
+    `source`, `has_jianpu`, `header` and `notes`. A page the review left
+    out is dropped (a thumbnail, an advert); a path it names that the
+    plan does not have is an error and the song keeps its guessed order.
+    """
+    by_name = {p.name: p for p in plans}
+    rejected = []
+    for entry in review:
+        name = str(entry.get("name", ""))
+        plan = by_name.get(name)
+        if plan is None:
+            rejected.append(f"{name}: not in the triage")
+            continue
+        if entry.get("source"):
+            plan.source = str(entry["source"])
+        if entry.get("has_jianpu") is not None:
+            plan.has_jianpu = bool(entry["has_jianpu"])
+        header = entry.get("header")
+        if isinstance(header, dict):
+            plan.header = dict(header)
+        if entry.get("notes"):
+            plan.review_notes = str(entry["notes"])
+        order = entry.get("order")
+        if not isinstance(order, list) or not order:
+            continue
+        wanted = [Path(str(x)) for x in order]
+        known = {p.resolve(): p for p in plan.pages}
+        unknown = [str(x) for x in wanted if x.resolve() not in known]
+        if unknown:
+            rejected.append(f"{name}: pages not in the plan: {unknown}")
+            continue
+        dropped = len(plan.pages) - len(wanted)
+        plan.pages = [known[x.resolve()] for x in wanted]
+        plan.order_evident = True
+        plan.problems = [x for x in plan.problems if x != "页序按文件名猜的"]
+        plan.problems.append(f"页序已核定（{entry.get('evidence') or '无依据说明'}）")
+        if dropped:
+            plan.problems.append(f"核定时去掉 {dropped} 页")
+        if plan.review_notes:
+            plan.problems.append(plan.review_notes)
+    return rejected
+
+
 def materialize(plan: SongPlan, out_root: Path, dpi: int = 300) -> Path:
     """Write the chosen pages as OUT/<name>/p01.png ... (greyscale PNG), ready for the reader."""
     from PIL import Image
@@ -271,11 +328,12 @@ def table(plans: list[SongPlan]) -> str:
         f"多版本 {sum(p.versions > 1 for p in plans)} 首；"
         f"无页面 {sum(not p.pages for p in plans)} 首。",
         "",
-        "| 样本名 | 原目录 | 页数 | 版本 | 页序 | 变调夹提示 | 首页尺寸 | 问题 |",
-        "|---|---|---|---|---|---|---|---|",
+        "| 样本名 | 原目录 | 页数 | 版本 | 页序 | 变调夹提示 | 首页尺寸 | 来源 | 简谱行 | 问题 |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for p in plans:
         count = str(len(p.pages)) if p.kind == "image" else "PDF"
+        jianpu = "—" if p.has_jianpu is None else ("有" if p.has_jianpu else "无")
         lines.append(
             "| "
             + " | ".join(
@@ -287,11 +345,21 @@ def table(plans: list[SongPlan]) -> str:
                     "确定" if p.order_evident else "猜的",
                     "—" if p.capo_hint is None else str(p.capo_hint),
                     f"{p.width}×{p.height}" if p.pages else "—",
+                    p.source or "—",
+                    jianpu,
                     "；".join(p.problems) or "",
                 ]
             )
             + " |"
         )
+    sources: dict[str, list[str]] = {}
+    for p in plans:
+        if p.pages:
+            sources.setdefault(p.source or "未知", []).append(p.name)
+    if any(p.source for p in plans):
+        lines += ["", "## 按来源（版式）分组", "", "| 来源 | 首数 | 例子 |", "|---|---|---|"]
+        for src, names in sorted(sources.items(), key=lambda kv: -len(kv[1])):
+            lines.append(f"| {src} | {len(names)} | {'、'.join(names[:4])} |")
     widths: dict[int, list[str]] = {}
     for p in plans:
         if p.pages and p.kind == "image":
@@ -319,6 +387,9 @@ def to_json(plans: list[SongPlan]) -> list[dict[str, object]]:
             "other_versions": [str(x) for x in p.other_versions],
             "junk": [str(x) for x in p.junk],
             "problems": p.problems,
+            "source": p.source,
+            "has_jianpu": p.has_jianpu,
+            "header": p.header,
         }
         for p in plans
     ]

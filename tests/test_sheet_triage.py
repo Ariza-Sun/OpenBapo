@@ -11,6 +11,7 @@ from PIL import Image
 
 from opencapo.sheet import layout
 from opencapo.sheet.triage import (
+    apply_review,
     capo_hint,
     materialize,
     ordered_pages,
@@ -108,7 +109,8 @@ def test_library_plans_folders_loose_files_and_name_clashes(tmp_path: Path) -> N
     assert "与另一目录同名（yellow）" in plans[2].problems
     text = table(plans)
     assert (
-        "| Dont_be_so_serious | Dont be so serious.png | 1 | 1 | 确定 | — | 1200×1600 |  |" in text
+        "| Dont_be_so_serious | Dont be so serious.png | 1 | 1 | 确定 | — | 1200×1600 | — | — |  |"
+        in text
     )
     assert "4 首；页序不确定 0 首；多版本 0 首；无页面 1 首。" in text
     assert "| 1200 | 3 |" in text
@@ -134,3 +136,42 @@ def test_materialize_writes_ordered_greyscale_pages_the_layout_can_read(tmp_path
     assert sorted(p.name for p in out.iterdir()) == ["p01.png", "p02.png"]
     with pytest.raises(FileNotFoundError):
         layout.rasterize(tmp_path / "out")  # a folder without pages
+
+
+def test_review_settles_the_order_and_labels_the_source(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    for name in ("f14f56.png", "25dfd9.png", "9ad6e5.png"):
+        page(raw / "song" / name, shade=ord(name[0]))
+    page(raw / "other" / "1.png")
+    plans = plan_library(raw)
+    song = next(p for p in plans if p.name == "song")
+    assert not song.order_evident
+    review = [
+        {
+            "name": "song",
+            "order": [str(raw / "song" / "9ad6e5.png"), str(raw / "song" / "f14f56.png")],
+            "evidence": "页码 1/2、2/2",
+            "source": "山山吉他",
+            "has_jianpu": True,
+            "header": {"capo": 2},
+            "notes": "第三张是缩略图",
+        },
+        {"name": "other", "source": "oguitar", "has_jianpu": False},
+        {"name": "missing", "order": []},
+        {"name": "other", "order": [str(raw / "other" / "nope.png")]},
+    ]
+    rejected = apply_review(plans, review)
+    assert rejected == [
+        "missing: not in the triage",
+        f"other: pages not in the plan: ['{raw / 'other' / 'nope.png'}']",
+    ]
+    assert [p.name for p in song.pages] == ["9ad6e5.png", "f14f56.png"] and song.order_evident
+    assert song.source == "山山吉他" and song.has_jianpu is True and song.header == {"capo": 2}
+    assert song.problems == ["页序已核定（页码 1/2、2/2）", "核定时去掉 1 页", "第三张是缩略图"]
+    other = next(p for p in plans if p.name == "other")
+    assert other.source == "oguitar" and other.has_jianpu is False and other.order_evident
+    text = table(plans)
+    assert "| song | song | 2 | 1 | 确定 | — | 1200×1600 | 山山吉他 | 有 | 页序已核定" in text
+    assert "| other | other | 1 | 1 | 确定 | — | 1200×1600 | oguitar | 无 |  |" in text
+    assert "## 按来源（版式）分组" in text and "| 山山吉他 | 1 | song |" in text
+    assert to_json(plans)[1]["header"] == {"capo": 2}
