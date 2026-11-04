@@ -1,9 +1,16 @@
-"""Read a printed guitar sheet (PDF / image) into the text sheet format, in two halves.
+"""Read a printed guitar sheet (PDF / image) into the text sheet format.
 
 Usage:
+    python scripts/sheet_ocr.py read SHEET.pdf [SHEET2.png ...] --out DIR [--bpm 76] [--render]
     python scripts/sheet_ocr.py prepare SHEET.pdf --out WORK_DIR
     python scripts/sheet_ocr.py assemble WORK_DIR --readings READINGS.json \
         --header HEADER.json [--bpm 76] --out SONG.sheet
+
+`read` does everything in one go: layout, reading every bar with the
+Claude Code command-line tool in headless mode (`claude -p`, under your own
+login), the checks, a second larger reading of doubtful bars, assembly,
+and optionally the rendered sample. Each source gets DIR/<stem>/ with the
+.sheet file, readings.json and review.md.
 
 `prepare` rasterizes the pages, finds systems and bars, and writes crops
 plus WORK_DIR/worksheet.json and the two prompts. An agent with vision
@@ -26,6 +33,14 @@ from pathlib import Path
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
+    read = commands.add_parser("read")
+    read.add_argument("sources", type=Path, nargs="+")
+    read.add_argument("--out", type=Path, required=True)
+    read.add_argument("--bpm", type=float, help="tempo when the sheet does not print one")
+    read.add_argument("--model", default="claude-opus-5-5")
+    read.add_argument("--batch", type=int, default=10, help="bars per model call")
+    read.add_argument("--parallel", type=int, default=3)
+    read.add_argument("--render", action="store_true", help="also write the WAV and reference")
     prepare = commands.add_parser("prepare")
     prepare.add_argument("source", type=Path)
     prepare.add_argument("--out", type=Path, required=True)
@@ -42,6 +57,30 @@ def main(argv: list[str] | None = None) -> int:
     assemble.add_argument("--time")
     assemble.add_argument("--mode", default="major")
     args = parser.parse_args(argv)
+
+    if args.command == "read":
+        from opencapo.sheet import load_sheet, render, write_reference, write_wav
+        from opencapo.sheet.reader import claude_runner, read_sheet
+
+        runner = claude_runner(args.model)
+        failures = 0
+        for source in args.sources:
+            work = args.out / source.stem
+            try:
+                result = read_sheet(
+                    source, work, runner=runner, bpm=args.bpm,
+                    batch_size=args.batch, parallel=args.parallel,
+                )  # fmt: skip
+            except Exception as e:  # one bad sheet must not stop the batch
+                print(f"{source}: failed: {e}", file=sys.stderr)
+                failures += 1
+                continue
+            if args.render:
+                sheet = load_sheet(result.sheet_path)
+                rendered = render(sheet)
+                write_wav(work / f"{source.stem}.wav", rendered.samples, rendered.sample_rate)
+                write_reference(work / f"{source.stem}.json", rendered.reference)
+        return 1 if failures else 0
 
     if args.command == "prepare":
         from opencapo.sheet.layout import worksheet
