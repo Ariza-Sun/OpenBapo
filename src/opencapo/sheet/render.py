@@ -80,18 +80,79 @@ def pluck(midi: float, seconds: float, *, seed: int, decay: float = 0.998) -> ND
     return np.asarray(np.convolve(out, body, mode="same"))
 
 
-def voicing(root: int, quality_tones: frozenset[int], bass: int | None) -> list[int]:
-    """Guitar-like voicing: bass (or root) low, then chord tones climbing over ~2 octaves."""
-    lowest_pc = bass if bass is not None else root
-    low = LOWEST_MIDI + (lowest_pc - LOWEST_MIDI) % 12
-    pitches = [low]
-    candidate = low + 1
-    while len(pitches) < 5 and candidate < low + 24:
-        if (candidate % 12 in quality_tones and candidate % 12 != lowest_pc) or (
-            candidate % 12 == lowest_pc and candidate - low >= 12
-        ):
-            pitches.append(candidate)
-        candidate += 1
+TUNING = (40, 45, 50, 55, 59, 64)  # E2 A2 D3 G3 B3 E4, low string first
+X = None
+# Open-position shapes as frets per string (None = not played), keyed by the
+# shape's written root and quality: what the sheet's diagrams show.
+SHAPES: dict[tuple[int, str], tuple[int | None, ...]] = {
+    (0, "maj"): (X, 3, 2, 0, 1, 0),  # C
+    (0, "maj7"): (X, 3, 2, 0, 0, 0),  # Cmaj7
+    (0, "7"): (X, 3, 2, 3, 1, 0),  # C7
+    (2, "maj"): (X, X, 0, 2, 3, 2),  # D
+    (2, "min"): (X, X, 0, 2, 3, 1),  # Dm
+    (2, "7"): (X, X, 0, 2, 1, 2),  # D7
+    (2, "min7"): (X, X, 0, 2, 1, 1),  # Dm7
+    (2, "sus2"): (X, X, 0, 2, 3, 0),  # Dsus2
+    (2, "sus4"): (X, X, 0, 2, 3, 3),  # Dsus4
+    (4, "maj"): (0, 2, 2, 1, 0, 0),  # E
+    (4, "min"): (0, 2, 2, 0, 0, 0),  # Em
+    (4, "7"): (0, 2, 0, 1, 0, 0),  # E7
+    (4, "min7"): (0, 2, 0, 0, 0, 0),  # Em7
+    (5, "maj"): (1, 3, 3, 2, 1, 1),  # F
+    (5, "maj7"): (X, X, 3, 2, 1, 0),  # Fmaj7
+    (7, "maj"): (3, 2, 0, 0, 0, 3),  # G
+    (7, "7"): (3, 2, 0, 0, 0, 1),  # G7
+    (9, "maj"): (X, 0, 2, 2, 2, 0),  # A
+    (9, "min"): (X, 0, 2, 2, 1, 0),  # Am
+    (9, "7"): (X, 0, 2, 0, 2, 0),  # A7
+    (9, "min7"): (X, 0, 2, 0, 1, 0),  # Am7
+    (9, "sus2"): (X, 0, 2, 2, 0, 0),  # Asus2
+    (9, "sus4"): (X, 0, 2, 2, 3, 0),  # Asus4
+    (11, "7"): (X, 2, 1, 2, 0, 2),  # B7
+    (11, "min"): (X, 2, 4, 4, 3, 2),  # Bm (barre)
+}
+# Movable barre shapes (E-form on the low string, A-form on the fifth) for the rest.
+BARRE_E: dict[str, tuple[int | None, ...]] = {
+    "maj": (0, 2, 2, 1, 0, 0),
+    "min": (0, 2, 2, 0, 0, 0),
+    "7": (0, 2, 0, 1, 0, 0),
+    "min7": (0, 2, 0, 0, 0, 0),
+    "maj7": (0, X, 1, 1, 0, X),
+}
+BARRE_A: dict[str, tuple[int | None, ...]] = {
+    "maj": (X, 0, 2, 2, 2, 0),
+    "min": (X, 0, 2, 2, 1, 0),
+    "7": (X, 0, 2, 0, 2, 0),
+    "min7": (X, 0, 2, 0, 1, 0),
+    "maj7": (X, 0, 2, 1, 2, 0),
+}
+
+
+def shape_frets(root: int, quality: str) -> tuple[int | None, ...]:
+    """Frets of the written chord shape: the open shape if there is one, else a barre."""
+    if (root, quality) in SHAPES:
+        return SHAPES[root, quality]
+    family = quality if quality in BARRE_E else {"maj6": "maj", "min6": "min"}.get(quality, "maj")
+    e_fret, a_fret = (root - 4) % 12, (root - 9) % 12
+    if a_fret < e_fret:  # the lower position is what a player picks
+        return tuple(None if f is None else f + a_fret for f in BARRE_A[family])
+    return tuple(None if f is None else f + e_fret for f in BARRE_E[family])
+
+
+def voicing(root: int, quality: str, capo: int, bass: int | None = None) -> list[int]:
+    """Sounding pitches of the written shape under the capo, low string first.
+
+    A slash chord puts its bass note on the lowest sounding string; the
+    other strings keep the shape.
+    """
+    pitches = [
+        open_pitch + fret + capo
+        for open_pitch, fret in zip(TUNING, shape_frets(root, quality), strict=True)
+        if fret is not None
+    ]
+    if bass is not None and pitches and pitches[0] % 12 != (bass + capo) % 12:
+        low = TUNING[0] + capo + (bass - TUNING[0]) % 12
+        pitches = [low, *[p for p in pitches if p > low]]
     return pitches
 
 
@@ -144,15 +205,13 @@ def bass_tone(midi: float, seconds: float) -> NDArray[np.float64]:
 def render(
     sheet: Sheet,
     *,
-    bass: bool = True,
+    bass: bool = False,
     melody: bool = True,
     accompaniment: str = "strum",
     melody_voice: str = "piano",
     seed: int = 0,
 ) -> Rendered:
     import numpy as np
-
-    from opencapo.analysis.chords.vocab import chord_tones
 
     if accompaniment not in ("piano", "strum"):
         raise ValueError("accompaniment must be 'piano' or 'strum'")
@@ -201,7 +260,7 @@ def render(
             start, end = seconds(position), seconds(position + span.beats)
             root = (span.root + sheet.capo) % 12
             chord_bass = None if span.bass is None else (span.bass + sheet.capo) % 12
-            spans.append((start, end, root, span.quality, chord_bass))
+            spans.append((start, end, root, span.quality, chord_bass, span.root, span.bass))
             label = format_label(root, span.quality, chord_bass if chord_bass != root else None)
             if ref_chords and ref_chords[-1][2] == label and ref_chords[-1][1] == start:
                 ref_chords[-1][1] = end
@@ -220,8 +279,8 @@ def render(
             hit = next((s for s in spans if s[0] - 1e-9 <= t < s[1]), None)
             if hit is None:
                 continue
-            _, end, root, quality, chord_bass = hit
-            pitches = voicing(root, chord_tones(root, quality), chord_bass)
+            _, end, root, quality, chord_bass, shape_root, shape_bass = hit
+            pitches = voicing(shape_root, quality.value, sheet.capo, shape_bass)
             next_hit = next((bar_start + o * spb for o, _ in hits if o > offset), end)
             ring = min(end - t, sheet.beats_per_bar * spb, next_hit - t + 0.05)
             if accompaniment == "strum":

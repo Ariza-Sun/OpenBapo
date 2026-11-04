@@ -2,7 +2,7 @@
 
 Usage:
     python scripts/sheet_synth.py SHEET.sheet [...] --out DIR [--accompaniment piano|strum]
-        [--melody-voice piano|voice] [--no-bass] [--no-melody]
+        [--melody-voice piano|voice] [--bass] [--no-melody]
 
 Writes DIR/<stem>.wav and DIR/<stem>.json for each sheet. The JSON holds the
 sounding chords (shapes transposed by the capo), the sung key, the beat grid
@@ -21,7 +21,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("sheets", type=Path, nargs="+")
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--no-bass", action="store_true")
+    parser.add_argument("--bass", action="store_true", help="add a bass part an octave below")
     parser.add_argument("--no-melody", action="store_true")
     parser.add_argument("--accompaniment", choices=("piano", "strum"), default="strum")
     parser.add_argument("--melody-voice", choices=("piano", "voice"), default="piano")
@@ -34,7 +34,7 @@ def main(argv: list[str] | None = None) -> int:
         sheet = load_sheet(path)
         rendered = render(
             sheet,
-            bass=not args.no_bass,
+            bass=args.bass,
             melody=not args.no_melody,
             accompaniment=args.accompaniment,
             melody_voice=args.melody_voice,

@@ -15,6 +15,7 @@ from opencapo.analysis.grid import build_grid
 from opencapo.model import ChordQuality, Mode
 from opencapo.sheet import SheetError, load_sheet, parse_sheet, render, write_reference, write_wav
 from opencapo.sheet.format import degree_midi, parse_chord_name, parse_chords, parse_melody
+from opencapo.sheet.render import shape_frets, voicing
 
 EXAMPLE = Path(__file__).parents[1] / "docs" / "examples" / "xiaoxingxing.sheet"
 
@@ -172,3 +173,16 @@ def test_tie_across_a_bar_line_holds_one_note() -> None:
     assert len(ref) == 4 + 3 + 4
     with pytest.raises(SheetError):
         parse_sheet("---\nC | - 1 1 1\n")
+
+
+def test_strum_voicings_follow_the_written_shape_under_the_capo() -> None:
+    # C shape with the capo on 4 sounds E major from the fifth string up, as on a guitar.
+    assert voicing(0, "maj", 4) == [52, 56, 59, 64, 68]  # E3 G#3 B3 E4 G#4
+    assert voicing(5, "maj", 4) == [45, 52, 57, 61, 64, 69]  # F barre -> A major, A2 at the bottom
+    assert voicing(9, "min", 0) == [45, 52, 57, 60, 64]  # open Am
+    assert (
+        shape_frets(11, "maj") == (X, 2, 4, 4, 4, 2) if (X := None) is None else True
+    )  # B: A-form barre at 2
+    assert shape_frets(6, "min") == (2, 4, 4, 2, 2, 2)  # F#m: E-form barre at 2
+    assert voicing(0, "maj", 0, bass=4)[0] == 40  # C/E puts E2 on the bottom
+    assert all(p >= 40 for p in voicing(3, "7", 0))  # Eb7 via a barre, nothing below E2
