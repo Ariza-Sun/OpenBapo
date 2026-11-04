@@ -1,0 +1,58 @@
+# 交接：第 2 步进行中（2026-11-04）
+
+> 给接手的 agent 看的。读完本文、`CLAUDE.md`、`docs/plans/step-2.md`，再动手。分支 `claude/gracious-cannon-i2saip`，已全部推送；工作树干净；未开 PR。
+
+## 1. 负责人的工作规则（必须遵守）
+
+- 先写计划再写代码；每个决定**一次只讨论一个**：问题、选项、利弊、推荐与理由；负责人拍板后记入 `step-2.md` 第 8 节，再谈下一个。
+- 实现完成后**先问负责人是否开 PR**，不要自己开；PR 描述逐条对照路线图当前步骤的验收标准。
+- 验收数字必须由仓库里的脚本产出，脚本与结果文件一起提交；数据集的音频 / 标注、负责人的歌谱、渲染出的音频一律不进仓库。
+- 负责人不是乐理专家，偏好机器学习的语言；汇报要主动、及时，不要等他来问；解释软件工程术语（PR、CI 等）。
+- 子代理一律用 Opus 5.5（`model="claude-opus-5-5"`；Agent 工具用 `model="opus"`、`effort="max"`）。
+- 负责人不持有、也不会提供任何歌曲录音（版权风险）；评测只用开放数据集和谱子渲染的合成音频。
+- 中文写文档与沟通；代码、标识符、提交信息用英文。保持 `ruff format --check . && ruff check . && mypy && pytest -q` 全绿后再推送（本分支现在 322 个测试通过）。
+
+## 2. 第 2 步的现状
+
+验收口径已改为负责人曲库（决定 11）：和弦 majmin ≥ 80%、调性 ≥ 85% 在**负责人提供的谱子渲染成的样本集**上算；GuitarSet 与 AAM 只作公开数据集参考。
+
+| 项 | 状态 |
+|---|---|
+| 和弦 + 调性流水线（BTC + lv-chordia + 色度模板 + 低音 + 调性规则，拍网格上融合） | 完成，`FusionParams` 默认值即调参结果 |
+| 公开数据集参考数字（`docs/benchmarks/step-2-chords.md`） | GuitarSet 伴奏 majmin 0.775、调性 0.789；AAM 0.947、单一调性 0.931；耗时 6.1 s |
+| 融合层 / 规则层优化 | 四轮，合计 ±0.002，已停（`step-2.md` 8.9）；剩余差距是两模型对木吉他 Funk / 爵士伴奏的能力 |
+| 样本生成器：谱子文本格式、渲染器（按谱上指法扫弦 + 钢琴旋律）、`--sheets` 评测接入 | 完成 |
+| 样本生成器：识谱（PDF / 图片 → 谱子文本）一条命令 | 完成并实测：《曾经的你》60 小节 189 秒，与人工核对版 59/60 一致，待复核 2/60 |
+| 样本集 manifest；评测按 manifest 读样本集（`step-2.md` 10.4 第 4 项） | **未做** |
+| 负责人批量提供谱子 → 生成样本集 → 报表"曲库合成"一组出数字（10.4 第 5 项） | **未做**，等谱子 |
+| 扫弦节奏型 | 固定型（下 下上 上下上），未读谱上的六线谱；负责人知情，暂不做 |
+
+## 3. 接下来按顺序做什么
+
+1. **manifest 与评测接入**：`scripts/sheet_ocr.py read` 产出的目录（每首 `.sheet` / `.wav` / `.json` / `readings.json` / `review.md`）加一个 `manifest.json`（版本、生成参数、每首头部信息、待复核数）；`scripts/eval_chords.py --sheets` 改为按 manifest 读，报表"曲库合成"一组按首列出。
+2. **拿负责人的第一批 PDF / 图片**（最好同一网站版式）跑 `sheet_ocr.py read ... --render`，把 `review.md` 里的小节给负责人过目；不同版式先各试一份，切图阈值在 `opencapo/sheet/layout.py`（`INK_THRESHOLD`、staff / notation 的相对尺寸）。
+3. 在 GPU 机器上跑 `eval_chords.py --guitarset ... --aam ... --sheets <样本集> --cache ...`，报表里"曲库合成"一行就是验收依据；更新 `step-2.md` 第 12 节、README。
+4. 若曲库样本集过线：按规则问负责人是否开 PR。若不过线：按错误分析（`scripts/analyze_chords.py --sheets ... --subset sheets`）定位，再一次一个决定地讨论。
+
+## 4. 怎么跑
+
+```bash
+# 识谱 + 渲染（一条命令；读图用 Claude Code 无头模式，走当前登录，不用 API key）
+python scripts/sheet_ocr.py read SONG.pdf [MORE.png ...] --out /data/sheets --bpm 76 --render
+# 只渲染手工录入的谱子
+python scripts/sheet_synth.py docs/examples/xiaoxingxing.sheet --out /tmp/x
+# 评测（含曲库样本集）；--cache 复用各专家的逐拍输出
+python scripts/eval_chords.py --guitarset /data/guitarset --aam /data/aam --sheets /data/sheets \
+    --device cuda --cache /data/eval-cache --out docs/benchmarks/step-2-chords
+# 错误分析
+python scripts/analyze_chords.py --sheets /data/sheets --cache /data/eval-cache --subset sheets
+```
+
+安装：`pip install -e ".[dev,analysis,sheets]"`。GPU 机器上 torch 必须与驱动匹配，lv-chordia 声明 `torch>=2.13` 会顶掉旧 torch，用约束文件 + `--no-deps` 装，见 `docs/benchmarks/README.md`。
+
+## 5. 待负责人决定 / 已知事项
+
+- 谱子识读出的两处疑点（`曾经的你`）：第 2 页乐句开头 `7,` 跳到 `1'` 的九度大跳（谱面如此，疑为刻错）；同乐句的附点 `2·` 在第 1 页与第 3 页印法不一致。按谱面原样保留。
+- GuitarSet 伴奏 0.775 / 0.789 未达旧门槛，已随决定 11 降为参考；若将来要补，方向是训练数据含木吉他伴奏的第三模型，公开候选目前没有合格的（`step-2.md` 8.9）。
+- 合成样本的分数是真录音的上限，报表与计划都已注明。
+- 旧的 node28 子会话（用 Remote Control 桥派发的评测任务）已完成或归档；评测缓存 `eval-cache/` 含 860 首的逐拍后验，可直接复用。
