@@ -116,19 +116,22 @@ class Sheet:
         return len(self.bars) * self.beats_per_bar * self.seconds_per_beat
 
 
+NOTE_NAME = r"(?:[#b]?[A-G][#b]*)"  # Chinese sheets write the accidental first: #F, bB
+
+
 def pitch_class(name: str) -> int:
-    match = re.fullmatch(r"([A-Ga-g])([#b]*)", name.strip())
+    match = re.fullmatch(r"([#b]?)([A-Ga-g])([#b]*)", name.strip())
     if not match:
         raise SheetError(f"not a note name: {name!r}")
-    pc = PITCH[match.group(1).upper()]
-    for accidental in match.group(2):
+    pc = PITCH[match.group(2).upper()]
+    for accidental in match.group(1) + match.group(3):
         pc += 1 if accidental == "#" else -1
     return pc % 12
 
 
 def parse_chord_name(text: str) -> tuple[int, ChordQuality, int | None]:
-    """``Am7``, ``F#m``, ``Bb``, ``C/E`` -> (root, quality, bass)."""
-    match = re.fullmatch(r"([A-G][#b]?)([^/]*)(?:/([A-G][#b]?))?", text.strip())
+    """``Am7``, ``F#m``, ``#Fm``, ``Bb``, ``C/E``, ``D/#F`` -> (root, quality, bass)."""
+    match = re.fullmatch(rf"({NOTE_NAME})([^/]*)(?:/({NOTE_NAME}))?", text.strip())
     if not match:
         raise SheetError(f"not a chord name: {text!r}")
     root, suffix, bass = match.groups()

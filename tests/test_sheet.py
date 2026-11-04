@@ -46,6 +46,9 @@ def test_parse_example_sheet() -> None:
         ("Csus4", (0, ChordQuality.SUS4, None)),
         ("C/E", (0, ChordQuality.MAJ, 4)),
         ("Em7b5", (4, ChordQuality.HDIM7, None)),
+        ("#Fm", (6, ChordQuality.MIN, None)),  # accidental first, as Chinese sheets print it
+        ("bB", (10, ChordQuality.MAJ, None)),
+        ("D/#F", (2, ChordQuality.MAJ, 6)),
     ],
 )
 def test_parse_chord_name(text: str, expected: tuple) -> None:  # type: ignore[type-arg]

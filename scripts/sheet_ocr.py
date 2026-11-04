@@ -82,7 +82,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "read":
-        from opencapo.sheet import load_sheet, render, write_manifest, write_reference, write_wav
+        from opencapo.sheet import (
+            SheetError,
+            load_sheet,
+            render,
+            write_manifest,
+            write_reference,
+            write_wav,
+        )
         from opencapo.sheet.reader import claude_runner, read_sheet
 
         runner = claude_runner(args.model)
@@ -99,7 +106,12 @@ def main(argv: list[str] | None = None) -> int:
                 failures += 1
                 continue
             if args.render:
-                sheet = load_sheet(result.sheet_path)
+                try:
+                    sheet = load_sheet(result.sheet_path)
+                except SheetError as e:  # a bar left for review keeps the sheet unparsable
+                    print(f"{source}: not rendered, fix review.md first: {e}", file=sys.stderr)
+                    failures += 1
+                    continue
                 rendered = render(sheet)
                 write_wav(work / f"{source.stem}.wav", rendered.samples, rendered.sample_rate)
                 write_reference(work / f"{source.stem}.json", rendered.reference)

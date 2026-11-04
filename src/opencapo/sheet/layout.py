@@ -129,8 +129,12 @@ def find_staves(mask: NDArray[np.bool_]) -> list[Band]:
 
 def find_systems(mask: NDArray[np.bool_]) -> list[SystemBox]:
     """Each tab staff with the notation line below it and the chord-diagram strip above."""
-    height = mask.shape[0]
-    rows = bands(mask, axis=0, min_ink=3, min_size=4)
+    height, width = mask.shape
+    # A row counts as inked when more than a few thin vertical strokes cross
+    # it: some layouts run a bracket or the bar lines from the staff down to
+    # the notation, which would otherwise fuse staff, digits and lyrics into
+    # one band and leave the lyrics as the first band "below the staff".
+    rows = bands(mask, axis=0, min_ink=max(3, int(0.015 * width)), min_size=4)
     staves = find_staves(mask)
     systems = []
     for i, staff in enumerate(staves):
@@ -167,19 +171,24 @@ def longest_runs(strip: NDArray[np.bool_]) -> NDArray[np.int64]:
     return best
 
 
-def bar_lines(mask: NDArray[np.bool_], notation: Band, width: int) -> list[int]:
-    """x positions of the bar lines in a notation line.
+def bar_lines(mask: NDArray[np.bool_], top: int, bottom: int, width: int) -> list[int]:
+    """x positions of the bar lines in the notation line between rows top and bottom.
 
-    Bar lines are the tallest unbroken vertical strokes in the line (digits
-    are shorter, tie arcs are thin and curved), so columns whose longest run
-    comes within 80% of the tallest count. The band may include the lyrics
-    below the digits, which is why the band height itself is not used.
+    Bar lines are the tallest unbroken vertical strokes in the line: digits
+    are shorter (a "1" is as tall as the digit row, a bar line overshoots
+    it, which is why the rows should extend a little beyond the digits),
+    tie arcs are thin and curved. The reference height is the eighth
+    tallest column, so a lone taller stroke (a system bracket at the left
+    edge) does not raise the bar; columns within 80% of it count.
     """
     import numpy as np
 
-    runs = longest_runs(mask[notation.top : notation.bottom])
-    tallest = float(np.percentile(runs[runs > 0], 99.5)) if np.any(runs > 0) else 0.0
-    xs = np.flatnonzero(runs >= 0.8 * tallest) if tallest > 0 else np.zeros(0, dtype=np.int64)
+    runs = longest_runs(mask[top:bottom])
+    inked = np.sort(runs[runs > 0])[::-1]
+    if inked.size == 0:
+        return []
+    tallest = float(inked[min(7, inked.size - 1)])
+    xs = np.flatnonzero(runs >= 0.8 * tallest)
     lines: list[int] = []
     for x in xs:
         if lines and x - lines[-1] <= max(3, int(0.004 * width)):
@@ -219,12 +228,12 @@ def analyze_page(
     margin_x = int(0.004 * width)
     counter = start
     for system in systems:
-        lines = bar_lines(mask, system.notation, width)
+        top = max(0, system.notation.top - margin_y)
+        bottom = min(height, system.notation.bottom + margin_y)
+        lines = bar_lines(mask, top, bottom, width)
         if len(lines) < 2:
             continue
         diagrams = diagram_boxes(mask, system.diagram_top, system.staff.top, width)
-        top = max(0, system.notation.top - margin_y)
-        bottom = min(height, system.notation.bottom + margin_y)
         for left, right in itertools.pairwise(lines):
             if right - left < 0.03 * width:
                 continue
