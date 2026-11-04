@@ -20,8 +20,10 @@ share (so ``[6 6]`` is two eighths), a trailing ``.`` dots a note (it takes
 three quarters of its share plus the next token's, as ``[2. 5]`` for a
 dotted eighth and a sixteenth), ``'`` and ``,`` raise or lower an octave,
 ``0`` is a rest and ``-`` extends the previous note, also across a bar
-line when it opens a bar. A bar may leave either side empty. Lines
-starting with ``#`` are comments.
+line when it opens a bar; ``#5`` and ``b7`` are accidentals. A bar may
+leave either side empty. A ``#`` at the start of a line, or after a space
+and not followed by a note name or degree, opens a comment (so ``D/#F``
+and ``#5`` are not comments).
 
 The sounding pitches follow the sheet's convention: the melody degrees are
 in the ``key`` (what is sung), the chord shapes sound ``capo`` semitones
@@ -39,6 +41,9 @@ from opencapo.model import ChordQuality, Mode
 
 PITCH = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 MAJOR_DEGREES = (0, 2, 4, 5, 7, 9, 11)  # 简谱 1-7 in a major key
+# A comment opens at a "#" starting the line or following a space, unless
+# the "#" spells a sharp (D/#F in a chord, #5 in a melody).
+COMMENT = re.compile(r"(?:^|(?<=\s))#(?![A-G1-7])")
 QUALITIES: dict[str, ChordQuality] = {
     "": ChordQuality.MAJ,
     "maj": ChordQuality.MAJ,
@@ -83,6 +88,7 @@ class NoteSpan:
     octave: int  # 0 = the sheet's plain digits, +1 per ', -1 per ,
     beats: Fraction
     tied: bool = False  # continues the previous bar's last note (a '-' opening the bar)
+    accidental: int = 0  # +1 for #, -1 for b, written before the digit
 
 
 @dataclass(frozen=True)
@@ -216,14 +222,17 @@ def parse_melody(text: str, beats_per_bar: int) -> tuple[NoteSpan, ...]:
                 spans.append(NoteSpan(None, 0, beats, tied=True))
                 continue
             last = spans[-1]
-            spans[-1] = NoteSpan(last.degree, last.octave, last.beats + beats, last.tied)
+            spans[-1] = NoteSpan(
+                last.degree, last.octave, last.beats + beats, last.tied, last.accidental
+            )
             continue
-        match = re.fullmatch(r"([0-7])('*)(,*)", token)
-        if not match:
+        match = re.fullmatch(r"([#b]?)([0-7])('*)(,*)", token)
+        if not match or (match.group(1) and match.group(2) == "0"):
             raise SheetError(f"not a 简谱 token: {token!r} in {text!r}")
-        digit, up, down = match.groups()
+        sign, digit, up, down = match.groups()
         degree = None if digit == "0" else int(digit)
-        spans.append(NoteSpan(degree, len(up) - len(down), beats))
+        accidental = {"#": 1, "b": -1}.get(sign, 0)
+        spans.append(NoteSpan(degree, len(up) - len(down), beats, accidental=accidental))
     return tuple(spans)
 
 
@@ -232,7 +241,7 @@ def parse_sheet(text: str, *, source: str = "") -> Sheet:
     body: list[str] = []
     in_body = False
     for raw in text.splitlines():
-        line = raw.split("#", 1)[0].rstrip()
+        line = COMMENT.split(raw, 1)[0].rstrip()
         if not line.strip():
             continue
         if line.strip() == "---":
@@ -266,7 +275,16 @@ def parse_sheet(text: str, *, source: str = "") -> Sheet:
             previous = bars[-1].notes[-1] if bars and bars[-1].notes else None
             if previous is None:
                 raise SheetError(f"'-' opens a bar with nothing to tie to: {line!r}")
-            notes = (NoteSpan(previous.degree, previous.octave, notes[0].beats, True), *notes[1:])
+            notes = (
+                NoteSpan(
+                    previous.degree,
+                    previous.octave,
+                    notes[0].beats,
+                    True,
+                    previous.accidental,
+                ),
+                *notes[1:],
+            )
         bars.append(Bar(parse_chords(chords_text, beats_per_bar), notes))
     if not bars:
         raise SheetError("no bars")
@@ -291,4 +309,4 @@ def degree_midi(sheet: Sheet, note: NoteSpan, base_octave: int = 4) -> int | Non
     if note.degree is None:
         return None
     tonic = 12 * (base_octave + 1) + sheet.key
-    return tonic + MAJOR_DEGREES[note.degree - 1] + 12 * note.octave
+    return tonic + MAJOR_DEGREES[note.degree - 1] + 12 * note.octave + note.accidental

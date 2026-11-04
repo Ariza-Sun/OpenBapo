@@ -55,6 +55,34 @@ def test_parse_chord_name(text: str, expected: tuple) -> None:  # type: ignore[t
     assert parse_chord_name(text) == expected
 
 
+def test_sharps_are_not_comments_and_melodies_take_accidentals() -> None:
+    sheet = parse_sheet(
+        "key: C  # the sung key\n---\n# a comment line\nD/#F | [#5 1'] b7 - 0 # trailing\n"
+    )
+    bar = sheet.bars[0]
+    assert (bar.chords[0].root, bar.chords[0].bass) == (2, 6)
+    assert [(n.degree, n.octave, n.accidental) for n in bar.notes] == [
+        (5, 0, 1),
+        (1, 1, 0),
+        (7, 0, -1),
+        (None, 0, 0),
+    ]
+    assert [degree_midi(sheet, n) for n in bar.notes[:3]] == [68, 72, 70]  # #5, 1', b7 in C
+    with pytest.raises(SheetError, match="简谱 token"):
+        parse_melody("#0 - - -", 4)
+    held = parse_sheet("key: C\n---\nC | 1 1 1 #4\nC | - 1 1 1\n")
+    assert held.bars[1].notes[0].accidental == 1  # the tie keeps the sharp
+
+
+def test_counted_and_uncounted_chords_may_mix() -> None:
+    spans = parse_chords("Bm(2) F", 4)
+    assert [(s.root, float(s.beats)) for s in spans] == [(11, 2.0), (5, 2.0)]
+    spans = parse_chords("C(1) G Am", 4)
+    assert [float(s.beats) for s in spans] == [1.0, 1.5, 1.5]
+    with pytest.raises(SheetError, match="no beats left"):
+        parse_chords("C(4) G", 4)
+
+
 def test_chord_and_melody_splitting() -> None:
     assert [c.beats for c in parse_chords("C F G Am", 4)] == [1, 1, 1, 1]
     assert [c.beats for c in parse_chords("C(3) G(1)", 4)] == [3, 1]
