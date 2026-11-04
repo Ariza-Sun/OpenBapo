@@ -4,9 +4,14 @@ The deterministic parts (layout, checks, assembly) live in `layout` and
 `omr`; this module runs the loop around them. The reading of each crop is
 done by the Claude Code command-line tool in headless mode (`claude -p`),
 which reads the image with its own Read tool under the user's own login,
-so no API key is involved. Batches of bars run in parallel; bars that fail
-the checks are cropped larger and read again on their own; what still
-fails is listed for review.
+so no API key is involved.
+
+Octave dots and sixteenth groupings are the misreads the checks cannot
+see (the bar still fills its beats), so every bar is read twice, in
+differently cut batches of enlarged crops, and the two readings are
+compared note by note. Bars where they differ, or that fail a check, get
+a third reading on their own from a crop three times the size; the third
+reading settles it, and a bar none of the three agree on goes to review.
 
 The runner is injectable so the loop can be tested without a model.
 """
@@ -36,9 +41,10 @@ from opencapo.sheet.omr import (
 Runner = Callable[[str], str]  # prompt -> model reply (text)
 
 DEFAULT_MODEL = "claude-opus-5-5"
-BATCH_SIZE = 10
-PARALLEL = 3
-ZOOM = 2  # magnification for the second reading of a doubtful bar
+BATCH_SIZE = 5
+PARALLEL = 4
+ZOOM = 2  # magnification of the crops for the two full passes
+ZOOM_AGAIN = 3  # ... and for the deciding reading of a disputed bar
 
 
 def claude_runner(model: str = DEFAULT_MODEL, timeout: float = 900.0) -> Runner:
@@ -119,10 +125,24 @@ def parse_batch(reply: str, expected: Sequence[int]) -> dict[int, BarReading]:
 def zoomed(path: Path, factor: int = ZOOM) -> Path:
     from PIL import Image
 
-    image = Image.open(path)
     out = path.with_name(path.stem + f"-x{factor}.png")
-    image.resize((image.width * factor, image.height * factor), Image.Resampling.LANCZOS).save(out)
+    if not out.exists():
+        image = Image.open(path)
+        size = (image.width * factor, image.height * factor)
+        image.resize(size, Image.Resampling.LANCZOS).save(out)
     return out
+
+
+def same_reading(a: BarReading, b: BarReading, beats_per_bar: int) -> bool:
+    """Equal as music (parsed chords and notes), not as text."""
+    from opencapo.sheet.format import SheetError, parse_chords, parse_melody
+
+    try:
+        return parse_chords(a.chords, beats_per_bar) == parse_chords(b.chords, beats_per_bar) and (
+            parse_melody(a.melody, beats_per_bar) == parse_melody(b.melody, beats_per_bar)
+        )
+    except SheetError:
+        return a.chords == b.chords and a.melody == b.melody
 
 
 @dataclass
@@ -130,7 +150,8 @@ class ReadResult:
     sheet_path: Path
     readings: list[BarReading]
     problems: list[Check]
-    reread: list[int] = field(default_factory=list)
+    reread: list[int] = field(default_factory=list)  # bars that needed the deciding reading
+    unsettled: list[int] = field(default_factory=list)  # ... and still had no two readings agree
     seconds: float = 0.0
     header: dict[str, object] = field(default_factory=dict)
 
@@ -146,7 +167,7 @@ def read_sheet(
     retries: int = 1,
     log: Callable[[str], None] = print,
 ) -> ReadResult:
-    """Layout -> read bars in batches -> check -> re-read doubtful bars -> assemble."""
+    """Layout -> two readings of every bar -> checks -> deciding reading of disputes -> assemble."""
     started = time.perf_counter()
     out_dir.mkdir(parents=True, exist_ok=True)
     sheet = worksheet(source, out_dir)
@@ -163,10 +184,10 @@ def read_sheet(
     log(f"header: {header}")
 
     indices = sorted(crops)
-    batches = [indices[i : i + batch_size] for i in range(0, len(indices), batch_size)]
+    enlarged = {i: str(zoomed(Path(crops[i]), ZOOM)) for i in indices}
 
-    def read_batch(batch: list[int]) -> dict[int, BarReading]:
-        items = [(i, crops[i]) for i in batch]
+    def read_batch(batch: list[int], paths: dict[int, str]) -> dict[int, BarReading]:
+        items = [(i, paths[i]) for i in batch]
         last: Exception | None = None
         for _ in range(retries + 1):
             try:
@@ -175,29 +196,60 @@ def read_sheet(
                 last = e
         raise RuntimeError(f"batch {batch[0]}-{batch[-1]} unreadable: {last}")
 
-    readings: dict[int, BarReading] = {}
-    with ThreadPoolExecutor(max_workers=max(1, parallel)) as pool:
-        for batch_readings in pool.map(read_batch, batches):
-            readings.update(batch_readings)
-    for index, r in readings.items():
-        r.crop = crops[index]
-    ordered = [readings[i] for i in indices]
-    log(f"read {len(ordered)} bars in {time.perf_counter() - started:.0f} s")
+    # Two full passes with the batch boundaries shifted, so no bar shares both
+    # of its contexts with the same neighbours.
+    passes: list[dict[int, BarReading]] = []
+    for offset in (0, batch_size // 2):
+        head = indices[:offset]
+        rest = indices[offset:]
+        batches = ([head] if head else []) + [
+            rest[i : i + batch_size] for i in range(0, len(rest), batch_size)
+        ]
+        readings: dict[int, BarReading] = {}
+        with ThreadPoolExecutor(max_workers=max(1, parallel)) as pool:
+            for batch_readings in pool.map(lambda b: read_batch(b, enlarged), batches):
+                readings.update(batch_readings)
+        passes.append(readings)
+    first, second = passes
+    log(f"two readings of {len(indices)} bars in {time.perf_counter() - started:.0f} s")
 
-    # Second look, one bar at a time and twice the size, for bars that fail a check.
-    doubtful = sorted({c.index for c in check_readings(ordered, beats_per_bar) if c.index >= 0})
+    disputed = [i for i in indices if not same_reading(first[i], second[i], beats_per_bar)]
+    failing = {
+        c.index
+        for r in (first, second)
+        for c in check_readings([r[i] for i in indices], beats_per_bar)
+        if c.index >= 0
+    }
+    doubtful = sorted(set(disputed) | failing)
+    chosen: dict[int, BarReading] = dict(first)
+    unsettled: list[int] = []
     for index in doubtful:
-        big = zoomed(Path(crops[index]))
+        big = {index: str(zoomed(Path(crops[index]), ZOOM_AGAIN))}
         try:
-            again = parse_batch(runner(batch_prompt([(index, str(big))])), [index])
-        except (ValueError, RuntimeError) as e:
-            log(f"bar {index}: second reading failed ({e})")
+            third = read_batch([index], big)[index]
+        except RuntimeError as e:
+            log(f"bar {index}: deciding reading failed ({e})")
+            unsettled.append(index)
             continue
-        again[index].crop = crops[index]
-        readings[index] = again[index]
-    ordered = [readings[i] for i in indices]
+        chosen[index] = third
+        valid_before = [
+            r for r in (first[index], second[index]) if not check_readings([r], beats_per_bar)
+        ]
+        third_valid = not check_readings([third], beats_per_bar)
+        agrees = [r for r in valid_before if same_reading(r, third, beats_per_bar)]
+        # The third reading settles a dispute when it matches one of the two
+        # valid readings, or when the earlier ones were invalid and it is not.
+        if not third_valid or (valid_before and not agrees):
+            unsettled.append(index)
+            third.notes = (
+                f"三次读法不一致：{first[index].melody!r} / {second[index].melody!r} / "
+                f"{third.melody!r}。" + third.notes
+            )
+    for index, r in chosen.items():
+        r.crop = crops[index]
+    ordered = [chosen[i] for i in indices]
     if doubtful:
-        log(f"re-read {len(doubtful)} bars: {doubtful}")
+        log(f"deciding reading for {len(doubtful)} bars: {doubtful}; unsettled: {unsettled}")
 
     header_text = {
         "title": str(header.get("title", source.stem)),
@@ -213,10 +265,13 @@ def read_sheet(
     (out_dir / "readings.json").write_text(
         json.dumps([r.__dict__ for r in ordered], ensure_ascii=False, indent=1), encoding="utf-8"
     )
-    write_review(out_dir / "review.md", built.problems, ordered)
+    problems = built.problems + [
+        Check(i, "三次读法不一致，见 readings.json 的 notes") for i in unsettled
+    ]
+    write_review(out_dir / "review.md", problems, ordered)
     seconds = time.perf_counter() - started
-    log(f"{sheet_path}: {len(ordered)} bars, {len(built.problems)} to review, {seconds:.0f} s")
-    return ReadResult(sheet_path, ordered, built.problems, doubtful, seconds, header)
+    log(f"{sheet_path}: {len(ordered)} bars, {len(problems)} to review, {seconds:.0f} s")
+    return ReadResult(sheet_path, ordered, problems, doubtful, unsettled, seconds, header)
 
 
 def safe_stem(text: str) -> str:
