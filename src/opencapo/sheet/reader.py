@@ -180,7 +180,7 @@ def read_sheet(
     header_json = extract_json(runner(header_prompt(str(pages[0]["header_crop"]))), "object")
     header: dict[str, object] = dict(header_json) if isinstance(header_json, dict) else {}
     (out_dir / "header.json").write_text(json.dumps(header, ensure_ascii=False), encoding="utf-8")
-    beats_per_bar = int(str(header.get("time", "4/4")).split("/")[0])
+    beats_per_bar = int(str(header.get("time") or "4/4").split("/")[0])  # unprinted: assume 4/4
     log(f"header: {header}")
 
     indices = sorted(crops)
@@ -257,7 +257,7 @@ def read_sheet(
         "mode": "major",
         "capo": str(header.get("capo") or 0),
         "bpm": f"{bpm if bpm is not None else float(str(header.get('bpm') or 90)):g}",
-        "time": str(header.get("time", "4/4")),
+        "time": str(header.get("time") or "4/4"),
     }
     built = assemble(header_text, ordered, beats_per_bar)
     sheet_path = out_dir / f"{source.stem}.sheet"
