@@ -281,6 +281,12 @@ def assemble(header: dict[str, str], readings: list[BarReading], beats_per_bar: 
         chords = r.chords or last_chords
         last_chords = chords
         melody = r.melody
+        try:
+            parse_melody(melody, beats_per_bar)
+        except SheetError:
+            # Keep the bar's chords (what step 2 is scored on) and leave the
+            # unreadable melody out of the sheet; the check lists the bar.
+            melody = ""
         lines.append(f"{chords:<10} | {melody}" if melody else chords)
     text = "\n".join(lines) + "\n"
     problems = check_readings(readings, beats_per_bar) + repeated_passage_mismatches(readings)

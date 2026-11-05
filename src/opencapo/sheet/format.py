@@ -66,6 +66,7 @@ QUALITIES: dict[str, ChordQuality] = {
     "+": ChordQuality.AUG,
     "dim7": ChordQuality.DIM7,
     "m7b5": ChordQuality.HDIM7,
+    "m7-5": ChordQuality.HDIM7,
     "hdim7": ChordQuality.HDIM7,
     # Chinese sheets write a minor chord with a raised fifth as "m/5+" or
     # "m+5" (E G C, a passing chord); at the triad level it is scored as
@@ -216,10 +217,15 @@ def parse_chords(text: str, beats_per_bar: int) -> tuple[ChordSpan, ...]:
     uncounted = sum(1 for m in explicit if not m)
     if uncounted and counted >= beats_per_bar:
         raise SheetError(f"counted chords fill the bar, no beats left for the rest: {text!r}")
+    scale = Fraction(1)
+    if not uncounted and 0 < counted < beats_per_bar:
+        # "C(1) G(1)" in a 4/4 bar: the counts give the proportions of a bar
+        # the reader saw split, not a bar left half empty.
+        scale = beats_per_bar / counted
     spans = []
     for token, match in zip(tokens, explicit, strict=True):
         if match:
-            name, count = match.group(1), Fraction(match.group(2))
+            name, count = match.group(1), Fraction(match.group(2)) * scale
         else:
             name, count = token, (beats_per_bar - counted) / uncounted
         root, quality, bass = parse_chord_name(name)

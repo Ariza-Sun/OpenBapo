@@ -154,3 +154,14 @@ def test_split_bars_are_joined_and_a_pickup_is_padded() -> None:
     # a short bar inside a row, or not completed by the next row, is left for the checks
     bars = [omr.BarReading(0, "C", "1 2 3 4", row=0), omr.BarReading(1, "C", "1 2", row=0)]
     assert [b.melody for b in omr.join_split_bars(bars, 4)] == ["1 2 3 4", "1 2"]
+
+
+def test_an_unreadable_melody_keeps_the_bar_chords() -> None:
+    header = {"title": "t", "key": "C", "mode": "major", "capo": "0", "bpm": "90", "time": "4/4"}
+    bars = [
+        omr.BarReading(0, "C", "1 2 3 4", row=0),
+        omr.BarReading(1, "G", "1 1 / 2 2", row=0),  # two alternatives written in one bar
+    ]
+    result = omr.assemble(header, bars, 4)
+    assert "\nG\n" in result.text  # chords only, the sheet still parses
+    assert [p.index for p in result.problems] == [1] and "melody" in result.problems[0].problem
