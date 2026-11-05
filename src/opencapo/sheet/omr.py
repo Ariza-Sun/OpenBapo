@@ -272,6 +272,8 @@ def assemble(header: dict[str, str], readings: list[BarReading], beats_per_bar: 
     (`join_split_bars`); the readings list is updated in place.
     """
     readings[:] = join_split_bars(readings, beats_per_bar)
+    for r in readings:  # readings written by an earlier join carried two counts: the last wins
+        r.chords = re.sub(r"\(\d+(?:\.\d+)?\)(?=\()", "", r.chords)
     lines = [f"{k}: {v}" for k, v in header.items() if v != ""]
     lines.append("---")
     last_chords = ""

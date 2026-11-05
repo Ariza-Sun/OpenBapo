@@ -149,6 +149,8 @@ def test_split_bars_are_joined_and_a_pickup_is_padded() -> None:
     header = {"title": "t", "key": "C", "mode": "major", "capo": "0", "bpm": "90", "time": "4/4"}
     result = omr.assemble(header, bars, 4)
     assert result.problems == [] and len(bars) == 5 and "F(2) G(2)  | 4 - 2 2" in result.text
+    stale = [omr.BarReading(0, "G(3)(2) Bm7(2)", "1 1 1 1", row=0)]
+    assert "G(2) Bm7(2)" in omr.assemble(header, stale, 4).text
     # a short bar inside a row, or not completed by the next row, is left for the checks
     bars = [omr.BarReading(0, "C", "1 2 3 4", row=0), omr.BarReading(1, "C", "1 2", row=0)]
     assert [b.melody for b in omr.join_split_bars(bars, 4)] == ["1 2 3 4", "1 2"]
