@@ -57,6 +57,8 @@ def test_parse_example_sheet() -> None:
         ("G6/9", (7, ChordQuality.MAJ6, None)),
         ("G6/9/B", (7, ChordQuality.MAJ6, 11)),
         ("D7sus4", (2, ChordQuality.SUS4, None)),
+        ("Fm7sus2", (5, ChordQuality.SUS2, None)),
+        ("G7add13", (7, ChordQuality.DOM7, None)),
     ],
 )
 def test_parse_chord_name(text: str, expected: tuple) -> None:  # type: ignore[type-arg]
@@ -89,6 +91,8 @@ def test_counted_and_uncounted_chords_may_mix() -> None:
     assert [float(s.beats) for s in spans] == [1.0, 1.5, 1.5]
     with pytest.raises(SheetError, match="no beats left"):
         parse_chords("C(4) G", 4)
+    assert [float(s.beats) for s in parse_chords("D(2)", 4)] == [4.0]  # a lone count fills the bar
+    assert [n.degree for n in parse_melody("1 X [X X] 0", 4)] == [1, None, None, None, None]
 
 
 def test_chord_and_melody_splitting() -> None:

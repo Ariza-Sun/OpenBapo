@@ -50,6 +50,9 @@ def main(argv: list[str] | None = None) -> int:
     read.add_argument("--batch", type=int, default=10, help="bars per model call")
     read.add_argument("--parallel", type=int, default=3)
     read.add_argument("--render", action="store_true", help="also write the WAV and reference")
+    read.add_argument(
+        "--skip-done", action="store_true", help="skip sources whose .sheet already exists in --out"
+    )
     prepare = commands.add_parser("prepare")
     prepare.add_argument("source", type=Path)
     prepare.add_argument("--out", type=Path, required=True)
@@ -96,6 +99,8 @@ def main(argv: list[str] | None = None) -> int:
         failures = 0
         for source in args.sources:
             work = args.out / source.stem
+            if args.skip_done and (work / f"{source.stem}.sheet").exists():
+                continue
             try:
                 result = read_sheet(
                     source, work, runner=runner, bpm=args.bpm,

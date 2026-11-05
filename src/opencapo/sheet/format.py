@@ -107,6 +107,16 @@ QUALITIES: dict[str, ChordQuality] = {
     "7b5": ChordQuality.DOM7,
     "maj7#11": ChordQuality.MAJ7,
     "aug7": ChordQuality.DOM7,
+    "add11": ChordQuality.MAJ,
+    "add13": ChordQuality.MAJ,
+    "7add11": ChordQuality.DOM7,
+    "7add13": ChordQuality.DOM7,
+    "m7sus2": ChordQuality.SUS2,
+    "m7sus4": ChordQuality.SUS4,
+    "msus2": ChordQuality.SUS2,
+    "msus4": ChordQuality.SUS4,
+    "maj7sus2": ChordQuality.SUS2,
+    "maj9sus4": ChordQuality.SUS4,
     "+7": ChordQuality.DOM7,
 }
 
@@ -197,6 +207,11 @@ def parse_chords(text: str, beats_per_bar: int) -> tuple[ChordSpan, ...]:
     if not tokens:
         return ()
     explicit = [re.fullmatch(r"(.+)\((\d+(?:\.\d+)?)\)", t) for t in tokens]
+    if len(tokens) == 1 and explicit[0]:
+        # A lone chord with a beat count fills the bar whatever the count says
+        # (readers write "D(2)" for a chord struck on beat 2, or the count of
+        # a partial bar); there is nothing else the remaining beats could be.
+        tokens, explicit = [explicit[0].group(1)], [None]
     counted = sum((Fraction(m.group(2)) for m in explicit if m), Fraction(0))
     uncounted = sum(1 for m in explicit if not m)
     if uncounted and counted >= beats_per_bar:
@@ -267,11 +282,11 @@ def parse_melody(text: str, beats_per_bar: int) -> tuple[NoteSpan, ...]:
                 last.degree, last.octave, last.beats + beats, last.tied, last.accidental
             )
             continue
-        match = re.fullmatch(r"([#b]?)([0-7])('*)(,*)", token)
-        if not match or (match.group(1) and match.group(2) == "0"):
+        match = re.fullmatch(r"([#b]?)([0-7Xx])('*)(,*)", token)
+        if not match or (match.group(1) and match.group(2) in "0Xx"):
             raise SheetError(f"not a 简谱 token: {token!r} in {text!r}")
         sign, digit, up, down = match.groups()
-        degree = None if digit == "0" else int(digit)
+        degree = None if digit in "0Xx" else int(digit)  # X: spoken / unpitched, a rest here
         accidental = {"#": 1, "b": -1}.get(sign, 0)
         spans.append(NoteSpan(degree, len(up) - len(down), beats, accidental=accidental))
     return tuple(spans)

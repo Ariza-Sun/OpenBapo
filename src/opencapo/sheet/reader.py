@@ -23,6 +23,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 import time
 from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor
@@ -52,30 +53,47 @@ ZOOM_AGAIN = 3  # ... and for the deciding reading of a disputed row
 RowReading = list[BarReading]
 
 
-def claude_runner(model: str = DEFAULT_MODEL, timeout: float = 900.0) -> Runner:
-    """A runner that calls `claude -p` with the Read tool allowed."""
+BACKOFF = (30.0, 120.0, 300.0)  # seconds between attempts when `claude -p` itself fails
+
+
+def claude_runner(
+    model: str = DEFAULT_MODEL, timeout: float = 900.0, backoff: Sequence[float] = BACKOFF
+) -> Runner:
+    """A runner that calls `claude -p` with the Read tool allowed.
+
+    A non-zero exit (a usage limit, a dropped connection) is retried after
+    growing pauses before giving up: a whole batch failing on a transient
+    outage costs hours of re-reading.
+    """
 
     def run(prompt: str) -> str:
-        result = subprocess.run(
-            [
-                "claude",
-                "-p",
-                "--model",
-                model,
-                "--allowedTools",
-                "Read",
-                "--output-format",
-                "text",
-                prompt,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            check=False,
-        )
-        if result.returncode != 0:
-            raise RuntimeError(f"claude -p failed ({result.returncode}): {result.stderr[-500:]}")
-        return result.stdout
+        last = ""
+        for attempt, pause in enumerate((*backoff, None)):
+            result = subprocess.run(
+                [
+                    "claude",
+                    "-p",
+                    "--model",
+                    model,
+                    "--allowedTools",
+                    "Read",
+                    "--output-format",
+                    "text",
+                    prompt,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+            if result.returncode == 0:
+                return result.stdout
+            last = f"claude -p failed ({result.returncode}): {result.stderr[-500:]}"
+            if pause is None:
+                break
+            print(f"{last}; retry {attempt + 1} in {pause:.0f} s", file=sys.stderr)
+            time.sleep(pause)
+        raise RuntimeError(last)
 
     return run
 

@@ -174,3 +174,24 @@ def test_read_sheet_needs_a_system(tmp_path: Path) -> None:
     Image.new("L", (1200, 1600), 255).save(page)
     with pytest.raises(RuntimeError, match="no systems"):
         reader.read_sheet(page, tmp_path / "work", runner=lambda _: "{}", log=lambda _: None)
+
+
+def test_claude_runner_retries_transient_failures(monkeypatch: pytest.MonkeyPatch) -> None:
+    import subprocess
+
+    outcomes = iter([1, 1, 0])
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        calls.append(cmd)
+        code = next(outcomes)
+        return subprocess.CompletedProcess(cmd, code, stdout="ok" if code == 0 else "", stderr="x")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    sleeps: list[float] = []
+    monkeypatch.setattr(reader.time, "sleep", sleeps.append)
+    assert reader.claude_runner(backoff=(1.0, 2.0))("p") == "ok"
+    assert len(calls) == 3 and sleeps == [1.0, 2.0]
+    outcomes = iter([1, 1, 1])
+    with pytest.raises(RuntimeError, match="claude -p failed"):
+        reader.claude_runner(backoff=(1.0, 2.0))("p")
