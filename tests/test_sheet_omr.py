@@ -135,7 +135,7 @@ def test_split_bars_are_joined_and_a_pickup_is_padded() -> None:
         omr.BarReading(2, "G", "5 5", row=0),  # cut by the line break ...
         omr.BarReading(3, "", "6 6", row=1),  # ... and finished on the next row
         omr.BarReading(4, "F", "4 -", row=1),
-        omr.BarReading(5, "G", "2 2", row=2),  # both halves carry a chord
+        omr.BarReading(5, "G(2)", "2 2", row=2),  # both halves carry a chord (one with a count)
         omr.BarReading(6, "C", "1 1 1 1", row=2),
     ]
     joined = omr.join_split_bars(bars, 4)

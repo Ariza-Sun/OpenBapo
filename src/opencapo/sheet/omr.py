@@ -20,6 +20,7 @@ own; what still fails is listed for review.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from fractions import Fraction
 from pathlib import Path
@@ -211,6 +212,11 @@ def beat_items(melody: str) -> int:
         return 0
 
 
+def uncounted(chords: str) -> str:
+    """Chord text without beat counts: ``G(3)`` -> ``G`` (a lone count means the whole bar)."""
+    return re.sub(r"\((\d+(?:\.\d+)?)\)", "", chords).strip()
+
+
 def join_split_bars(readings: list[BarReading], beats_per_bar: int) -> list[BarReading]:
     """Printed bars that a line break cut in two become one; a short first bar is a pickup.
 
@@ -228,8 +234,9 @@ def join_split_bars(readings: list[BarReading], beats_per_bar: int) -> list[BarR
             before = beat_items(previous.melody)
             if 0 < before < beats_per_bar and before + items == beats_per_bar:
                 chords = previous.chords
-                if r.chords and previous.chords and " " not in previous.chords + r.chords:
-                    chords = f"{previous.chords}({before}) {r.chords}({items})"
+                first, second = (uncounted(previous.chords), uncounted(r.chords))
+                if first and second and " " not in first + second:
+                    chords = f"{first}({before}) {second}({items})"
                 elif r.chords and not previous.chords:
                     chords = r.chords
                 out[-1] = BarReading(
