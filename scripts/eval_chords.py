@@ -524,14 +524,29 @@ def key_scores(
 
     est = None if estimate is None else key_name(estimate)
     if reference is None:
-        return {"key_exact": float("nan"), "key_weighted": float("nan"), "key_est": est}
+        return {
+            "key_exact": float("nan"),
+            "key_tonal": float("nan"),
+            "key_weighted": float("nan"),
+            "key_est": est,
+        }
     ref = key_name(reference)
     if estimate is None:
-        return {"key_exact": 0.0, "key_weighted": 0.0, "key_ref": ref, "key_relation": "none"}
+        return {
+            "key_exact": 0.0,
+            "key_tonal": 0.0,
+            "key_weighted": 0.0,
+            "key_ref": ref,
+            "key_relation": "none",
+        }
     weighted = float(mir_eval.key.weighted_score(ref, est))
     relation = KEY_RELATIONS.get(round(weighted, 1), "other")
     return {
         "key_exact": float(reference == estimate),
+        # The sung key's tonal centre: a sheet's "1=X" names the major key of
+        # the notes in use even for a song in the relative minor, so for the
+        # song book the relative key counts as correct (decision 16).
+        "key_tonal": float(reference == estimate or relation == "relative"),
         "key_weighted": weighted,
         "key_ref": ref,
         "key_est": est,
@@ -804,7 +819,7 @@ def summarize(system: dict) -> dict:
             continue
         summary[subset] = {
             m: mean_of(subset_rows, m)
-            for m in (*CHORD_METRICS, "key_exact", "key_weighted", "seconds")
+            for m in (*CHORD_METRICS, "key_exact", "key_tonal", "key_weighted", "seconds")
         }
         if any(not np.isnan(r.get("majmin_performed", float("nan"))) for r in subset_rows):
             summary[subset]["majmin_performed"] = mean_of(subset_rows, "majmin_performed")
@@ -906,8 +921,12 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
         "拍网格来自数据集自带的拍点标注；分轨来自 Demucs（低音线用）。"
         "指标：mir_eval `chord`（按时长加权）与调性精确匹配。"
         f"验收门槛：负责人曲库谱子渲染的样本集（曲库合成）上 majmin ≥ {ACCEPTANCE_MAJMIN:.0%}、"
-        f"调性 ≥ {ACCEPTANCE_KEY:.0%}（`docs/plans/step-2.md` 决定 11）；合成音频没有人声和混音，"
-        "分数是真录音的上限。GuitarSet 与 AAM 作公开数据集参考（决定 7、8：GuitarSet 只看伴奏曲目，"
+        f"调性主音 ≥ {ACCEPTANCE_KEY:.0%}（`docs/plans/step-2.md` 决定 11、16）；"
+        "合成音频没有人声和混音，分数是真录音的上限。"
+        '"调性精确"要求大小调都对；"调性主音"把关系大小调也算对：'
+        "谱子的 1=X 只写音级所在的大调，不区分大小调，曲库一组按它验收，"
+        "公开数据集按精确匹配参考。"
+        "GuitarSet 与 AAM 作公开数据集参考（决定 7、8：GuitarSet 只看伴奏曲目，"
         "独奏曲目是单音旋律；AAM 的调性只看全曲单一调性的曲目，转调曲目另报命中率）。"
         "调参只用 GuitarSet 吉他手 00–02。",
         "",
@@ -933,14 +952,20 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
             f"## {title}",
             "",
             "| 系统 | majmin | sevenths | majmin_inv | sevenths_inv | root "
-            "| 调性精确 | 调性加权 | 每曲耗时 | 验收 |",
-            "|---|---|---|---|---|---|---|---|---|---|",
+            "| 调性精确 | 调性主音 | 调性加权 | 每曲耗时 | 验收 |",
+            "|---|---|---|---|---|---|---|---|---|---|---|",
         ]
         for s in systems:
             if subset not in s["summary"]:
                 continue
             m = s["summary"][subset]
-            gated_key = m.get("key_exact_single_key", m["key_exact"])
+            # The song book is gated on the tonal centre (relative keys count,
+            # decision 16); the public sets on the exact key of single-key pieces.
+            gated_key = (
+                m["key_tonal"]
+                if subset == "sheets"
+                else m.get("key_exact_single_key", m["key_exact"])
+            )
             verdict = (
                 "自检"
                 if s["system"] == "annotations"
@@ -956,7 +981,7 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
                 verdict = "参考"
             cells = [
                 s["system"],
-                *(fmt(m[k]) for k in (*CHORD_METRICS, "key_exact", "key_weighted")),
+                *(fmt(m[k]) for k in (*CHORD_METRICS, "key_exact", "key_tonal", "key_weighted")),
                 f"{m['seconds']:.2f} s",
                 verdict,
             ]
@@ -989,7 +1014,8 @@ def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
                 str(info.get("bars", "—")),
                 str(info.get("to_review", "—")),
                 *(fmt(r[k]) for k in ("majmin", "sevenths", "root")),
-                f"{r.get('key_ref', '—')} / {r.get('key_est', '—')}",
+                f"{r.get('key_ref', '—')} / {r.get('key_est', '—')}"
+                + ("（关系调）" if r.get("key_relation") == "relative" else ""),
                 f"{r['seconds']:.2f} s",
             ]
             lines.append("| " + " | ".join(cells) + " |")
@@ -1241,7 +1267,7 @@ def main(argv: list[str] | None = None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "environment": env,
-        "acceptance": {"majmin": ACCEPTANCE_MAJMIN, "key_exact": ACCEPTANCE_KEY},
+        "acceptance": {"majmin": ACCEPTANCE_MAJMIN, "key_tonal": ACCEPTANCE_KEY},
         "tracks": {
             "guitarset": sum(t.dataset == "guitarset" for t in tracks),
             "aam": sum(t.dataset == "aam" for t in tracks),

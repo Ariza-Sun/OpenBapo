@@ -251,6 +251,7 @@ def test_chord_scores_self_check_and_gaps() -> None:
 def test_key_scores() -> None:
     assert eval_chords.key_scores((0, "major"), (0, "major")) == {
         "key_exact": 1.0,
+        "key_tonal": 1.0,
         "key_weighted": 1.0,
         "key_ref": "C major",
         "key_est": "C major",
@@ -258,6 +259,7 @@ def test_key_scores() -> None:
     }
     relative = eval_chords.key_scores((0, "major"), (9, "minor"))
     assert relative["key_exact"] == 0.0 and 0.0 < relative["key_weighted"] < 1.0
+    assert relative["key_tonal"] == 1.0  # the relative key shares the tonal centre
     assert relative["key_relation"] == "relative"
     assert relative["key_ref"] == "C major" and relative["key_est"] == "A minor"
     assert eval_chords.key_scores((0, "major"), (7, "major"))["key_relation"] == "fifth"
@@ -284,6 +286,7 @@ def test_summarize_splits_by_dataset_and_group() -> None:
             "sevenths_inv": 0.7,
             "root": 0.9,
             "key_exact": 1.0,
+            "key_tonal": 1.0,
             "key_weighted": 1.0,
             "seconds": 1.0,
         },
@@ -298,6 +301,7 @@ def test_summarize_splits_by_dataset_and_group() -> None:
             "sevenths_inv": 0.5,
             "root": 0.7,
             "key_exact": 0.0,
+            "key_tonal": 0.0,
             "key_weighted": 0.5,
             "seconds": 2.0,
         },
@@ -312,6 +316,7 @@ def test_summarize_splits_by_dataset_and_group() -> None:
             "sevenths_inv": 0.9,
             "root": 0.9,
             "key_exact": 1.0,
+            "key_tonal": 1.0,
             "key_weighted": 1.0,
             "seconds": 3.0,
         },
@@ -371,9 +376,8 @@ def test_summarize_splits_by_dataset_and_group() -> None:
     assert "对实奏和弦" in text and "| committee (tuned) | 0.900 | 1.000 |" in text
     assert "| 2.00 s | 参考 |" in text  # the solo-only and mixed GuitarSet rows are reference
     assert "| 3.00 s | 参考 |" in text  # public datasets are reference since decision 11
-    solo_row = (
-        "| committee (tuned) | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.500 | 2.00 s"
-    )
+    solo_row = "| committee (tuned) | 0.600 | 0.500 | 0.600 | 0.500 | 0.700 | 0.000 | 0.000"
+    solo_row += " | 0.500 | 2.00 s"
     assert "仅独奏" in text and solo_row + " | 参考 |" in text
 
 

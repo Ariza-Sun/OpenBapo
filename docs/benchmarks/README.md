@@ -66,7 +66,7 @@
    python scripts/analyze_chords.py --sheets /data/sheets --cache /data/eval-cache --subset sheets
    ```
 
-   评测只读样本集目录里的 `manifest.json`：清单由目录里现有的文件重建（每首 `.sheet` + `.wav` + `.json`，识谱产出附带 `readings.json` / `review.md`），记录格式版本、生成时间、代码提交号、渲染参数，以及每首的头部信息、来源（识谱 / 人工录入）和待复核小节数；缺文件的首列为 incomplete，不计分。报表里这一组是验收依据（`docs/plans/step-2.md` 决定 11），并逐首列出；合成音频和弦干净、没有人声，分数是真录音的上限而非估计。你录入的歌谱和渲染结果都不要提交，仓库只保留公有领域的示例曲。
+   评测只读样本集目录里的 `manifest.json`：清单由目录里现有的文件重建（每首 `.sheet` + `.wav` + `.json`，识谱产出附带 `readings.json` / `review.md`），记录格式版本、生成时间、代码提交号、渲染参数，以及每首的头部信息、来源（识谱 / 人工录入）和待复核小节数；缺文件的首列为 incomplete，不计分。报表里这一组是验收依据（`docs/plans/step-2.md` 决定 11），并逐首列出；调性按"主音"验收：估计为谱子的 1=X 调或其关系小调都算对（决定 16，中文谱的 1=X 不区分大小调），"调性精确"列作参考；合成音频和弦干净、没有人声，分数是真录音的上限而非估计。你录入的歌谱和渲染结果都不要提交，仓库只保留公有领域的示例曲。
 
    **torch 提醒**：lv-chordia 的依赖声明是 `torch>=2.13`，在只能用旧 CUDA 驱动（因而只能装旧 torch）的机器上，`pip install -e ".[analysis]"` 会把 torch 换成不匹配驱动的新版本。先装好与驱动匹配的 torch / torchaudio，再用约束文件钉住它们、lv-chordia 用 `--no-deps` 装并手动补其纯 Python 依赖：
 
