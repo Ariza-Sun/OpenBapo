@@ -195,3 +195,11 @@ def test_claude_runner_retries_transient_failures(monkeypatch: pytest.MonkeyPatc
     outcomes = iter([1, 1, 1])
     with pytest.raises(RuntimeError, match="claude -p failed"):
         reader.claude_runner(backoff=(1.0, 2.0))("p")
+
+
+def test_failure_pause_waits_for_a_reported_reset() -> None:
+    assert reader.failure_pause("network error", 30.0, 1000.0) == 30.0
+    assert reader.failure_pause("Claude AI usage limit reached|1000003600", 30.0, 1000000000.0) == (
+        3660.0
+    )
+    assert reader.failure_pause("usage limit reached|1000000010", 300.0, 1000000000.0) == 300.0

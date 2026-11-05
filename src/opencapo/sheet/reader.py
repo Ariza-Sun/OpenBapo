@@ -53,7 +53,19 @@ ZOOM_AGAIN = 3  # ... and for the deciding reading of a disputed row
 RowReading = list[BarReading]
 
 
-BACKOFF = (30.0, 120.0, 300.0)  # seconds between attempts when `claude -p` itself fails
+# Seconds between attempts when `claude -p` itself fails. The tail is long on
+# purpose: outages of the headless tool (usage windows) last up to hours, and
+# failing a song costs a full re-read later.
+BACKOFF = (30.0, 120.0, 300.0, 900.0, 1800.0, 3600.0)
+LIMIT_RESET = re.compile(r"limit reached\|(\d{9,})")  # "...usage limit reached|<epoch seconds>"
+
+
+def failure_pause(output: str, pause: float, now: float) -> float:
+    """How long to wait after a failed call: until a reported limit reset, else `pause`."""
+    match = LIMIT_RESET.search(output)
+    if match:
+        return max(pause, float(match.group(1)) - now + 60.0)
+    return pause
 
 
 def claude_runner(
@@ -62,8 +74,9 @@ def claude_runner(
     """A runner that calls `claude -p` with the Read tool allowed.
 
     A non-zero exit (a usage limit, a dropped connection) is retried after
-    growing pauses before giving up: a whole batch failing on a transient
-    outage costs hours of re-reading.
+    growing pauses, or until the reset time the tool reports, before giving
+    up: a whole batch failing on a transient outage costs hours of
+    re-reading. The failure message keeps the tail of both output streams.
     """
 
     def run(prompt: str) -> str:
@@ -88,11 +101,13 @@ def claude_runner(
             )
             if result.returncode == 0:
                 return result.stdout
-            last = f"claude -p failed ({result.returncode}): {result.stderr[-500:]}"
+            said = (result.stdout[-300:] + " " + result.stderr[-300:]).strip()
+            last = f"claude -p failed ({result.returncode}): {said}"
             if pause is None:
                 break
-            print(f"{last}; retry {attempt + 1} in {pause:.0f} s", file=sys.stderr)
-            time.sleep(pause)
+            wait = failure_pause(said, pause, time.time())
+            print(f"{last}; retry {attempt + 1} in {wait:.0f} s", file=sys.stderr)
+            time.sleep(wait)
         raise RuntimeError(last)
 
     return run
