@@ -113,6 +113,9 @@ def find_staves(mask: NDArray[np.bool_]) -> list[Band]:
     import numpy as np
 
     height, width = mask.shape
+    # Sizes are relative to a nominal page height: long strips (one tall
+    # screenshot of a whole song) would otherwise make every staff "too small".
+    height = min(height, int(1.5 * width))
     long_rows = np.flatnonzero(mask.sum(axis=1) >= 0.6 * width)
     staves: list[Band] = []
     group: list[int] = []
@@ -137,6 +140,21 @@ def find_staves(mask: NDArray[np.bool_]) -> list[Band]:
                 staves.append(Band(group[0], group[-1] + 1, int(width)))
         group = [y] if y is not None else []
     return staves
+
+
+STAFF_FALLBACKS = (200, 230)  # fainter still in low-resolution screenshots and scans
+
+
+def staff_mask(image: Image.Image) -> NDArray[np.bool_]:
+    """The page at the first staff threshold that finds a staff (grey lines fade in screenshots)."""
+    mask = ink_mask(image, STAFF_THRESHOLD)
+    if find_staves(mask):
+        return mask
+    for threshold in STAFF_FALLBACKS:
+        candidate = ink_mask(image, threshold)
+        if find_staves(candidate):
+            return candidate
+    return mask
 
 
 def widest_gap(mask: NDArray[np.bool_], top: int, bottom: int, min_ink: int) -> int | None:
@@ -208,7 +226,7 @@ def analyze_page(
     """
     mask = ink_mask(image)
     height, width = mask.shape
-    systems = find_systems(mask, ink_mask(image, STAFF_THRESHOLD))
+    systems = find_systems(mask, staff_mask(image))
     min_ink = max(3, int(0.015 * width))
     # Rows meet at the widest blank gap between one system's lyrics and the
     # next one's chord names; rows cut by a fixed margin lost octave dots and
@@ -247,7 +265,7 @@ def worksheet(source: Path, out_dir: Path, dpi: int = DPI) -> dict[str, object]:
     next_index = 0
     for p, image in enumerate(pages):
         # Everything above the first staff: title, 1=, capo, tempo if printed.
-        first_staff = find_staves(ink_mask(image, STAFF_THRESHOLD))
+        first_staff = find_staves(staff_mask(image))
         header_bottom = first_staff[0].top if first_staff else int(0.2 * image.height)
         header = image.crop((0, 0, image.width, header_bottom))
         header_path = out_dir / f"{stem}-p{p + 1}-header.png"
