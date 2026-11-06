@@ -67,6 +67,7 @@ QUALITIES: dict[str, ChordQuality] = {
     "dim7": ChordQuality.DIM7,
     "m7b5": ChordQuality.HDIM7,
     "m7-5": ChordQuality.HDIM7,
+    "dim6": ChordQuality.DIM7,  # a diminished triad with the sixth: the same four notes as dim7
     "hdim7": ChordQuality.HDIM7,
     # Chinese sheets write a minor chord with a raised fifth as "m/5+" or
     # "m+5" (E G C, a passing chord); at the triad level it is scored as
@@ -193,6 +194,9 @@ def parse_chord_name(text: str) -> tuple[int, ChordQuality, int | None]:
     if not match:
         raise SheetError(f"not a chord name: {text!r}")
     root, suffix, bass = match.groups()
+    suffix = re.sub(
+        r"\((?:no|omit)\d+\)$", "", suffix
+    )  # "69(no5)": an omitted tone changes nothing
     if suffix not in QUALITIES:
         raise SheetError(f"unknown chord quality {suffix!r} in {text!r}")
     return pitch_class(root), QUALITIES[suffix], pitch_class(bass) if bass else None
@@ -218,9 +222,9 @@ def parse_chords(text: str, beats_per_bar: int) -> tuple[ChordSpan, ...]:
     if uncounted and counted >= beats_per_bar:
         raise SheetError(f"counted chords fill the bar, no beats left for the rest: {text!r}")
     scale = Fraction(1)
-    if not uncounted and 0 < counted < beats_per_bar:
-        # "C(1) G(1)" in a 4/4 bar: the counts give the proportions of a bar
-        # the reader saw split, not a bar left half empty.
+    if not uncounted and counted > 0 and counted != beats_per_bar and len(tokens) > 1:
+        # "C(1) G(1)" or "Gadd9(3) Gmaj7(2)" in a 4/4 bar: the counts give the
+        # proportions of a bar the reader saw split, not its exact beats.
         scale = beats_per_bar / counted
     spans = []
     for token, match in zip(tokens, explicit, strict=True):

@@ -60,6 +60,8 @@ def test_parse_example_sheet() -> None:
         ("Fm7sus2", (5, ChordQuality.SUS2, None)),
         ("G7add13", (7, ChordQuality.DOM7, None)),
         ("#Fm7-5", (6, ChordQuality.HDIM7, None)),
+        ("F69(no5)", (5, ChordQuality.MAJ6, None)),
+        ("bEdim6", (3, ChordQuality.DIM7, None)),
     ],
 )
 def test_parse_chord_name(text: str, expected: tuple) -> None:  # type: ignore[type-arg]
@@ -104,8 +106,7 @@ def test_chord_and_melody_splitting() -> None:
     assert [c.beats for c in parse_chords("C", 3)] == [3]
     assert parse_chords("", 4) == ()
     assert [c.beats for c in parse_chords("C(3) G", 4)] == [3, 1]  # the rest goes to G
-    with pytest.raises(SheetError):
-        parse_chords("C(3) G(3)", 4)  # counts beyond the bar
+    assert [float(s.beats) for s in parse_chords("C(3) G(3)", 4)] == [2.0, 2.0]  # proportions
     with pytest.raises(SheetError):
         parse_chords("H", 4)
     notes = parse_melody("5 [6 6] 0 -", 4)
