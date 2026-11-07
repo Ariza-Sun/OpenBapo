@@ -27,18 +27,18 @@ An open-source Discord bot that turns a song's audio into a guitar play-along sh
 | 节拍 F-measure（GTZAN，998 首） | 拍点 **0.891**，强拍 0.786 | 拍点 ≥ 0.85 |
 | 4 分钟歌曲分轨 + 节拍（单卡，热启动） | **7.1 秒**（冷启动 13.7 秒） | ≤ 90 秒 |
 
-第 2 步（和弦 + 调性）代码已完成，首轮实测（`docs/benchmarks/step-2-chords.md`）：
+第 2 步（和弦 + 调性）完成，实测（`docs/benchmarks/step-2-chords.md`）：
 
 | 指标 | 实测（多专家融合） | 验收 |
 |---|---|---|
-| 和弦 majmin（负责人曲库样本集，验收依据） | 待生成 | ≥ 0.80 |
+| 和弦 majmin（负责人曲库样本集 220 首，验收依据） | **0.974** | ≥ 0.80 |
 | 和弦 majmin（GuitarSet 伴奏曲目，报数半 90 段，参考） | **0.775** | 参考 |
 | 和弦 majmin（AAM 500 首，参考） | **0.947** | 参考 |
-| 调性正确率（负责人曲库样本集，验收依据） | 待生成 | ≥ 0.85 |
+| 调性正确率（负责人曲库样本集 220 首，关系大小调算对，验收依据） | **0.936** | ≥ 0.85 |
 | 调性正确率（GuitarSet 伴奏 / AAM 单一调性 72 首，参考） | **0.789 / 0.931** | 参考 |
 | 4 分钟歌曲和弦 + 调性（单卡，热启动） | **6.1 秒**（整条流水线 13.4 秒） | ≤ 30 秒 |
 
-GuitarSet 伴奏上的缺口集中在 Funk / 爵士风格，已在计划里记为已知缺口。另有谱子渲染的合成音频评测（`docs/examples/xiaoxingxing.sheet`、`scripts/sheet_synth.py`），用于在没有录音的情况下检查自己的曲库。编配、渲染与 Discord Bot 尚未开始。
+GuitarSet 伴奏上的缺口集中在 Funk / 爵士风格，已在计划里记为已知缺口。验收依据是负责人曲库谱子渲染的合成音频（识谱 `scripts/sheet_ocr.py`、渲染 `scripts/sheet_synth.py`），没有人声和混音，分数是真录音的上限。编配、渲染与 Discord Bot 尚未开始。
 
 ## 开发
 

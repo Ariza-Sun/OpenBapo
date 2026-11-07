@@ -912,7 +912,7 @@ def fmt(value: float) -> str:
 
 def markdown(systems: list[dict], env: dict, notes: list[str]) -> str:
     lines = [
-        "# 第 2 步：和弦与调性评测（GuitarSet + AAM）",
+        "# 第 2 步：和弦与调性评测（曲库合成 + GuitarSet + AAM）",
         "",
         f"由 `scripts/eval_chords.py` 生成于 {env['date']}。",
         f"设备：{env.get('gpu') or env['device']}；Python {env['python']}；"
