@@ -161,7 +161,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"no reading for rows {missing}", file=sys.stderr)
         return 1
     read = json.loads(args.header.read_text(encoding="utf-8")) if args.header else {}
-    for problem in reconcile_header(read):
+    beats = int(str(args.time or read.get("time") or "4/4").split("/")[0])
+    for problem in reconcile_header(read, readings, beats):
         print(f"header: {problem}", file=sys.stderr)
     key = args.key or read.get("key")
     if not key:

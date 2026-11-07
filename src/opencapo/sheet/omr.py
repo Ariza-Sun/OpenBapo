@@ -75,16 +75,81 @@ HEADER_PROMPT = """这是一张中文吉他谱第一页的页眉。请只输出�
 """
 
 
-def reconcile_header(header: dict[str, object]) -> list[str]:
+# Diatonic chords of a major key by scale degree offset: I ii iii IV V vi, plus V7.
+DIATONIC = {0: "maj", 2: "min", 4: "min", 5: "maj", 7: "maj", 9: "min"}
+
+
+def shape_key(readings: list[BarReading], beats_per_bar: int = 4) -> tuple[int | None, float]:
+    """The major key the written chord shapes belong to, and its share of the chord time.
+
+    Each major key scores the beats of chords that are diatonic to it (the
+    relative minor shares the chords, so a minor song lands on its relative
+    major, which is what a sheet's 1= names). Returns (None, 0) without chords.
+    """
+    from opencapo.model.music import ChordQuality
+
+    families = {
+        "maj": {ChordQuality.MAJ, ChordQuality.MAJ7, ChordQuality.MAJ6, ChordQuality.DOM7,
+                ChordQuality.SUS2, ChordQuality.SUS4},
+        "min": {ChordQuality.MIN, ChordQuality.MIN7, ChordQuality.MIN6},
+    }  # fmt: skip
+    spans = []
+    for r in readings:
+        try:
+            spans += list(parse_chords(r.chords, beats_per_bar))
+        except SheetError:
+            continue
+    total = float(sum(s.beats for s in spans))
+    if not total:
+        return None, 0.0
+    scores = []
+    for tonic in range(12):
+        scores.append(
+            sum(
+                float(s.beats)
+                for s in spans
+                if (s.root - tonic) % 12 in DIATONIC
+                and s.quality in families[DIATONIC[(s.root - tonic) % 12]]
+            )
+        )
+    best = max(range(12), key=lambda k: scores[k])
+    return best, scores[best] / total
+
+
+def reconcile_header(
+    header: dict[str, object], readings: list[BarReading] | None = None, beats_per_bar: int = 4
+) -> list[str]:
     """Fill the sung key from the fingering key and capo when it is missing, and report conflicts.
 
     Sheets print the sung key (原调 1=X), or the fingering key (选调 1=Y)
-    with the capo, or both; both must agree as Y + capo = X. Returns the
+    with the capo, or both; both must agree as Y + capo = X. Many sheets
+    print only "1=Y, capo N" where Y is the fingering key: with the bar
+    readings, the key the written chord shapes belong to tells which one
+    the 1= is (it names the shapes' key → a fingering key). Returns the
     problems found; the header is updated in place.
     """
     from opencapo.sheet.format import pitch_class
 
     problems: list[str] = []
+    capo_value = header.get("capo")
+    if (
+        readings
+        and not header.get("play_key")
+        and header.get("key")
+        and isinstance(capo_value, int | float)
+        and int(capo_value) % 12
+    ):
+        try:
+            printed = pitch_class(str(header["key"]))
+        except SheetError:
+            printed = None
+        shapes, share = shape_key(readings, beats_per_bar)
+        if printed is not None and shapes == printed and share >= 0.6:
+            # The printed 1= is the key of the shapes under the capo, i.e. the
+            # fingering key; the song sounds capo semitones higher.
+            header["play_key"] = header["key"]
+            header["key"] = None
+            header["key_source"] = "1= 是指法调（和弦形状所属的调），演唱调 = 指法调 + 变调夹"
     try:
         play = pitch_class(str(header["play_key"])) if header.get("play_key") else None
         sung = pitch_class(str(header["key"])) if header.get("key") else None

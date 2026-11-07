@@ -165,3 +165,23 @@ def test_an_unreadable_melody_keeps_the_bar_chords() -> None:
     result = omr.assemble(header, bars, 4)
     assert "\nG\n" in result.text  # chords only, the sheet still parses
     assert [p.index for p in result.problems] == [1] and "melody" in result.problems[0].problem
+
+
+def test_a_printed_fingering_key_is_told_from_the_chord_shapes() -> None:
+    c_shapes = [omr.BarReading(i, c, "") for i, c in enumerate(["C", "Am", "F", "G7", "C", "Em"])]
+    assert omr.shape_key(c_shapes) == (0, 1.0)
+    assert omr.shape_key([]) == (None, 0.0)
+    # "1=C, capo 2" over C shapes: the 1= is the fingering key, the song is in D
+    header: dict[str, object] = {"key": "C", "play_key": None, "capo": 2}
+    assert omr.reconcile_header(header, c_shapes) == []
+    assert header["key"] == "D" and header["play_key"] == "C"
+    # "1=D, capo 2" over C shapes: the 1= is the sung key already
+    header = {"key": "D", "play_key": None, "capo": 2}
+    assert omr.reconcile_header(header, c_shapes) == [] and header["key"] == "D"
+    # no capo: nothing to tell apart
+    header = {"key": "C", "capo": 0}
+    assert omr.reconcile_header(header, c_shapes) == [] and header["key"] == "C"
+    # a minor song in A minor shapes under capo 3, printed 1=C: still C shapes -> sung bE
+    a_minor = [omr.BarReading(i, c, "") for i, c in enumerate(["Am", "Dm", "E7", "Am", "F", "G"])]
+    header = {"key": "C", "capo": 3}
+    assert omr.reconcile_header(header, a_minor) == [] and header["key"] == "D#"

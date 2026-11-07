@@ -355,6 +355,9 @@ def read_sheet(
     if doubtful:
         log(f"deciding reading for {len(doubtful)} rows: {doubtful}; unsettled: {unsettled}")
 
+    # Now that the chords are read, tell a printed fingering key from a sung key.
+    header_problems += reconcile_header(header, ordered, beats_per_bar)
+    (out_dir / "header.json").write_text(json.dumps(header, ensure_ascii=False), encoding="utf-8")
     header_text = {
         "title": str(header.get("title", source.stem)),
         "key": str(header.get("key", "C")),
