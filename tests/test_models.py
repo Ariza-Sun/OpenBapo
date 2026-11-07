@@ -93,8 +93,11 @@ def test_pipeline_with_chords_end_to_end(chord_progression: Path) -> None:
         chord_stage=default_chord_stage("cpu"),
     )
     analysis = result.analysis
-    assert analysis.key is not None and analysis.key.mode.value == "major"
-    assert analysis.key.tonic == 0
+    # C F G7 Am ends every loop on Am, so C major and its relative A minor are
+    # equally fair readings (the key rules settle the pair on a near tie); the
+    # tonal centre is what the product uses (decision 16 in docs/plans/step-2.md).
+    assert analysis.key is not None
+    assert (analysis.key.tonic, analysis.key.mode.value) in {(0, "major"), (9, "minor")}
     roots = [c.root for c in analysis.chords]
     # C F G7 Am per bar, repeating: every bar's root is one of these and all four appear.
     assert set(roots) <= {0, 5, 7, 9} and {0, 5, 7, 9} <= set(roots)
