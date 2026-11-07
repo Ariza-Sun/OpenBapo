@@ -71,3 +71,37 @@ def test_cli_with_real_models(click: Path, tmp_path: Path) -> None:
     assert main(["analyze", str(click), "--out", str(out), "--device", "cpu"]) == 0
     analysis = Analysis.from_json(out.read_text(encoding="utf-8"))
     assert analysis.tempo is not None and analysis.beats
+
+
+@pytest.fixture(scope="module")
+def chord_progression(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    path = tmp_path_factory.mktemp("audio") / "progression.wav"
+    subprocess.run(
+        [sys.executable, str(MAKE_TONE), str(path), "--progression", str(BPM), "--seconds", "16"],
+        check=True,
+    )
+    return path
+
+
+def test_pipeline_with_chords_end_to_end(chord_progression: Path) -> None:
+    from opencapo.analysis.chords.stage import default_chord_stage
+
+    result = analyze_file(
+        chord_progression,
+        separator=DemucsSeparator(device="cpu"),
+        tracker=BeatThisTracker(device="cpu"),
+        chord_stage=default_chord_stage("cpu"),
+    )
+    analysis = result.analysis
+    # C F G7 Am ends every loop on Am, so C major and its relative A minor are
+    # equally fair readings (the key rules settle the pair on a near tie); the
+    # tonal centre is what the product uses (decision 16 in docs/plans/step-2.md).
+    assert analysis.key is not None
+    assert (analysis.key.tonic, analysis.key.mode.value) in {(0, "major"), (9, "minor")}
+    roots = [c.root for c in analysis.chords]
+    # C F G7 Am per bar, repeating: every bar's root is one of these and all four appear.
+    assert set(roots) <= {0, 5, 7, 9} and {0, 5, 7, 9} <= set(roots)
+    beat_times = {b.time for b in analysis.beats}
+    assert all(c.start in beat_times for c in analysis.chords)
+    assert result.timings.chords > 0
+    assert Analysis.from_json(analysis.to_json()) == analysis

@@ -4,6 +4,8 @@ import numpy as np
 
 from opencapo.analysis.audio import Audio
 from opencapo.analysis.beats import BeatTimes
+from opencapo.analysis.chords.fusion import ChordPosteriors
+from opencapo.analysis.chords.vocab import N_LABELS
 from opencapo.analysis.separate import STEM_NAMES, Stems
 
 
@@ -38,3 +40,26 @@ class FakeTracker:
         self.inputs.append(audio)
         beats = np.arange(0.0, audio.duration, 60.0 / self.bpm)
         return BeatTimes(beats=beats, downbeats=beats[:: self.beats_per_bar])
+
+
+class FakeChordExpert:
+    """Emits a fixed schedule of (label index, seconds) as peaky frame posteriors."""
+
+    def __init__(self, schedule: list[tuple[int, float]], name: str = "fake", p: float = 0.9):
+        self.schedule = schedule
+        self.name = name
+        self.is_model = True
+        self.p = p
+
+    def estimate(self, audio: Audio, stems: Stems | None) -> ChordPosteriors:
+        hop = 0.1
+        times, rows = [], []
+        t = 0.0
+        for label, seconds in self.schedule:
+            for _ in range(round(seconds / hop)):
+                row = np.full(N_LABELS, (1 - self.p) / (N_LABELS - 1))
+                row[label] = self.p
+                times.append(t)
+                rows.append(row)
+                t += hop
+        return ChordPosteriors(times=np.array(times), probs=np.array(rows))

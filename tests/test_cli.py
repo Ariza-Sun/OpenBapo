@@ -46,7 +46,7 @@ def test_analyze_to_stdout(tone: Path, capsys: pytest.CaptureFixture[str]) -> No
 def test_timing_to_stderr(tone: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert run(["analyze", str(tone), "--out", "-", "--timing", "-"]) == 0
     timing = json.loads(capsys.readouterr().err)
-    assert set(timing) == {"decode", "separate", "beats", "total"}
+    assert {"decode", "separate", "beats", "chords", "key", "total"} <= set(timing)
 
 
 def test_timing_to_file(tone: Path, tmp_path: Path) -> None:

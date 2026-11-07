@@ -20,23 +20,33 @@ import platform
 import statistics
 from pathlib import Path
 
-ACCEPTANCE_SECONDS = 90.0
+ACCEPTANCE_SECONDS = 90.0  # step 1: separation + beats
+ACCEPTANCE_CHORDS_SECONDS = 30.0  # step 2: chords + key
 
 
-def run_once(song: Path, model: str, device: str, separator_cache: dict) -> dict[str, float]:
+def run_once(
+    song: Path, model: str, device: str, separator_cache: dict, chord_experts: str
+) -> dict[str, float]:
     from opencapo.analysis.beats import BeatThisTracker
     from opencapo.analysis.pipeline import analyze_file
     from opencapo.analysis.separate import DemucsSeparator
+    from opencapo.cli import build_chord_stage
 
     if model not in separator_cache:
         separator_cache[model] = DemucsSeparator(model=model, device=device)
     if "tracker" not in separator_cache:
         separator_cache["tracker"] = BeatThisTracker(device=device)
+    if "chords" not in separator_cache:
+        separator_cache["chords"] = build_chord_stage(chord_experts, device)
     result = analyze_file(
-        song, separator=separator_cache[model], tracker=separator_cache["tracker"]
+        song,
+        separator=separator_cache[model],
+        tracker=separator_cache["tracker"],
+        chord_stage=separator_cache["chords"],
     )
     timings = result.timings.as_dict()
     timings["beats_found"] = len(result.analysis.beats)
+    timings["chords_found"] = len(result.analysis.chords)
     timings["bpm"] = result.analysis.tempo.bpm if result.analysis.tempo else float("nan")
     return timings
 
@@ -47,6 +57,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--device", default="auto")
     parser.add_argument("--repeat", type=int, default=3, help="warm runs per configuration")
     parser.add_argument("--separators", default="htdemucs,htdemucs_ft")
+    parser.add_argument("--chord-experts", default="btc,lvchordia,chroma", help="'none' to skip")
     parser.add_argument("--out", default="docs/benchmarks/step-1-timing")
     args = parser.parse_args(argv)
 
@@ -58,9 +69,12 @@ def main(argv: list[str] | None = None) -> int:
     cache: dict = {}
     results = []
     for model in args.separators.split(","):
-        cold = run_once(args.song, model, device, cache)
-        warm = [run_once(args.song, model, device, cache) for _ in range(args.repeat)]
-        stages = ["decode", "separate", "beats", "total"]
+        cold = run_once(args.song, model, device, cache, args.chord_experts)
+        warm = [
+            run_once(args.song, model, device, cache, args.chord_experts)
+            for _ in range(args.repeat)
+        ]
+        stages = ["decode", "separate", "beats", "chords", "key", "total"]
         results.append(
             {
                 "separator": model,
@@ -79,7 +93,8 @@ def main(argv: list[str] | None = None) -> int:
         "platform": platform.platform(),
         "device": device,
         "packages": {
-            n: importlib.metadata.version(n) for n in ("opencapo", "torch", "demucs", "beat-this")
+            n: importlib.metadata.version(n)
+            for n in ("opencapo", "torch", "demucs", "beat-this", "lv-chordia")
         },
     }
     import torch
@@ -91,6 +106,8 @@ def main(argv: list[str] | None = None) -> int:
         "environment": env,
         "song": {"name": args.song.name, "duration_seconds": duration},
         "acceptance_total_seconds": ACCEPTANCE_SECONDS,
+        "acceptance_chords_seconds": ACCEPTANCE_CHORDS_SECONDS,
+        "chord_experts": args.chord_experts,
         "results": results,
     }
     out = Path(args.out)
@@ -99,22 +116,25 @@ def main(argv: list[str] | None = None) -> int:
 
     minutes, seconds = divmod(round(duration), 60)
     lines = [
-        "# 第 1 步：耗时（分轨 + 节拍）",
+        "# 流水线耗时（分轨 + 节拍 + 和弦 + 调性）",
         "",
         f"由 `scripts/time_pipeline.py` 生成于 {env['date']}。",
         f"设备：{env.get('gpu') or device}；Python {env['python']}；"
         + "、".join(f"{k} {v}" for k, v in env["packages"].items()),
         "",
         f"歌曲时长 {minutes}:{seconds:02d}（文件不提交）。每个配置先跑 1 次冷启动（含加载权重），"
-        f"再跑 {args.repeat} 次取中位数。验收：4 分钟歌曲分轨 + 节拍 ≤ {ACCEPTANCE_SECONDS:.0f} 秒"
-        "（看 `htdemucs` 行的热启动合计）。",
+        f"再跑 {args.repeat} 次取中位数。验收：第 1 步分轨 + 节拍 ≤ {ACCEPTANCE_SECONDS:.0f} 秒，"
+        f"第 2 步和弦 + 调性 ≤ {ACCEPTANCE_CHORDS_SECONDS:.0f} 秒（看 `htdemucs` 行的热启动数字）。"
+        f"和弦专家：{args.chord_experts}。",
         "",
-        "| 分轨模型 | 解码 | 分轨 | 节拍 | 合计（热） | 合计（冷） | 验收 |",
-        "|---|---|---|---|---|---|---|",
+        "| 分轨模型 | 解码 | 分轨 | 节拍 | 和弦 | 调性 | 合计（热） | 合计（冷） | 验收 |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for r in results:
         w, c = r["warm_median"], r["cold"]
-        verdict = "通过" if w["total"] <= ACCEPTANCE_SECONDS else "未通过"
+        step1_ok = w["separate"] + w["beats"] <= ACCEPTANCE_SECONDS
+        step2_ok = w["chords"] + w["key"] <= ACCEPTANCE_CHORDS_SECONDS
+        verdict = "通过" if step1_ok and step2_ok else "未通过"
         if r["separator"] != "htdemucs":
             verdict = "参考"
         cells = [
@@ -122,6 +142,8 @@ def main(argv: list[str] | None = None) -> int:
             f"{w['decode']:.1f} s",
             f"{w['separate']:.1f} s",
             f"{w['beats']:.1f} s",
+            f"{w['chords']:.1f} s",
+            f"{w['key']:.1f} s",
             f"**{w['total']:.1f} s**",
             f"{c['total']:.1f} s",
             verdict,

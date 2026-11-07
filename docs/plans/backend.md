@@ -34,7 +34,7 @@ API 层
 | 分轨 | 混音 | vocals / drums / bass / other | **已定：Demucs `htdemucs`**（第 1 步）；备选 BS-RoFormer |
 | 节拍 / 强拍 / BPM | 混音（实测 drums + bass 重混更差：拍点 F1 0.770 对 0.891） | `Beat`、`Tempo`、`TimeSignature` | **已定：Beat This!**（第 1 步，GTZAN 拍点 F1 0.891）；备选 madmom、all-in-one |
 | 和弦 | 混音去鼓（bass + other）+ 拍网格 | `Chord`（含转位、置信度） | BTC、ChordFormer、autochord |
-| 调性 | `Chord` 序列 + 音频 | `Key` | 和弦统计规则法 + essentia key extractor 互校 |
+| 调性 | `Chord` 序列 + 音频 | `Key` | **已定：规则法**（第 2 步）：色度模板（Krumhansl 轮廓）与分窗和弦统计互校，关系大小调按主和弦时长与首尾和弦投票；不依赖 essentia |
 | 人声旋律 | vocals | 音高曲线 → 切分 → 量化到拍网格 → `Note` | RMVPE / CREPE 提取音高；音符切分与量化自写 |
 | 歌词识别 | vocals | 文本（用户提供歌词时跳过） | faster-whisper |
 | 歌词对齐 | vocals + 文本 | `LyricSyllable` | WhisperX 的 wav2vec2 强制对齐；中文对齐模型需单独评估；英文音节切分 pyphen / CMUdict；音节挂到 `Note` 用时间最近匹配 + 单调约束 |
@@ -50,7 +50,11 @@ API 层
 | 分轨 | Demucs v4 `htdemucs`（adefossez/demucs，PyPI `demucs` ≥ 4.1） | MIT | **未声明；按非商业对待。** 作者原话："The license of the weights is not clear: MusDB contains some data that were only usable for research purpose"，并表示无权替 Meta 或 MUSDB 版权方澄清 | MUSDB HQ + Meta 内部 800 首 | 第 1 步接入（`docs/plans/step-1.md` 决定 2）。权重首次运行时自动从 Hugging Face / Meta 文件服务器下载，不随代码分发。自部署文档须转述这一许可证状态；如发现许可证更干净且质量够的 4 轨模型，只换 `Separator` 适配器 |
 | 节拍 / 强拍 | Beat This!（CPJKU/beat_this，PyPI `beat-this` ≥ 1.1，checkpoint `final0`） | MIT | **MIT** | 16 个公开数据集，GTZAN 整体留出 | 第 1 步接入（决定 3）。不用 DBN 后处理，因此不依赖 madmom |
 
-未接入但评估过的候选：madmom 的模型文件为 **CC BY-NC-SA 4.0**（README 明示），只可作评测基线，不打包；all-in-one 权重许可证未声明；BS-RoFormer 社区权重许可证各异、部分为 CC-BY-NC-SA。
+| 和弦（E1） | BTC（jayg996/BTC-ISMIR19，`btc_model_large_voca.pt`，commit 2682317） | MIT（模型代码已随本仓库分发，见 `analysis/chords/models/btc_vendor/LICENSE`） | **未声明**：权重随 MIT 仓库分发，作者未单独说明 | Isophonics、Robbie Williams、USPop | 第 2 步接入。权重首次运行从作者仓库的固定 commit 下载到 `~/.cache/opencapo/`，校验 SHA-256 后再反序列化 |
+| 和弦（E2） | lv-chordia（openmirlab/lv-chordia，Jiang 等 ISMIR 2019 的五网络集成） | MIT | **未单独声明**：五份权重随 MIT 仓库分发 | 论文在 Billboard / Isophonics / RWC 上报数，训练集待核 | 第 2 步接入；从 GitHub 安装（`analysis` 依赖组直接引用） |
+| 调性 / 低音 / 色度（E3–E5） | 无权重（规则） | — | — | — | 第 2 步，纯代码 |
+
+未接入但评估过的候选：madmom 的模型文件为 **CC BY-NC-SA 4.0**（README 明示），只可作评测基线，不打包；all-in-one 权重许可证未声明；BS-RoFormer 社区权重许可证各异、部分为 CC-BY-NC-SA；crema（BSD-2）只能在 Keras 2 上运行，与 Python 3.12+ 的 TensorFlow 不兼容，第 2 步按环境原因淘汰；accordoai 为本科论文级实验、只用 Beatles 训练，未进入对比。
 
 ## 3. 编配
 
@@ -101,6 +105,6 @@ API 层
 
 1. 中文歌词强制对齐模型的选择与效果评估。
 2. 人声音符切分 / 量化算法（滑音、颤音、装饰音的处理）；是否引入现成的歌声转录模型。
-3. 和弦模型的最终选型：需要在 Isophonics 上实测几个候选的准确率与推理速度。
+3. 和弦模型的最终选型：按 `step-2.md` 的多专家方案，在 GuitarSet 与 AAM 上实测各候选单独与融合后的准确率与推理速度。
 4. 简谱排版规则细节（换行、连音线跨行、高低八度点）。
 5. 指法库与节奏型库的初始内容从哪来（手工整理 vs 从开源谱库提取）。

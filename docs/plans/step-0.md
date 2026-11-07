@@ -164,7 +164,7 @@ opencapo analyze <audio> --out <json> [--title TEXT] [--artist TEXT]
 | 风险 | 说明 | 处理步骤 |
 |---|---|---|
 | `5`（强力和弦）可能没有模型能输出 | BTC 的 14 种性质里没有 `5`；Isophonics 里有但样本很少。需选词表含 `5` 的模型，或用后处理规则（如三音缺失判定） | 第 2 步 |
-| Isophonics 测试集污染 | BTC 等模型的训练数据通常包含 Isophonics，用公开权重在 Beatles 上测，准确率会偏高，"≥ 80%"验收失真。可选：引用论文交叉验证结果 / 另找模型未见过的测试集（如 RWC Popular）/ 两者都报。由负责人定 | 第 2 步 |
+| Isophonics 测试集污染 | BTC 等模型的训练数据通常包含 Isophonics，用公开权重在 Beatles 上测，准确率会偏高。**已消解**：第 2 步改用候选模型都没见过的 GuitarSet 与 AAM（Beatles 音频也拿不到），见 `step-2.md` 决定 2 | 第 2 步 |
 | tick 的拍单位依赖拍号 | 6/8 中检测到的"拍"可能是附点四分或八分，tick → MusicXML quarterLength 的换算需要知道，与上表"拍号"缺口一并解决 | 第 1 步 |
 | 第一拍之前的人声无法表示 | `start_tick ≥ 0`；若出现，在网格前补拍或丢弃 | 第 7 步 |
 | 简化规则未覆盖 dim / aug / dim7 / hdim7 | `docs/plans/backend.md` 第 3 节的简化映射没写这四种（例如 hdim7 简化成 dim 还是 min） | 第 3 步 |

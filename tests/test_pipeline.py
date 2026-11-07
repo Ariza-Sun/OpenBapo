@@ -31,7 +31,7 @@ def test_analyze_file_fills_beats_tempo_meter_and_duration(tone: Path) -> None:
 def test_timings_cover_every_stage(tone: Path) -> None:
     result = analyze_file(tone, separator=FakeSeparator(), tracker=FakeTracker())
     timings = result.timings.as_dict()
-    assert list(timings) == ["decode", "separate", "beats", "total"]
+    assert list(timings) == ["decode", "separate", "beats", "chords", "key", "total"]
     assert all(value >= 0.0 for value in timings.values())
     assert timings["total"] >= timings["decode"] + timings["separate"] + timings["beats"]
 
@@ -94,7 +94,15 @@ def test_stage_timer_accumulates() -> None:
     with timings.stage("warmup"):
         pass
     assert timings.decode >= 0.0
-    assert list(timings.as_dict()) == ["decode", "separate", "beats", "warmup", "total"]
+    assert list(timings.as_dict()) == [
+        "decode",
+        "separate",
+        "beats",
+        "chords",
+        "key",
+        "warmup",
+        "total",
+    ]
 
 
 def test_missing_packages_message(monkeypatch: pytest.MonkeyPatch) -> None:

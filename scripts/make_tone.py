@@ -3,11 +3,14 @@
 Usage:
     python scripts/make_tone.py OUT.wav [--seconds 3]            # a 440 Hz sine
     python scripts/make_tone.py OUT.wav --click 120 [--seconds 12]  # a click track
+    python scripts/make_tone.py OUT.wav --progression 120         # C F G7 Am + bass + clicks
 
 The click track plays a short tone on every beat at the given BPM, with a
 louder, lower click on every fourth beat, so a beat tracker should report the
-BPM and 4 beats per bar. The repository ships no real recordings; tests and CI
-generate this instead.
+BPM and 4 beats per bar. The progression adds one sine-wave chord per bar
+(C, F, G7, Am, repeating) with a bass note on the root, so chord experts
+should report those chords in C major. The repository ships no real
+recordings; tests and CI generate this instead.
 """
 
 import argparse
@@ -43,14 +46,54 @@ def click_track(seconds: float, bpm: float, beats_per_bar: int = 4) -> list[floa
     return samples
 
 
+PROGRESSION = [  # (chord tones as MIDI, bass as MIDI): C, F, G7, Am
+    ([60, 64, 67], 36),
+    ([65, 69, 72], 41),
+    ([67, 71, 74, 77], 43),
+    ([69, 72, 76], 45),
+]
+
+
+def midi_hz(midi: int) -> float:
+    return 440.0 * 2 ** ((midi - 69) / 12)
+
+
+def chord_progression(seconds: float, bpm: float, beats_per_bar: int = 4) -> list[float]:
+    """Sine chords (with three harmonics) and a bass note, one chord per bar, over clicks."""
+    samples = click_track(seconds, bpm, beats_per_bar)
+    bar_seconds = beats_per_bar * 60.0 / bpm
+    n = len(samples)
+    bar = 0
+    while bar * bar_seconds < seconds:
+        tones, bass = PROGRESSION[bar % len(PROGRESSION)]
+        start = int(bar * bar_seconds * SAMPLE_RATE)
+        end = min(n, int((bar + 1) * bar_seconds * SAMPLE_RATE))
+        for i in range(start, end):
+            t = (i - start) / SAMPLE_RATE
+            value = 0.0
+            for midi in tones:
+                for h in (1, 2, 3):
+                    value += (0.06 / h) * math.sin(2 * math.pi * midi_hz(midi) * h * t)
+            for h in (1, 2, 3):
+                value += (0.12 / h) * math.sin(2 * math.pi * midi_hz(bass) * h * t)
+            samples[i] = max(-1.0, min(1.0, samples[i] * 0.5 + value))
+        bar += 1
+    return samples
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("out")
     parser.add_argument("--seconds", type=float, default=None)
     parser.add_argument("--click", type=float, metavar="BPM", help="write a click track instead")
+    parser.add_argument(
+        "--progression", type=float, metavar="BPM", help="write a chord progression with clicks"
+    )
     args = parser.parse_args()
 
-    if args.click:
+    if args.progression:
+        samples = chord_progression(args.seconds or 16.0, args.progression)
+    elif args.click:
         samples = click_track(args.seconds or 12.0, args.click)
     else:
         samples = sine(args.seconds or 3.0)

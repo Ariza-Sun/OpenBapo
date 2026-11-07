@@ -6,7 +6,7 @@ from opencapo.errors import InputError
 
 # Importable names of the analysis extra, checked before any model is loaded
 # so a missing install produces one clear message instead of a traceback.
-ANALYSIS_PACKAGES = ("numpy", "torch", "demucs", "beat_this")
+ANALYSIS_PACKAGES = ("numpy", "librosa", "torch", "demucs", "beat_this", "lv_chordia")
 
 
 def missing_analysis_packages() -> list[str]:
