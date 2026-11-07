@@ -184,6 +184,32 @@ def sheet_tracks(root: Path) -> list[Track]:
     return tracks
 
 
+def anonymize_sheets(systems: list[dict], key_path: Path) -> dict[str, str]:
+    """Replace each song-book sample's name and title by song-NNN in every system's rows.
+
+    The owner's song list stays private: the numbering (sorted by sample
+    name, so it is stable across runs) is written to key_path, which must
+    live outside the repository. Returns the mapping name -> code.
+    """
+    names = sorted({r["track"] for s in systems for r in s["rows"] if r["dataset"] == "sheets"})
+    codes = {name: f"song-{i:03d}" for i, name in enumerate(names, start=1)}
+    titles: dict[str, str] = {}
+    for s in systems:
+        for r in s["rows"]:
+            if r["dataset"] != "sheets":
+                continue
+            code = codes[r["track"]]
+            info = r.get("info") or {}
+            titles.setdefault(code, str(info.get("title") or r["group"]))
+            r["track"] = r["group"] = code
+            if info:
+                r["info"] = {k: v for k, v in info.items() if k not in ("name", "title", "files")}
+    key = [{"code": codes[n], "name": n, "title": titles.get(codes[n], "")} for n in names]
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+    key_path.write_text(json.dumps(key, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return codes
+
+
 def sheet_manifest_note(root: Path) -> str:
     """One line for the report's notes: which sample set the song-book numbers come from."""
     from opencapo.sheet import load_manifest
@@ -1149,6 +1175,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--inspect", action="store_true", help="print dataset formats and exit")
     parser.add_argument("--out", default="docs/benchmarks/step-2-chords")
     parser.add_argument(
+        "--anonymize-sheets",
+        type=Path,
+        help="replace song-book names and titles in the report by song-001 ...; "
+        "write the key to this JSON file (keep it outside the repository)",
+    )
+    parser.add_argument(
         "--dump-key-inputs",
         type=Path,
         help="also write the key estimator's inputs per track (JSON, gzip if .gz)",
@@ -1259,6 +1291,8 @@ def main(argv: list[str] | None = None) -> int:
         dump_key_inputs(
             args.dump_key_inputs, tracks, outputs, expert_names, model_names, final_params
         )
+    if args.anonymize_sheets:
+        anonymize_sheets(systems, args.anonymize_sheets)
     for s in systems:
         s["summary"] = summarize(s)
 

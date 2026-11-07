@@ -413,3 +413,23 @@ def test_chord_scores_drop_estimates_past_the_reference() -> None:
     est = np.array([[0.0, 2.0], [2.0, 4.0], [4.2, 5.0]])  # the last one lies in the audio tail
     scores = eval_chords.chord_scores(ref, ["C:maj", "G:maj"], est, ["C:maj", "G:maj", "N"])
     assert scores["majmin"] == 1.0
+
+
+def test_anonymize_sheets_replaces_names_and_writes_the_key(tmp_path: Path) -> None:
+    row = {
+        "dataset": "sheets",
+        "track": "依恋",
+        "group": "依恋",
+        "info": {"title": "依恋", "name": "依恋", "files": {}, "capo": 2},
+    }
+    other = {"dataset": "sheets", "track": "大海", "group": "大海", "info": {"title": "大海"}}
+    public = {"dataset": "aam", "track": "0001", "group": "pop"}
+    systems = [{"rows": [dict(row), dict(other), dict(public)]}, {"rows": [dict(row)]}]
+    codes = eval_chords.anonymize_sheets(systems, tmp_path / "key.json")
+    assert codes == {"依恋": "song-001", "大海": "song-002"}  # sorted by sample name
+    first = systems[0]["rows"]
+    assert [r["track"] for r in first] == ["song-001", "song-002", "0001"]
+    assert first[0]["group"] == "song-001" and first[0]["info"] == {"capo": 2}
+    assert systems[1]["rows"][0]["track"] == "song-001"
+    key = json.loads((tmp_path / "key.json").read_text(encoding="utf-8"))
+    assert key[0] == {"code": "song-001", "name": "依恋", "title": "依恋"}
