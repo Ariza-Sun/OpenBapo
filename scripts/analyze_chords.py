@@ -133,7 +133,7 @@ def compress(intervals: np.ndarray, labels: Sequence[str]) -> str:
 
 
 def load_params(path: Path | None):  # type: ignore[no-untyped-def]
-    from opencapo.analysis.chords.fusion import FusionParams
+    from openbapo.analysis.chords.fusion import FusionParams
 
     if path is None:
         return FusionParams()

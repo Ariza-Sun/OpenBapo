@@ -9,8 +9,8 @@ import pytest
 pytest.importorskip("PIL")
 from PIL import Image
 
-from opencapo.sheet import layout
-from opencapo.sheet.triage import (
+from openbapo.sheet import layout
+from openbapo.sheet.triage import (
     apply_review,
     capo_hint,
     materialize,

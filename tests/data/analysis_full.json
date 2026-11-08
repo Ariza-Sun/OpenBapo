@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "title": "示例 Example",
-  "artist": "OpenCapo",
+  "artist": "OpenBapo",
   "duration": 4.25,
   "beats": [
     {"time": 0.5, "is_downbeat": true, "bar_index": 0, "beat_in_bar": 1},

@@ -4,8 +4,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from opencapo.analysis.audio import Audio, decode
-from opencapo.analysis.separate import STEM_NAMES, Stems, stems_workdir
+from openbapo.analysis.audio import Audio, decode
+from openbapo.analysis.separate import STEM_NAMES, Stems, stems_workdir
 
 
 def zeros(frames: int = 100) -> Stems:

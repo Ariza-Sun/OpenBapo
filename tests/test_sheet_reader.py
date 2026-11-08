@@ -9,7 +9,7 @@ pytest.importorskip("PIL")
 from PIL import Image
 from test_sheet_omr import drawn_page
 
-from opencapo.sheet import reader
+from openbapo.sheet import reader
 
 
 def test_extract_json_and_prompts() -> None:

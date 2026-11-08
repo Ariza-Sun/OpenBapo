@@ -50,7 +50,7 @@ API 层
 | 分轨 | Demucs v4 `htdemucs`（adefossez/demucs，PyPI `demucs` ≥ 4.1） | MIT | **未声明；按非商业对待。** 作者原话："The license of the weights is not clear: MusDB contains some data that were only usable for research purpose"，并表示无权替 Meta 或 MUSDB 版权方澄清 | MUSDB HQ + Meta 内部 800 首 | 第 1 步接入（`docs/plans/step-1.md` 决定 2）。权重首次运行时自动从 Hugging Face / Meta 文件服务器下载，不随代码分发。自部署文档须转述这一许可证状态；如发现许可证更干净且质量够的 4 轨模型，只换 `Separator` 适配器 |
 | 节拍 / 强拍 | Beat This!（CPJKU/beat_this，PyPI `beat-this` ≥ 1.1，checkpoint `final0`） | MIT | **MIT** | 16 个公开数据集，GTZAN 整体留出 | 第 1 步接入（决定 3）。不用 DBN 后处理，因此不依赖 madmom |
 
-| 和弦（E1） | BTC（jayg996/BTC-ISMIR19，`btc_model_large_voca.pt`，commit 2682317） | MIT（模型代码已随本仓库分发，见 `analysis/chords/models/btc_vendor/LICENSE`） | **未声明**：权重随 MIT 仓库分发，作者未单独说明 | Isophonics、Robbie Williams、USPop | 第 2 步接入。权重首次运行从作者仓库的固定 commit 下载到 `~/.cache/opencapo/`，校验 SHA-256 后再反序列化 |
+| 和弦（E1） | BTC（jayg996/BTC-ISMIR19，`btc_model_large_voca.pt`，commit 2682317） | MIT（模型代码已随本仓库分发，见 `analysis/chords/models/btc_vendor/LICENSE`） | **未声明**：权重随 MIT 仓库分发，作者未单独说明 | Isophonics、Robbie Williams、USPop | 第 2 步接入。权重首次运行从作者仓库的固定 commit 下载到 `~/.cache/openbapo/`，校验 SHA-256 后再反序列化 |
 | 和弦（E2） | lv-chordia（openmirlab/lv-chordia，Jiang 等 ISMIR 2019 的五网络集成） | MIT | **未单独声明**：五份权重随 MIT 仓库分发 | 论文在 Billboard / Isophonics / RWC 上报数，训练集待核 | 第 2 步接入；从 GitHub 安装（`analysis` 依赖组直接引用） |
 | 调性 / 低音 / 色度（E3–E5） | 无权重（规则） | — | — | — | 第 2 步，纯代码 |
 

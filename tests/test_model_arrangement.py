@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from opencapo.model import STRUM_AUTO, Arrangement
+from openbapo.model import STRUM_AUTO, Arrangement
 
 
 def test_defaults() -> None:

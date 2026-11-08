@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from opencapo.model import (
+from openbapo.model import (
     Analysis,
     Beat,
     Chord,

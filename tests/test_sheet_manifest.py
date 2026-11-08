@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from opencapo.sheet import (
+from openbapo.sheet import (
     build_manifest,
     load_manifest,
     parse_sheet,
@@ -17,7 +17,7 @@ from opencapo.sheet import (
     write_reference,
     write_wav,
 )
-from opencapo.sheet.manifest import MANIFEST_VERSION, review_count
+from openbapo.sheet.manifest import MANIFEST_VERSION, review_count
 
 SHEET = "title: 歌\nkey: D\ncapo: 2\nbpm: 120\ntime: 4/4\n---\nC | 1 2 3 4\nG | 5 - - -\n"
 
@@ -73,7 +73,7 @@ def test_manifest_lists_complete_songs_with_their_origin(tmp_path: Path) -> None
         )  # fmt: skip
         assert s["duration"] == pytest.approx(4.0)
     assert manifest["incomplete"] == [{"name": "c", "problem": "c: no c.wav next to c.sheet"}]
-    assert set(manifest["code"]) == {"opencapo", "commit"}
+    assert set(manifest["code"]) == {"openbapo", "commit"}
 
 
 def test_manifest_is_rebuilt_identically_and_render_differences_are_kept_per_song(

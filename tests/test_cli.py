@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from fakes import FakeSeparator, FakeTracker
 
-from opencapo.cli import main
-from opencapo.model import Analysis
+from openbapo.cli import main
+from openbapo.model import Analysis
 
 MAKE_TONE = Path(__file__).parents[1] / "scripts" / "make_tone.py"
 
@@ -87,7 +87,7 @@ def test_undecodable_file(tmp_path: Path, capsys: pytest.CaptureFixture[str]) ->
 def test_too_long(
     tone: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("opencapo.analysis.audio.MAX_DURATION_SECONDS", 2.0)
+    monkeypatch.setattr("openbapo.analysis.audio.MAX_DURATION_SECONDS", 2.0)
     assert run(["analyze", str(tone), "--out", "-"]) == 1
     assert "the limit is 0:02" in capsys.readouterr().err
 
@@ -101,9 +101,9 @@ def test_unwritable_output(tone: Path, tmp_path: Path, capsys: pytest.CaptureFix
 def test_missing_analysis_extra(
     tone: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("opencapo.analysis.deps.ANALYSIS_PACKAGES", ("no_such_pkg",))
+    monkeypatch.setattr("openbapo.analysis.deps.ANALYSIS_PACKAGES", ("no_such_pkg",))
     assert main(["analyze", str(tone), "--out", "-"]) == 1
-    assert "opencapo[analysis]" in capsys.readouterr().err
+    assert "openbapo[analysis]" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize(
@@ -123,12 +123,12 @@ def test_usage_errors_exit_2(argv: list[str]) -> None:
 
 def test_cli_imports_nothing_heavy() -> None:
     # A core-only install must reach the install hint before numpy/torch are needed.
-    code = "import sys, opencapo.cli; assert 'numpy' not in sys.modules, 'numpy imported'"
+    code = "import sys, openbapo.cli; assert 'numpy' not in sys.modules, 'numpy imported'"
     subprocess.run([sys.executable, "-c", code], check=True)
 
 
 def test_module_entry_point_reports_usage() -> None:
     proc = subprocess.run(
-        [sys.executable, "-m", "opencapo", "--version"], capture_output=True, text=True, check=True
+        [sys.executable, "-m", "openbapo", "--version"], capture_output=True, text=True, check=True
     )
-    assert proc.stdout.startswith("opencapo ")
+    assert proc.stdout.startswith("openbapo ")

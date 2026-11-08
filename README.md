@@ -1,6 +1,6 @@
-# OpenCapo
+# OpenBapo
 
-[![CI](https://github.com/Ariza-Sun/OpenCapo/actions/workflows/ci.yml/badge.svg)](https://github.com/Ariza-Sun/OpenCapo/actions/workflows/ci.yml)
+[![CI](https://github.com/Ariza-Sun/OpenBapo/actions/workflows/ci.yml/badge.svg)](https://github.com/Ariza-Sun/OpenBapo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 **Turn a song into a guitar play-along sheet.** Upload a recording and get chord diagrams, a strumming tab, the vocal melody in numbered notation (jianpu) and the lyrics on one sheet. Change the singing key, the fingering key or the strum pattern, and export to PNG, PDF or MusicXML. Works for Chinese and English songs, delivered as a Discord bot.
@@ -9,7 +9,7 @@
 
 ## Why
 
-Tools that transcribe chords from audio (Capo, Chordify, Moises and others) are closed and paid. Guitar play-along sheets on Chinese tab sites are arranged by hand, so less popular songs and most English songs have none. OpenCapo aims to be an open, self-hostable alternative that produces the numbered-notation play-along sheet Chinese guitarists are used to.
+Tools that transcribe chords from audio (Capo, Chordify, Moises and others) are closed and paid. Guitar play-along sheets on Chinese tab sites are arranged by hand, so less popular songs and most English songs have none. OpenBapo aims to be an open, self-hostable alternative that produces the numbered-notation play-along sheet Chinese guitarists are used to.
 
 ## Progress
 
@@ -31,22 +31,22 @@ The full plan is in the [roadmap](docs/ROADMAP.md) and the [requirements](docs/R
 You need Python 3.11 or newer and `ffmpeg`. A GPU makes the models faster, but a CPU works.
 
 ```bash
-git clone https://github.com/Ariza-Sun/OpenCapo.git
-cd OpenCapo
+git clone https://github.com/Ariza-Sun/OpenBapo.git
+cd OpenBapo
 python -m venv .venv && source .venv/bin/activate
 
 # Install torch and torchaudio for your CUDA version first (see pytorch.org); for CPU only:
 pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
 pip install -e ".[analysis]"
 
-opencapo analyze your-song.mp3 --out analysis.json
+openbapo analyze your-song.mp3 --out analysis.json
 ```
 
 Model weights are downloaded on first use. No audio at hand? Synthesise a C–F–G7–Am progression with the bundled script and analyse that:
 
 ```bash
 python scripts/make_tone.py demo.wav --progression 120 --seconds 16
-opencapo analyze demo.wav --out demo.json
+openbapo analyze demo.wav --out demo.json
 ```
 
 The output holds the beats and downbeats, tempo, time signature, key, and a chord sequence aligned to the beats. Roots are pitch classes (0 = C … 11 = B); each chord also has a quality, an inversion bass and a confidence. An excerpt of `demo.json`:
@@ -111,7 +111,7 @@ Two caveats:
 ## Repository layout
 
 ```
-src/opencapo/
+src/openbapo/
   model/      data model: Beat, Tempo, Key, Chord, Analysis; JSON round-trip
   analysis/   analysis pipeline: decoding, separation, beats, chords and key (chords/)
   sheet/      text sheet format, renderer and sheet reader: the evaluation sample generator
@@ -144,4 +144,4 @@ The code in this repository is released under the [MIT licence](LICENSE). Model 
 | Chords | BTC | not stated separately (shipped in an MIT code repository) |
 | Chords | lv-chordia | not stated separately (shipped in an MIT code repository) |
 
-Details and training data are in section 2.1 of [docs/plans/backend.md](docs/plans/backend.md). Check each licence yourself before commercial use or a public deployment. OpenCapo outputs sheets only; it never returns separated, re-pitched or re-timed audio.
+Details and training data are in section 2.1 of [docs/plans/backend.md](docs/plans/backend.md). Check each licence yourself before commercial use or a public deployment. OpenBapo outputs sheets only; it never returns separated, re-pitched or re-timed audio.

@@ -27,10 +27,10 @@ ACCEPTANCE_CHORDS_SECONDS = 30.0  # step 2: chords + key
 def run_once(
     song: Path, model: str, device: str, separator_cache: dict, chord_experts: str
 ) -> dict[str, float]:
-    from opencapo.analysis.beats import BeatThisTracker
-    from opencapo.analysis.pipeline import analyze_file
-    from opencapo.analysis.separate import DemucsSeparator
-    from opencapo.cli import build_chord_stage
+    from openbapo.analysis.beats import BeatThisTracker
+    from openbapo.analysis.pipeline import analyze_file
+    from openbapo.analysis.separate import DemucsSeparator
+    from openbapo.cli import build_chord_stage
 
     if model not in separator_cache:
         separator_cache[model] = DemucsSeparator(model=model, device=device)
@@ -61,8 +61,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default="docs/benchmarks/step-1-timing")
     args = parser.parse_args(argv)
 
-    from opencapo.analysis.audio import probe
-    from opencapo.analysis.device import resolve_device
+    from openbapo.analysis.audio import probe
+    from openbapo.analysis.device import resolve_device
 
     device = resolve_device(args.device)
     duration = probe(args.song).duration
@@ -94,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
         "device": device,
         "packages": {
             n: importlib.metadata.version(n)
-            for n in ("opencapo", "torch", "demucs", "beat-this", "lv-chordia")
+            for n in ("openbapo", "torch", "demucs", "beat-this", "lv-chordia")
         },
     }
     import torch

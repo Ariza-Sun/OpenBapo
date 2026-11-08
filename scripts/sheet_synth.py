@@ -28,7 +28,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--melody-voice", choices=("piano", "voice"), default="piano")
     args = parser.parse_args(argv)
 
-    from opencapo.sheet import load_sheet, render, write_manifest, write_reference, write_wav
+    from openbapo.sheet import load_sheet, render, write_manifest, write_reference, write_wav
 
     args.out.mkdir(parents=True, exist_ok=True)
     for path in args.sheets:

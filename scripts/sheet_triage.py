@@ -39,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dpi", type=int, default=300, help="rasterisation of PDF sources")
     args = parser.parse_args(argv)
 
-    from opencapo.sheet.triage import apply_review, materialize, plan_library, table, to_json
+    from openbapo.sheet.triage import apply_review, materialize, plan_library, table, to_json
 
     plans = plan_library(args.raw)
     for path in args.review:

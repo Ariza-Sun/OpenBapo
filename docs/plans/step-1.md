@@ -5,7 +5,7 @@
 
 ## 1. 目标与范围
 
-本步把分析流水线的前两个环节接进来，让 `opencapo analyze` 第一次真正读音频。做完后应当有：
+本步把分析流水线的前两个环节接进来，让 `openbapo analyze` 第一次真正读音频。做完后应当有：
 
 1. **音频解码与时长检查**：六种格式都能解码；超过 8 分钟给出清楚的错误；`Analysis.duration` 填上。
 2. **分轨**：混音 → vocals / drums / bass / other，只在流水线内部以临时文件 / 内存数组存在，流程结束（含出错）后不残留。
@@ -13,7 +13,7 @@
 4. **评测脚本**：在公开数据集上算节拍 F-measure（mir_eval），结果文件提交进仓库。
 5. **计时**：每个环节的耗时记录下来，并有脚本在 GPU 上产出"4 分钟歌曲分轨 + 节拍"的耗时数字。
 6. **许可证**：用到的每份模型权重的许可证写进 `docs/plans/backend.md`。
-7. **依赖分组**：torch 与模型依赖进可选依赖组 `opencapo[analysis]`，核心包仍只依赖 pydantic。
+7. **依赖分组**：torch 与模型依赖进可选依赖组 `openbapo[analysis]`，核心包仍只依赖 pydantic。
 
 **本步不做**：和弦、调性（第 2 步）；节奏型推荐（第 3 步）；段落结构检测（需求明确不做，候选模型若顺带输出一律丢弃）；局部速度曲线（需求只要全局 BPM）；分轨的任何存储 / 下发 / 导出；Discord；队列。
 
@@ -22,7 +22,7 @@
 ### 2.1 模块
 
 ```
-src/opencapo/
+src/openbapo/
     errors.py                # InputError（CLI 与流水线共用）
     analysis/
         __init__.py          # 只有文档字符串，不 import 任何重依赖
@@ -45,10 +45,10 @@ docs/benchmarks/
     step-1-timing.md / .json # time_pipeline.py 的输出（提交进仓库）
 ```
 
-- `opencapo.analysis` 这个包名是第 0 步预留的；本步起它就是分析流水线。
+- `openbapo.analysis` 这个包名是第 0 步预留的；本步起它就是分析流水线。
 - `Separator` / `BeatTracker` 做成协议（Python 的 `typing.Protocol`，即只规定方法签名的接口），流水线只依赖接口。好处：单元测试用假实现在 CPU 上跑通整条流水线；换模型只换适配器。
 - `grid.py` 是纯计算，不 import torch，可在 CI 上完整测试。
-- 模型包在适配器方法里延迟 import；`opencapo.analysis` 包本身与 `deps.py` 不碰 numpy / torch，所以核心安装下运行 `opencapo analyze` 得到的是一句安装提示，不是 ImportError（有测试守着）。
+- 模型包在适配器方法里延迟 import；`openbapo.analysis` 包本身与 `deps.py` 不碰 numpy / torch，所以核心安装下运行 `openbapo analyze` 得到的是一句安装提示，不是 ImportError（有测试守着）。
 - 分轨先在内存里（`Stems`，四个 `(channels, frames)` 数组），再写成 32 位浮点 WAV 到临时目录供后续环节读；两者都随 `with` 块结束消失。
 
 ### 2.2 数据流
@@ -99,8 +99,8 @@ docs/benchmarks/
 analysis = ["numpy", "torch>=2.1", "demucs>=4.1", "beat-this>=1.1", ...]   # 以确认的模型为准
 ```
 
-- 核心包（`pip install opencapo`）仍只依赖 pydantic；编配 / 渲染（第 3、4 步）不装 `analysis` 也能装和测。
-- 没装 `analysis` 时运行 `opencapo analyze`，报一句清楚的错："analysis stages need `pip install 'opencapo[analysis]'`"，退出码 1。
+- 核心包（`pip install openbapo`）仍只依赖 pydantic；编配 / 渲染（第 3、4 步）不装 `analysis` 也能装和测。
+- 没装 `analysis` 时运行 `openbapo analyze`，报一句清楚的错："analysis stages need `pip install 'openbapo[analysis]'`"，退出码 1。
 - `ffmpeg` 命令行程序是运行时外部依赖（解码 mp3 / m4a / ogg / opus 都靠它），README 与自部署文档写明；GitHub Actions 的 ubuntu runner 自带。
 - torch 的 CUDA 版本由安装方按 pytorch.org 的说明选；`pyproject.toml` 不锁 CUDA 版本。
 
@@ -146,7 +146,7 @@ python scripts/eval_beats.py --audio <dir> --annotations <dir> \
 - 数据集见第 8 节决定 4；音频与标注**不提交**进仓库，脚本按目录参数读取。
 - 指标：mir_eval `beat.f_measure`（默认 70 ms 容差），分别算拍点与强拍；按曲目平均；另按流派分组报告。每个候选记录版本号、每曲平均耗时。
 - 输出 Markdown 表 + JSON（含 GPU 型号、日期、各依赖版本、曲目数），直接提交到 `docs/benchmarks/`。README 的"状态"一节引用这个数字。
-- 候选模型的适配器放在脚本里（或 `scripts/_trackers.py`），不进 `src/`；选定的那个再搬进 `src/opencapo/analysis/beats.py`。
+- 候选模型的适配器放在脚本里（或 `scripts/_trackers.py`），不进 `src/`；选定的那个再搬进 `src/openbapo/analysis/beats.py`。
 
 ### 5.2 `scripts/time_pipeline.py`
 
@@ -184,7 +184,7 @@ git add docs/benchmarks && git commit -m "Add step-1 beat evaluation and timing 
 | GPU 实测 | 不进 CI；脚本产出数字 | 5.1、5.2 节 |
 
 - `pytest` 默认 `-m "not models"`，现有 CI 四条检查不变。
-- 新 CI 任务 `analysis-smoke`：`pip install -e ".[analysis]" --extra-index-url https://download.pytorch.org/whl/cpu`（CPU 版 torch 小得多）→ `pytest -m models` → `opencapo analyze click.wav --out - --timing -`。这个任务同时是"依赖在新版 Python 上装得上"的探针。
+- 新 CI 任务 `analysis-smoke`：`pip install -e ".[analysis]" --extra-index-url https://download.pytorch.org/whl/cpu`（CPU 版 torch 小得多）→ `pytest -m models` → `openbapo analyze click.wav --out - --timing -`。这个任务同时是"依赖在新版 Python 上装得上"的探针。
 
 ## 7. 数据模型改动
 
@@ -266,6 +266,6 @@ git add docs/benchmarks && git commit -m "Add step-1 beat evaluation and timing 
 |---|---|---|
 | 节拍 F-measure ≥ 85%（评测脚本输出，数字进 README 或 docs） | `scripts/eval_beats.py` → `docs/benchmarks/step-1-beats.md`；README 引用 | **通过**：拍点 F1 0.891（GTZAN 998 首，RTX 3090） |
 | 4 分钟歌曲在一张 GPU 上：分轨 + 节拍 ≤ 90 秒 | `scripts/time_pipeline.py` → `docs/benchmarks/step-1-timing.md`（RTX 3090） | **通过**：热启动 7.1 秒，冷启动 13.7 秒 |
-| `opencapo analyze` 输出含 `Beat`、`Tempo` | `tests/test_pipeline.py`、`tests/test_cli.py`（假模型）；`tests/test_models.py` 与 CI `analysis-smoke` 任务（真模型，节拍器音频 BPM ≈ 120） | 已实现 |
+| `openbapo analyze` 输出含 `Beat`、`Tempo` | `tests/test_pipeline.py`、`tests/test_cli.py`（假模型）；`tests/test_models.py` 与 CI `analysis-smoke` 任务（真模型，节拍器音频 BPM ≈ 120） | 已实现 |
 | 分轨文件在流程结束后不残留 | `tests/test_separate.py`（临时目录）、`tests/test_pipeline.py`（流水线正常与异常路径）、`tests/test_models.py`（真模型） | 已实现 |
 | 模型权重许可证逐个列在 `docs/plans/backend.md` | backend.md 第 2.1 节 | 已写 |

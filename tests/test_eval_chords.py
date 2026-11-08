@@ -382,7 +382,7 @@ def test_summarize_splits_by_dataset_and_group() -> None:
 
 
 def test_sheet_loader_reads_renders(tmp_path: Path) -> None:
-    from opencapo.sheet import parse_sheet, render, write_manifest, write_reference, write_wav
+    from openbapo.sheet import parse_sheet, render, write_manifest, write_reference, write_wav
 
     sheet_text = "title: t\nkey: D\ncapo: 2\nbpm: 120\n---\nC | 1 2 3 4\nG | 5 - - -\n"
     sheet = parse_sheet(sheet_text)

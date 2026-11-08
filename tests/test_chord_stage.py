@@ -5,14 +5,14 @@ import pytest
 from fakes import FakeChordExpert, FakeSeparator, FakeTracker
 from synth import SR, progression, to_stereo, voicing
 
-from opencapo.analysis.chords.chroma import ChromaTemplateExpert
-from opencapo.analysis.chords.stage import ChordStage
-from opencapo.analysis.chords.vocab import label_index
-from opencapo.analysis.pipeline import analyze_file
-from opencapo.analysis.separate import Stems
-from opencapo.cli import build_chord_stage, main
-from opencapo.errors import InputError
-from opencapo.model import Analysis, Beat, ChordQuality, Mode
+from openbapo.analysis.chords.chroma import ChromaTemplateExpert
+from openbapo.analysis.chords.stage import ChordStage
+from openbapo.analysis.chords.vocab import label_index
+from openbapo.analysis.pipeline import analyze_file
+from openbapo.analysis.separate import Stems
+from openbapo.cli import build_chord_stage, main
+from openbapo.errors import InputError
+from openbapo.model import Analysis, Beat, ChordQuality, Mode
 
 C, F, G7, AM = (
     label_index(0, ChordQuality.MAJ),

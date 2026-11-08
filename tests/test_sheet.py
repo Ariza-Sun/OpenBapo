@@ -8,14 +8,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from opencapo.analysis.audio import Audio
-from opencapo.analysis.chords.chroma import ChromaTemplateExpert
-from opencapo.analysis.chords.stage import ChordStage
-from opencapo.analysis.grid import build_grid
-from opencapo.model import ChordQuality, Mode
-from opencapo.sheet import SheetError, load_sheet, parse_sheet, render, write_reference, write_wav
-from opencapo.sheet.format import degree_midi, parse_chord_name, parse_chords, parse_melody
-from opencapo.sheet.render import shape_frets, voicing
+from openbapo.analysis.audio import Audio
+from openbapo.analysis.chords.chroma import ChromaTemplateExpert
+from openbapo.analysis.chords.stage import ChordStage
+from openbapo.analysis.grid import build_grid
+from openbapo.model import ChordQuality, Mode
+from openbapo.sheet import SheetError, load_sheet, parse_sheet, render, write_reference, write_wav
+from openbapo.sheet.format import degree_midi, parse_chord_name, parse_chords, parse_melody
+from openbapo.sheet.render import shape_frets, voicing
 
 EXAMPLE = Path(__file__).parents[1] / "docs" / "examples" / "xiaoxingxing.sheet"
 
