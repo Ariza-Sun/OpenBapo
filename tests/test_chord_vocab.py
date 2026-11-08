@@ -1,7 +1,7 @@
 import pytest
 
-from opencapo.analysis.chords import vocab
-from opencapo.analysis.chords.vocab import (
+from openbapo.analysis.chords import vocab
+from openbapo.analysis.chords.vocab import (
     N_LABELS,
     NO_CHORD,
     LabelError,
@@ -14,7 +14,7 @@ from opencapo.analysis.chords.vocab import (
     parse_label,
     pitch_class,
 )
-from opencapo.model import ChordQuality
+from openbapo.model import ChordQuality
 
 
 def test_label_space_size() -> None:

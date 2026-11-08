@@ -73,7 +73,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "manifest":
-        from opencapo.sheet import write_manifest
+        from openbapo.sheet import write_manifest
 
         manifest = write_manifest(args.root)
         songs, incomplete = manifest["songs"], manifest["incomplete"]
@@ -85,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "read":
-        from opencapo.sheet import (
+        from openbapo.sheet import (
             SheetError,
             load_sheet,
             render,
@@ -93,7 +93,7 @@ def main(argv: list[str] | None = None) -> int:
             write_reference,
             write_wav,
         )
-        from opencapo.sheet.reader import claude_runner, read_sheet
+        from openbapo.sheet.reader import claude_runner, read_sheet
 
         runner = claude_runner(args.model)
         failures = 0
@@ -126,8 +126,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1 if failures else 0
 
     if args.command == "prepare":
-        from opencapo.sheet.layout import worksheet
-        from opencapo.sheet.omr import HEADER_PROMPT, READING_PROMPT
+        from openbapo.sheet.layout import worksheet
+        from openbapo.sheet.omr import HEADER_PROMPT, READING_PROMPT
 
         sheet = worksheet(args.source, args.out, args.dpi)
         (args.out / "reading_prompt.txt").write_text(READING_PROMPT, encoding="utf-8")
@@ -138,8 +138,8 @@ def main(argv: list[str] | None = None) -> int:
         )  # type: ignore[arg-type]
         return 0
 
-    from opencapo.sheet.omr import BarReading, Check, reconcile_header, write_review
-    from opencapo.sheet.omr import assemble as assemble_sheet
+    from openbapo.sheet.omr import BarReading, Check, reconcile_header, write_review
+    from openbapo.sheet.omr import assemble as assemble_sheet
 
     worksheet_data = json.loads((args.work_dir / "worksheet.json").read_text(encoding="utf-8"))
     crops = {int(s["index"]): str(s["crop"]) for p in worksheet_data["pages"] for s in p["systems"]}

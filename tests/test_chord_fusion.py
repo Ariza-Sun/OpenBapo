@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from opencapo.analysis.chords.fusion import (
+from openbapo.analysis.chords.fusion import (
     BassEstimate,
     ChordPosteriors,
     FusionParams,
@@ -16,8 +16,8 @@ from opencapo.analysis.chords.fusion import (
     key_prior,
     viterbi,
 )
-from opencapo.analysis.chords.vocab import N_LABELS, NO_CHORD, label_index
-from opencapo.model import Analysis, Beat, ChordQuality, Key, Mode
+from openbapo.analysis.chords.vocab import N_LABELS, NO_CHORD, label_index
+from openbapo.model import Analysis, Beat, ChordQuality, Key, Mode
 
 C = label_index(0, ChordQuality.MAJ)
 F = label_index(5, ChordQuality.MAJ)

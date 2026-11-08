@@ -2,11 +2,11 @@
 
 import numpy as np
 
-from opencapo.analysis.audio import Audio
-from opencapo.analysis.beats import BeatTimes
-from opencapo.analysis.chords.fusion import ChordPosteriors
-from opencapo.analysis.chords.vocab import N_LABELS
-from opencapo.analysis.separate import STEM_NAMES, Stems
+from openbapo.analysis.audio import Audio
+from openbapo.analysis.beats import BeatTimes
+from openbapo.analysis.chords.fusion import ChordPosteriors
+from openbapo.analysis.chords.vocab import N_LABELS
+from openbapo.analysis.separate import STEM_NAMES, Stems
 
 
 class FakeSeparator:

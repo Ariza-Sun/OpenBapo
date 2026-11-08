@@ -1,66 +1,147 @@
-# OpenCapo
+# OpenBapo
 
-开源的"听歌出弹唱谱"Discord Bot：上传一首歌的音频，几分钟后得到一张吉他弹唱谱（和弦图 + 六线谱节奏型 + 简谱 + 歌词），可以换演唱调、指法调、节奏型，导出 PNG / PDF / MusicXML。中文 / 英文歌曲均支持。
+[![CI](https://github.com/Ariza-Sun/OpenBapo/actions/workflows/ci.yml/badge.svg)](https://github.com/Ariza-Sun/OpenBapo/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An open-source Discord bot that turns a song's audio into a guitar play-along sheet (chord diagrams, strumming tab, numbered-notation melody, aligned lyrics), with singing-key / fingering-key / strum-pattern options and PNG / PDF / MusicXML export. Chinese and English songs supported.
+**Turn a song into a guitar play-along sheet.** Upload a recording and get chord diagrams, a strumming tab, the vocal melody in numbered notation (jianpu) and the lyrics on one sheet. Change the singing key, the fingering key or the strum pattern, and export to PNG, PDF or MusicXML. Works for Chinese and English songs, delivered as a Discord bot.
 
-## 文档
+> ⚠️ **Work in progress.** What works today is the command-line analyser: it finds the beats, tempo, chords and key of a recording and writes them as JSON. Arranging, sheet rendering and the Discord bot are still to come; see [Progress](#progress).
 
-| 文档 | 内容 |
-|---|---|
-| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 阶段 1 需求：做什么、做到什么程度、验收标准、后续开发 |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | 分步路线图：先做什么后做什么，每步的验收标准 |
-| [CLAUDE.md](CLAUDE.md) | 给 agent 的工作说明与硬性边界 |
-| [docs/plans/frontend-discord.md](docs/plans/frontend-discord.md) | Discord 前端计划：命令、控件、约束、与后端的接口 |
-| [docs/plans/backend.md](docs/plans/backend.md) | 后端计划：架构、分析流水线、编配、渲染、存储、部署 |
-| [docs/plans/step-0.md](docs/plans/step-0.md) | 第 0 步实现计划：项目骨架、数据模型、CLI |
-| [docs/plans/step-1.md](docs/plans/step-1.md) | 第 1 步实现计划：分轨、节拍、BPM、拍号 |
-| [docs/benchmarks/](docs/benchmarks/README.md) | 验收数字（由脚本生成）：节拍 F-measure、各环节耗时 |
-| [docs/reference/desperado-sheet.webp](docs/reference/desperado-sheet.webp) | 弹唱谱默认排版标准 |
+## Why
 
-## 状态
+Tools that transcribe chords from audio (Capo, Chordify, Moises and others) are closed and paid. Guitar play-along sheets on Chinese tab sites are arranged by hand, so less popular songs and most English songs have none. OpenBapo aims to be an open, self-hostable alternative that produces the numbered-notation play-along sheet Chinese guitarists are used to.
 
-阶段 1 第 1 步（分轨 + 节拍 + BPM）已完成，见 [docs/plans/step-1.md](docs/plans/step-1.md)。`opencapo analyze` 能解码音频（8 分钟上限）、用 Demucs 分轨（只在内部用，结束即删）、用 Beat This! 输出拍点 / 小节 / 全局 BPM / 拍号。验收数字（由 [docs/benchmarks/](docs/benchmarks/README.md) 里的脚本生成，RTX 3090）：
+## Progress
 
-| 指标 | 结果 | 验收门槛 |
+| Step | What | Status |
 |---|---|---|
-| 节拍 F-measure（GTZAN，998 首） | 拍点 **0.891**，强拍 0.786 | 拍点 ≥ 0.85 |
-| 4 分钟歌曲分轨 + 节拍（单卡，热启动） | **7.1 秒**（冷启动 13.7 秒） | ≤ 90 秒 |
+| 0 | Project skeleton, data model, CLI | ✅ Done |
+| 1 | Source separation, beats, tempo, time signature | ✅ Done |
+| 2 | Chords and key | ✅ Done |
+| 3 | Arranging: capo, fingering key, chord simplification, strum patterns | ⏳ Next |
+| 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | — |
+| 5 | Lyrics: alignment of pasted lyrics, and recognition | — |
+| 6 | Discord bot | — |
+| 7 | Vocal melody to jianpu | — |
 
-第 2 步（和弦 + 调性）完成，实测（`docs/benchmarks/step-2-chords.md`）：
+The full plan is in the [roadmap](docs/ROADMAP.md) and the [requirements](docs/REQUIREMENTS.md) (both in Chinese).
 
-| 指标 | 实测（多专家融合） | 验收 |
-|---|---|---|
-| 和弦 majmin（负责人曲库样本集 220 首，验收依据） | **0.974** | ≥ 0.80 |
-| 和弦 majmin（GuitarSet 伴奏曲目，报数半 90 段，参考） | **0.775** | 参考 |
-| 和弦 majmin（AAM 500 首，参考） | **0.947** | 参考 |
-| 调性正确率（负责人曲库样本集 220 首，关系大小调算对，验收依据） | **0.936** | ≥ 0.85 |
-| 调性正确率（GuitarSet 伴奏 / AAM 单一调性 72 首，参考） | **0.789 / 0.931** | 参考 |
-| 4 分钟歌曲和弦 + 调性（单卡，热启动） | **6.1 秒**（整条流水线 13.4 秒） | ≤ 30 秒 |
+## Quick start
 
-GuitarSet 伴奏上的缺口集中在 Funk / 爵士风格，已在计划里记为已知缺口。验收依据是负责人曲库谱子渲染的合成音频（识谱 `scripts/sheet_ocr.py`、渲染 `scripts/sheet_synth.py`），没有人声和混音，分数是真录音的上限。编配、渲染与 Discord Bot 尚未开始。
-
-## 开发
-
-需要 Python ≥ 3.11 和 `ffmpeg` 命令行工具（解码音频）。
+You need Python 3.11 or newer and `ffmpeg`. A GPU makes the models faster, but a CPU works.
 
 ```bash
+git clone https://github.com/Ariza-Sun/OpenBapo.git
+cd OpenBapo
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-ruff format --check . && ruff check . && mypy && pytest
+
+# Install torch and torchaudio for your CUDA version first (see pytorch.org); for CPU only:
+pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install -e ".[analysis]"
+
+openbapo analyze your-song.mp3 --out analysis.json
 ```
 
-跑分析流水线还要装模型依赖（torch、torchaudio、demucs、beat-this）。torch 与 torchaudio 要来自同一个构建：GPU 机器按 pytorch.org 的说明先装对应 CUDA 版本的两者，再装下面的包；纯 CPU 机器可先 `pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu`：
+Model weights are downloaded on first use. No audio at hand? Synthesise a C–F–G7–Am progression with the bundled script and analyse that:
 
 ```bash
-pip install -e ".[dev,analysis]"
-python scripts/make_tone.py click.wav --click 120 --seconds 12
-opencapo analyze click.wav --out analysis.json --timing -
-pytest -m models   # 真模型的端到端测试（CPU 也能跑，首次会下载权重）
+python scripts/make_tone.py demo.wav --progression 120 --seconds 16
+openbapo analyze demo.wav --out demo.json
 ```
 
-模型权重首次运行时自动下载，各自的许可证见 [docs/plans/backend.md](docs/plans/backend.md) 第 2.1 节；Demucs 的权重许可证未声明，按非商业对待。lv-chordia 声明要 `torch>=2.13`，在驱动较旧、只能装旧 torch 的机器上会被 pip 顶掉 torch，处理办法见 [docs/benchmarks/README.md](docs/benchmarks/README.md) 的 torch 提醒。
+The output holds the beats and downbeats, tempo, time signature, key, and a chord sequence aligned to the beats. Roots are pitch classes (0 = C … 11 = B); each chord also has a quality, an inversion bass and a confidence. An excerpt of `demo.json`:
 
-## 许可证
+```json
+{
+  "beats": [{"time": 0.0, "is_downbeat": true, "bar_index": 0, "beat_in_bar": 1}, ...],
+  "tempo": {"bpm": 120.0},
+  "time_signature": {"numerator": 4, "denominator": 4},
+  "key": {"tonic": 9, "mode": "minor", "confidence": 0.004},
+  "chords": [
+    {"start": 0.0, "end": 2.0, "root": 0, "quality": "maj", "bass": null, "confidence": 0.96},
+    {"start": 2.0, "end": 4.0, "root": 5, "quality": "maj", "bass": null, "confidence": 0.92},
+    ...
+  ]
+}
+```
 
-MIT，见 [LICENSE](LICENSE)。依赖的模型权重各有其许可证，选型时逐个核对。
+Every loop of this progression ends on Am, so the key comes out as A minor, the relative minor of C major. The very low confidence says the two were nearly tied.
+
+Useful options: `--device cpu|cuda`, `--timing -` to print the time spent in each stage, and `--chord-experts lvchordia` to use a single chord model.
+
+## How it works
+
+```
+audio ─decode─▶ source separation (Demucs) ─▶ beats / downbeats / tempo (Beat This!)
+                          │
+                          ▼
+          chords: BTC + lv-chordia + chroma templates + bass line,
+          fused on the beat grid and smoothed with Viterbi
+                          │
+                          ▼
+          key: chord statistics cross-checked with chroma templates
+                          │
+                          ▼
+          arranging → rendering → Discord   (in progress)
+```
+
+- **Decisions on the beat.** Two deep-learning chord models and two rule-based experts each give a posterior per beat. A fusion layer votes on the beat grid, then Viterbi smoothing makes chord changes cheap on downbeats and expensive mid-bar, so every chord starts and ends on a beat.
+- **Stems stay internal.** Separated stems are an intermediate product, deleted after analysis; they are never stored or returned.
+- **Analysis apart from arranging.** Model inference runs once. The resulting JSON can be re-arranged and re-rendered any number of times, which is plain computation taking seconds.
+
+## Accuracy
+
+Every number comes from a script in this repository; see [docs/benchmarks](docs/benchmarks/README.md). Measured on an RTX 3090.
+
+| Task | Data | Result |
+|---|---|---|
+| Beats | GTZAN (998 tracks) | beat F-measure **0.891**, downbeat 0.786 |
+| Chords (major/minor) | 220 Chinese and English pop songs: guitar sheets rendered to audio | **0.974** |
+| Chords (major/minor) | AAM, synthetic full-band mixes (500 tracks) | **0.947** |
+| Chords (major/minor) | GuitarSet, acoustic guitar comping (90 excerpts) | 0.775 |
+| Key | the same 220 guitar sheets (relative major/minor counted as correct) | **0.936** |
+| Key | GuitarSet comping / AAM single-key tracks | 0.789 / 0.931 |
+| Speed | 4-minute song: separation, beats, chords and key | 13.4 s |
+
+Two caveats:
+
+- The 220-song set is rendered from guitar sheets, with no vocals and no real mix. Treat its scores as an upper bound for real recordings.
+- The GuitarSet gap is mostly funk and jazz comping, a known weak spot of the open chord models available today.
+
+## Repository layout
+
+```
+src/openbapo/
+  model/      data model: Beat, Tempo, Key, Chord, Analysis; JSON round-trip
+  analysis/   analysis pipeline: decoding, separation, beats, chords and key (chords/)
+  sheet/      text sheet format, renderer and sheet reader: the evaluation sample generator
+scripts/      evaluation, timing, sheet reading and rendering scripts
+tests/        unit tests; tests marked `models` load the real models
+docs/         requirements, roadmap, per-step plans and benchmark results (in Chinese)
+```
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+ruff format --check . && ruff check . && mypy && pytest   # must pass before a push
+pip install -e ".[dev,analysis]" && pytest -m models      # end-to-end tests with the real models
+```
+
+- torch and torchaudio must come from the same build. lv-chordia declares `torch>=2.13`, so on machines limited to an older torch, pip will replace it; [docs/benchmarks/README.md](docs/benchmarks/README.md) shows how to avoid that.
+- Design decisions and trade-offs are recorded in each step's plan under [docs/plans/](docs/plans/). Read the plan for the step you are working on first.
+
+Issues and pull requests are welcome. Code, identifiers and commit messages are in English; the design documents are in Chinese.
+
+## Models and licences
+
+The code in this repository is released under the [MIT licence](LICENSE). Model weights are not distributed with it; each is downloaded from its source on first use.
+
+| Use | Model | Weight licence |
+|---|---|---|
+| Source separation | Demucs `htdemucs` | not stated; **treat as non-commercial** |
+| Beats | Beat This! | MIT |
+| Chords | BTC | not stated separately (shipped in an MIT code repository) |
+| Chords | lv-chordia | not stated separately (shipped in an MIT code repository) |
+
+Details and training data are in section 2.1 of [docs/plans/backend.md](docs/plans/backend.md). Check each licence yourself before commercial use or a public deployment. OpenBapo outputs sheets only; it never returns separated, re-pitched or re-timed audio.

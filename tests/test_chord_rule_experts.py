@@ -2,31 +2,31 @@ import numpy as np
 import pytest
 from synth import SR, progression, to_stereo, voicing
 
-from opencapo.analysis.audio import Audio
-from opencapo.analysis.chords.bassline import (
+from openbapo.analysis.audio import Audio
+from openbapo.analysis.chords.bassline import (
     BassLineDetector,
     bass_pitch_classes,
     bass_source,
     pool_per_beat,
 )
-from opencapo.analysis.chords.chroma import (
+from openbapo.analysis.chords.chroma import (
     Chromagram,
     ChromaTemplateExpert,
     chromagram,
     mean_chroma,
     templates,
 )
-from opencapo.analysis.chords.fusion import aggregate_to_beats
-from opencapo.analysis.chords.key import (
+from openbapo.analysis.chords.fusion import aggregate_to_beats
+from openbapo.analysis.chords.key import (
     estimate_key,
     key_from_index,
     key_index,
     scores_from_chords,
     scores_from_chroma,
 )
-from opencapo.analysis.chords.vocab import NO_CHORD, index_label, label_index
-from opencapo.analysis.separate import Stems
-from opencapo.model import Chord, ChordQuality, Mode
+from openbapo.analysis.chords.vocab import NO_CHORD, index_label, label_index
+from openbapo.analysis.separate import Stems
+from openbapo.model import Chord, ChordQuality, Mode
 
 C_MAJ = voicing([0, 4, 7])
 F_MAJ = voicing([5, 9, 0])

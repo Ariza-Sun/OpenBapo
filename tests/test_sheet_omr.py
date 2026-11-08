@@ -8,7 +8,7 @@ import pytest
 pytest.importorskip("PIL")
 from PIL import Image, ImageDraw
 
-from opencapo.sheet import layout, omr
+from openbapo.sheet import layout, omr
 
 
 def drawn_page(width: int = 1200, height: int = 1600, systems: int = 1) -> Image.Image:

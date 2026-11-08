@@ -35,11 +35,11 @@ jobs:
       - name: CLI reports a missing analysis install
         run: |
           python scripts/make_tone.py "$RUNNER_TEMP/tone.wav"
-          if opencapo analyze "$RUNNER_TEMP/tone.wav" --out "$RUNNER_TEMP/analysis.json" 2> "$RUNNER_TEMP/err.txt"; then
+          if openbapo analyze "$RUNNER_TEMP/tone.wav" --out "$RUNNER_TEMP/analysis.json" 2> "$RUNNER_TEMP/err.txt"; then
             echo "expected a failure without the analysis extra"; exit 1
           fi
           cat "$RUNNER_TEMP/err.txt"
-          grep -q 'opencapo\[analysis\]' "$RUNNER_TEMP/err.txt"
+          grep -q 'openbapo\[analysis\]' "$RUNNER_TEMP/err.txt"
 
   # Runs the real models on CPU with a synthetic click track. Also the probe
   # for "the analysis extra still installs on this Python".
@@ -58,7 +58,7 @@ jobs:
           path: |
             ~/.cache/torch
             ~/.cache/huggingface
-          key: model-weights-${{ hashFiles('src/opencapo/analysis/separate.py', 'src/opencapo/analysis/beats.py') }}
+          key: model-weights-${{ hashFiles('src/openbapo/analysis/separate.py', 'src/openbapo/analysis/beats.py') }}
       - name: Install ffmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Install (CPU torch)
@@ -70,5 +70,5 @@ jobs:
       - name: CLI smoke test
         run: |
           python scripts/make_tone.py "$RUNNER_TEMP/click.wav" --click 120 --seconds 12
-          opencapo analyze "$RUNNER_TEMP/click.wav" --out "$RUNNER_TEMP/analysis.json" --device cpu --timing -
-          python -c "import sys; from opencapo.model import Analysis; a = Analysis.from_json(open(sys.argv[1], encoding='utf-8').read()); assert a.tempo and a.beats, 'no beats'; print(a.tempo, a.time_signature, len(a.beats), 'beats')" "$RUNNER_TEMP/analysis.json"
+          openbapo analyze "$RUNNER_TEMP/click.wav" --out "$RUNNER_TEMP/analysis.json" --device cpu --timing -
+          python -c "import sys; from openbapo.model import Analysis; a = Analysis.from_json(open(sys.argv[1], encoding='utf-8').read()); assert a.tempo and a.beats, 'no beats'; print(a.tempo, a.time_signature, len(a.beats), 'beats')" "$RUNNER_TEMP/analysis.json"

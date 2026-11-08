@@ -7,7 +7,7 @@ from typing import Any
 from hypothesis import given
 from hypothesis import strategies as st
 
-from opencapo.model import (
+from openbapo.model import (
     Analysis,
     Arrangement,
     Beat,

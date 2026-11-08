@@ -7,10 +7,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from opencapo.analysis.chords.fusion import FusionParams
-from opencapo.analysis.chords.key import key_index, scores_from_chroma
-from opencapo.analysis.chords.vocab import N_LABELS, label_index
-from opencapo.model import Beat, ChordQuality, Mode
+from openbapo.analysis.chords.fusion import FusionParams
+from openbapo.analysis.chords.key import key_index, scores_from_chroma
+from openbapo.analysis.chords.vocab import N_LABELS, label_index
+from openbapo.model import Beat, ChordQuality, Mode
 
 SCRIPTS = Path(__file__).parents[1] / "scripts"
 
@@ -108,7 +108,7 @@ def test_relation_names() -> None:
 
 
 def test_voiced_pooling_uses_cached_frames_and_falls_back_without_them() -> None:
-    from opencapo.analysis.chords.fusion import FusionParams
+    from openbapo.analysis.chords.fusion import FusionParams
 
     out = outputs_for([(0, ChordQuality.MAJ)], beats_per_chord=2)
     probs = np.full((4, N_LABELS), 0.001)

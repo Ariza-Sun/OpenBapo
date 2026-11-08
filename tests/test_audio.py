@@ -6,14 +6,14 @@ import numpy as np
 import pytest
 from conftest import convert, write_tone
 
-from opencapo.analysis.audio import (
+from openbapo.analysis.audio import (
     MAX_DURATION_SECONDS,
     Audio,
     decode,
     probe,
     probe_duration,
 )
-from opencapo.errors import InputError
+from openbapo.errors import InputError
 
 pytestmark = pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg not installed")
 
@@ -100,7 +100,7 @@ def test_rejects_too_long(tone: Path) -> None:
 
 
 def test_rejects_when_container_under_reports(tone: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("opencapo.analysis.audio.probe_duration", lambda _: 1.0)
+    monkeypatch.setattr("openbapo.analysis.audio.probe_duration", lambda _: 1.0)
     with pytest.raises(InputError, match="limit"):
         decode(tone, max_duration=2.0)
 

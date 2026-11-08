@@ -1,7 +1,7 @@
 import pytest
 
-from opencapo.analysis.grid import beats_per_bar, build_grid
-from opencapo.model import Analysis
+from openbapo.analysis.grid import beats_per_bar, build_grid
+from openbapo.model import Analysis
 
 
 def positions(times: list[float], downbeats: list[float]) -> list[tuple[int, int]]:

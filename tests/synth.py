@@ -4,7 +4,7 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from opencapo.analysis.audio import Audio
+from openbapo.analysis.audio import Audio
 
 SR = 22050
 

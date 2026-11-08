@@ -29,7 +29,7 @@ def load(path: Path) -> dict:  # type: ignore[type-arg]
 
 
 def to_chords(rows: list[list[object]]) -> list:  # type: ignore[type-arg]
-    from opencapo.model import Chord, ChordQuality
+    from openbapo.model import Chord, ChordQuality
 
     return [
         Chord(
@@ -40,7 +40,7 @@ def to_chords(rows: list[list[object]]) -> list:  # type: ignore[type-arg]
 
 
 def estimate(record: dict) -> str | None:  # type: ignore[type-arg]
-    from opencapo.analysis.chords.key import estimate_key, scores_from_chords
+    from openbapo.analysis.chords.key import estimate_key, scores_from_chords
 
     chords = to_chords(record["chords"])
     key = estimate_key(np.array(record["chroma_scores"]), scores_from_chords(chords), chords)

@@ -4,14 +4,14 @@ from pathlib import Path
 import pytest
 from fakes import FakeSeparator, FakeTracker
 
-from opencapo.analysis.deps import missing_analysis_packages, require_analysis_packages
-from opencapo.analysis.pipeline import StageTimings, analyze_file
-from opencapo.errors import InputError
-from opencapo.model import Analysis
+from openbapo.analysis.deps import missing_analysis_packages, require_analysis_packages
+from openbapo.analysis.pipeline import StageTimings, analyze_file
+from openbapo.errors import InputError
+from openbapo.model import Analysis
 
 
 def stem_dirs() -> list[Path]:
-    return list(Path(tempfile.gettempdir()).glob("opencapo-stems-*"))
+    return list(Path(tempfile.gettempdir()).glob("openbapo-stems-*"))
 
 
 def test_analyze_file_fills_beats_tempo_meter_and_duration(tone: Path) -> None:
@@ -78,7 +78,7 @@ def test_beat_input_can_be_the_rhythm_stems(tone: Path) -> None:
 def test_too_long_is_rejected_before_any_model_runs(
     tone: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("opencapo.analysis.audio.MAX_DURATION_SECONDS", 2.0)
+    monkeypatch.setattr("openbapo.analysis.audio.MAX_DURATION_SECONDS", 2.0)
     separator = FakeSeparator()
     with pytest.raises(InputError, match="limit is 0:02"):
         analyze_file(tone, separator=separator, tracker=FakeTracker())
@@ -106,7 +106,7 @@ def test_stage_timer_accumulates() -> None:
 
 
 def test_missing_packages_message(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("opencapo.analysis.deps.ANALYSIS_PACKAGES", ("numpy", "no_such_pkg"))
+    monkeypatch.setattr("openbapo.analysis.deps.ANALYSIS_PACKAGES", ("numpy", "no_such_pkg"))
     assert missing_analysis_packages() == ["no_such_pkg"]
-    with pytest.raises(InputError, match=r"no_such_pkg.*opencapo\[analysis\]"):
+    with pytest.raises(InputError, match=r"no_such_pkg.*openbapo\[analysis\]"):
         require_analysis_packages()

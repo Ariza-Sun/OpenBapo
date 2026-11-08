@@ -1,5 +1,5 @@
-import opencapo
+import openbapo
 
 
 def test_version_is_set() -> None:
-    assert opencapo.__version__
+    assert openbapo.__version__

@@ -1,4 +1,4 @@
-# OpenCapo 阶段 1 路线图
+# OpenBapo 阶段 1 路线图
 
 > 给项目负责人看的分步清单。每一步由负责人确认后交给 agent 执行；完成的标准写在"验收"里，没达到就不算完成。
 > 顺序原则：**最不确定的先做**。阶段 1 的风险全在分析质量（和弦准确率、歌词对齐、人声切音符），Discord 只是最后一层薄壳，放最后。
@@ -25,15 +25,15 @@
 ## 第 0 步：项目骨架与数据模型
 
 **做什么**
-- Python 包 `opencapo`，`pyproject.toml`，格式化 / lint / 测试工具链，GitHub Actions CI。
+- Python 包 `openbapo`，`pyproject.toml`，格式化 / lint / 测试工具链，GitHub Actions CI。
 - 数据模型：`Beat`、`Tempo`、`Key`、`Chord`、`Note`、`LyricSyllable` 及顶层 `Analysis` 对象（见需求 5.2），JSON 序列化 / 反序列化。
 - 调整参数对象 `Arrangement`：演唱调偏移、指法调、节奏型、简化开关、歌词文本。
-- 一条空的 CLI：`opencapo analyze <audio> --out <json>`，先跑通参数解析与输出。
+- 一条空的 CLI：`openbapo analyze <audio> --out <json>`，先跑通参数解析与输出。
 
 **验收**
 - `pip install -e .` 成功；`pytest` 通过；CI 在 PR 上自动跑并通过。
 - 数据模型有单元测试，JSON 往返无损。
-- 一首示例音频跑 `opencapo analyze` 能输出合法（可为空）的 JSON。
+- 一首示例音频跑 `openbapo analyze` 能输出合法（可为空）的 JSON。
 
 ---
 
@@ -48,7 +48,7 @@
 **验收**
 - 节拍 F-measure ≥ 85%（评测脚本输出，数字进 README 或 docs）。
 - 4 分钟歌曲在一张 GPU 上：分轨 + 节拍 ≤ 90 秒。
-- `opencapo analyze` 输出含 `Beat`、`Tempo`；分轨文件在流程结束后不残留。
+- `openbapo analyze` 输出含 `Beat`、`Tempo`；分轨文件在流程结束后不残留。
 - 模型权重许可证逐个列在 `docs/plans/backend.md`。
 
 ---

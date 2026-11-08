@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "opencapo"
+name = "openbapo"
 version = "0.0.1"
 description = "Turn a song recording into a guitar play-along sheet."
 readme = "README.md"
@@ -48,10 +48,10 @@ dev = [
 ]
 
 [project.scripts]
-opencapo = "opencapo.cli:main"
+openbapo = "openbapo.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/opencapo"]
+packages = ["src/openbapo"]
 
 [tool.hatch.metadata]
 # lv-chordia is only published on GitHub, so the analysis extra points at it directly.
@@ -60,15 +60,15 @@ allow-direct-references = true
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-exclude = ["src/opencapo/analysis/chords/models/btc_vendor"]
+extend-exclude = ["src/openbapo/analysis/chords/models/btc_vendor"]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
-"src/opencapo/sheet/omr.py" = ["RUF001", "RUF002", "RUF003"]  # the reading protocol is Chinese prose
-"src/opencapo/sheet/reader.py" = ["RUF001", "RUF002", "RUF003"]
-"src/opencapo/sheet/triage.py" = ["RUF001", "RUF002", "RUF003"]  # the triage table is Chinese
+"src/openbapo/sheet/omr.py" = ["RUF001", "RUF002", "RUF003"]  # the reading protocol is Chinese prose
+"src/openbapo/sheet/reader.py" = ["RUF001", "RUF002", "RUF003"]
+"src/openbapo/sheet/triage.py" = ["RUF001", "RUF002", "RUF003"]  # the triage table is Chinese
 "tests/test_sheet_omr.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/test_sheet_triage.py" = ["RUF001", "RUF002", "RUF003"]
 # The benchmark scripts write Chinese Markdown, where full-width punctuation is correct.
@@ -98,7 +98,7 @@ follow_untyped_imports = false
 
 [[tool.mypy.overrides]]
 # Third-party model code kept verbatim.
-module = ["opencapo.analysis.chords.models.btc_vendor.*"]
+module = ["openbapo.analysis.chords.models.btc_vendor.*"]
 ignore_errors = true
 
 [tool.pytest.ini_options]

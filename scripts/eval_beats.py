@@ -107,8 +107,8 @@ def load_tracks(
             problems.append(f"empty annotation: {path.name}")
             continue
         if verify_audio:
-            from opencapo.analysis.audio import probe
-            from opencapo.errors import InputError
+            from openbapo.analysis.audio import probe
+            from openbapo.errors import InputError
 
             try:
                 probe(audio[key])
@@ -177,13 +177,13 @@ Predictor = Callable[[Path], tuple[np.ndarray, np.ndarray]]
 
 
 def build_beat_this(device: str, beat_input: str) -> Predictor:
-    from opencapo.analysis.audio import decode
-    from opencapo.analysis.beats import BeatThisTracker
+    from openbapo.analysis.audio import decode
+    from openbapo.analysis.beats import BeatThisTracker
 
     tracker = BeatThisTracker(device=device)
     separator = None
     if beat_input == "drums_bass":
-        from opencapo.analysis.separate import DemucsSeparator
+        from openbapo.analysis.separate import DemucsSeparator
 
         separator = DemucsSeparator(device=device)
 
@@ -233,7 +233,7 @@ def environment(device: str) -> dict:
         "device": device,
         "packages": {},
     }
-    for name in ("opencapo", "torch", "beat-this", "demucs", "mir_eval", "numpy"):
+    for name in ("openbapo", "torch", "beat-this", "demucs", "mir_eval", "numpy"):
         try:
             info["packages"][name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
@@ -299,7 +299,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default="docs/benchmarks/step-1-beats", help="output path stem")
     args = parser.parse_args(argv)
 
-    from opencapo.analysis.device import resolve_device
+    from openbapo.analysis.device import resolve_device
 
     device = resolve_device(args.device)
     tracks, problems = load_tracks(args.audio, args.annotations)

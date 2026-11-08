@@ -1,4 +1,4 @@
-"""End-to-end checks with the real models. Needs `pip install "opencapo[analysis]"`,
+"""End-to-end checks with the real models. Needs `pip install "openbapo[analysis]"`,
 network access for the weights on first run, and CPU time; run with `pytest -m models`.
 """
 
@@ -10,12 +10,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from opencapo.analysis.audio import decode
-from opencapo.analysis.beats import BeatThisTracker
-from opencapo.analysis.pipeline import analyze_file
-from opencapo.analysis.separate import STEM_NAMES, DemucsSeparator
-from opencapo.cli import main
-from opencapo.model import Analysis
+from openbapo.analysis.audio import decode
+from openbapo.analysis.beats import BeatThisTracker
+from openbapo.analysis.pipeline import analyze_file
+from openbapo.analysis.separate import STEM_NAMES, DemucsSeparator
+from openbapo.cli import main
+from openbapo.model import Analysis
 
 pytestmark = pytest.mark.models
 
@@ -54,11 +54,11 @@ def test_beat_this_tracks_the_click(click: Path) -> None:
 
 
 def test_pipeline_end_to_end(click: Path) -> None:
-    before = set(Path(tempfile.gettempdir()).glob("opencapo-stems-*"))
+    before = set(Path(tempfile.gettempdir()).glob("openbapo-stems-*"))
     result = analyze_file(
         click, separator=DemucsSeparator(device="cpu"), tracker=BeatThisTracker(device="cpu")
     )
-    assert set(Path(tempfile.gettempdir()).glob("opencapo-stems-*")) == before
+    assert set(Path(tempfile.gettempdir()).glob("openbapo-stems-*")) == before
     analysis = result.analysis
     assert analysis.tempo is not None and analysis.tempo.bpm == pytest.approx(BPM, abs=3.0)
     assert analysis.beats and analysis.duration == pytest.approx(12.0)
@@ -84,7 +84,7 @@ def chord_progression(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def test_pipeline_with_chords_end_to_end(chord_progression: Path) -> None:
-    from opencapo.analysis.chords.stage import default_chord_stage
+    from openbapo.analysis.chords.stage import default_chord_stage
 
     result = analyze_file(
         chord_progression,

@@ -5,10 +5,10 @@ import numpy as np
 import pytest
 from synth import progression, voicing
 
-from opencapo.analysis.chords.fusion import aggregate_to_beats
-from opencapo.analysis.chords.models import btc, lvchordia
-from opencapo.analysis.chords.vocab import NO_CHORD, index_label, label_index
-from opencapo.model import ChordQuality
+from openbapo.analysis.chords.fusion import aggregate_to_beats
+from openbapo.analysis.chords.models import btc, lvchordia
+from openbapo.analysis.chords.vocab import NO_CHORD, index_label, label_index
+from openbapo.model import ChordQuality
 
 C_F_G7_AM = [
     (0, ChordQuality.MAJ),

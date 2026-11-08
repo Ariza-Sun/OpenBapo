@@ -154,7 +154,7 @@ def sheet_tracks(root: Path) -> list[Track]:
     the manifest lists are scored (`scripts/sheet_ocr.py manifest DIR`
     rebuilds it from the files; decision 12).
     """
-    from opencapo.sheet import load_manifest
+    from openbapo.sheet import load_manifest
 
     manifest = load_manifest(root)
     tracks = []
@@ -212,7 +212,7 @@ def anonymize_sheets(systems: list[dict], key_path: Path) -> dict[str, str]:
 
 def sheet_manifest_note(root: Path) -> str:
     """One line for the report's notes: which sample set the song-book numbers come from."""
-    from opencapo.sheet import load_manifest
+    from openbapo.sheet import load_manifest
 
     m = load_manifest(root)
     songs = m["songs"]
@@ -223,7 +223,7 @@ def sheet_manifest_note(root: Path) -> str:
     return (
         f"曲库合成样本集：{len(songs)} 首（识谱 {ocr}、人工录入 {manual}），"
         f"待复核 {to_review} 小节；manifest 生成于 {m.get('generated')}，"
-        f"代码 {code.get('commit') or code.get('opencapo') or '未知'}，渲染参数 {m.get('render')}。"
+        f"代码 {code.get('commit') or code.get('openbapo') or '未知'}，渲染参数 {m.get('render')}。"
     )
 
 
@@ -593,7 +593,7 @@ KEY_RELATION_NAMES = ("exact", "fifth", "relative", "parallel", "other", "none")
 class TrackOutputs:
     """Everything the fusion needs for one track, cached so tuning is cheap."""
 
-    beats: list  # opencapo Beat objects
+    beats: list  # openbapo Beat objects
     duration: float
     beat_probs: dict[str, np.ndarray]  # plain per-beat means, as the stage computed them
     bass: object | None
@@ -607,7 +607,7 @@ class TrackOutputs:
         """Per-beat posteriors for these experts; voiced pooling needs frame_probs."""
         if not voiced:
             return {n: self.beat_probs[n] for n in names}
-        from opencapo.analysis.chords.fusion import ChordPosteriors, aggregate_to_beats
+        from openbapo.analysis.chords.fusion import ChordPosteriors, aggregate_to_beats
 
         cache = self.__dict__.setdefault("_voiced", {})
         frames = getattr(self, "frame_probs", {})  # objects pickled before the field existed
@@ -625,9 +625,9 @@ class TrackOutputs:
 
 
 def build_experts(names: Sequence[str], device: str) -> list:
-    from opencapo.analysis.chords.chroma import ChromaTemplateExpert
-    from opencapo.analysis.chords.models.btc import BTCExpert
-    from opencapo.analysis.chords.models.lvchordia import LVChordiaExpert
+    from openbapo.analysis.chords.chroma import ChromaTemplateExpert
+    from openbapo.analysis.chords.models.btc import BTCExpert
+    from openbapo.analysis.chords.models.lvchordia import LVChordiaExpert
 
     table: dict[str, Callable[[], object]] = {
         "btc": lambda: BTCExpert(device=device),
@@ -638,12 +638,12 @@ def build_experts(names: Sequence[str], device: str) -> list:
 
 
 def compute_outputs(track: Track, experts: list, separator, device: str) -> TrackOutputs:  # type: ignore[no-untyped-def]
-    from opencapo.analysis.audio import decode
-    from opencapo.analysis.chords.bassline import BassLineDetector, bass_source
-    from opencapo.analysis.chords.chroma import ChromaTemplateExpert, chromagram, mean_chroma
-    from opencapo.analysis.chords.fusion import aggregate_to_beats
-    from opencapo.analysis.chords.key import scores_from_chroma
-    from opencapo.analysis.grid import build_grid
+    from openbapo.analysis.audio import decode
+    from openbapo.analysis.chords.bassline import BassLineDetector, bass_source
+    from openbapo.analysis.chords.chroma import ChromaTemplateExpert, chromagram, mean_chroma
+    from openbapo.analysis.chords.fusion import aggregate_to_beats
+    from openbapo.analysis.chords.key import scores_from_chroma
+    from openbapo.analysis.grid import build_grid
 
     audio = decode(track.audio)
     grid = build_grid(track.beats.tolist(), track.downbeats.tolist())
@@ -688,7 +688,7 @@ def preliminary_chords(
     outputs: TrackOutputs, expert_names: Sequence[str], model_names: Sequence[str], params
 ) -> list:  # type: ignore[no-untyped-def]
     """The chords decoded without a key prior; the key is estimated from these."""
-    from opencapo.analysis.chords.fusion import decode
+    from openbapo.analysis.chords.fusion import decode
 
     probs = outputs.pooled(expert_names, params.voiced_aggregation)
     models = [n for n in model_names if n in probs]
@@ -751,9 +751,9 @@ def run_fusion(
     outputs: TrackOutputs, expert_names: Sequence[str], model_names: Sequence[str], params
 ):  # type: ignore[no-untyped-def]
     """Chords + key for a subset of experts with given FusionParams (mirrors ChordStage)."""
-    from opencapo.analysis.chords.fusion import decode
-    from opencapo.analysis.chords.key import estimate_key, scores_from_chords
-    from opencapo.analysis.chords.vocab import format_label
+    from openbapo.analysis.chords.fusion import decode
+    from openbapo.analysis.chords.key import estimate_key, scores_from_chords
+    from openbapo.analysis.chords.vocab import format_label
 
     probs = outputs.pooled(expert_names, params.voiced_aggregation)
     models = [n for n in model_names if n in probs]
@@ -874,7 +874,7 @@ def summarize(system: dict) -> dict:
 
 def tune(tracks: list[Track], outputs: dict[str, TrackOutputs], expert_names, model_names):  # type: ignore[no-untyped-def]
     """Grid search FusionParams on the tuning tracks, maximising majmin."""
-    from opencapo.analysis.chords.fusion import FusionParams
+    from openbapo.analysis.chords.fusion import FusionParams
 
     # Model experts weigh 0.5-2; the rule-based chroma expert may also be dropped (0).
     weight_grids = [[0.5, 1.0, 2.0] if n in model_names else [0.0, 0.5, 1.0] for n in expert_names]
@@ -917,7 +917,7 @@ def environment(device: str) -> dict:
         "device": device,
         "packages": {},
     }
-    for name in ("opencapo", "torch", "lv-chordia", "librosa", "mir_eval", "demucs", "numpy"):
+    for name in ("openbapo", "torch", "lv-chordia", "librosa", "mir_eval", "demucs", "numpy"):
         try:
             info["packages"][name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
@@ -1143,7 +1143,7 @@ def inspect(tracks: list[Track]) -> None:
 
 
 def _parses(label: str) -> bool:
-    from opencapo.analysis.chords.vocab import LabelError, parse_label
+    from openbapo.analysis.chords.vocab import LabelError, parse_label
 
     try:
         parse_label(label)
@@ -1209,8 +1209,8 @@ def main(argv: list[str] | None = None) -> int:
         inspect(tracks)
         return 0
 
-    from opencapo.analysis.chords.fusion import FusionParams
-    from opencapo.analysis.device import resolve_device
+    from openbapo.analysis.chords.fusion import FusionParams
+    from openbapo.analysis.device import resolve_device
 
     device = resolve_device(args.device)
     expert_names = [n for n in args.experts.split(",") if n]
@@ -1218,7 +1218,7 @@ def main(argv: list[str] | None = None) -> int:
     model_names = [e.name for e in experts if e.is_model]
     separator = None
     if not args.no_stems:
-        from opencapo.analysis.separate import DemucsSeparator
+        from openbapo.analysis.separate import DemucsSeparator
 
         separator = DemucsSeparator(device=device)
 

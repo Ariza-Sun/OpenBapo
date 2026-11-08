@@ -28,8 +28,8 @@
 
 ## 3. 第 2 步留下的可复用部件
 
-- 分析：`opencapo.analysis.chords`（BTC、lv-chordia、色度模板、低音、调性规则，拍网格上融合），`opencapo analyze` 输出 `Chord` 序列与 `Key`。
-- 样本生成器 `opencapo.sheet`：谱子文本格式（第 3、4 步输出简谱时复用其解析器）、渲染器、识谱（`scripts/sheet_ocr.py`，按行读图，决定 15）、整理（`scripts/sheet_triage.py`）、样本集清单（`manifest`，决定 12）。
+- 分析：`openbapo.analysis.chords`（BTC、lv-chordia、色度模板、低音、调性规则，拍网格上融合），`openbapo analyze` 输出 `Chord` 序列与 `Key`。
+- 样本生成器 `openbapo.sheet`：谱子文本格式（第 3、4 步输出简谱时复用其解析器）、渲染器、识谱（`scripts/sheet_ocr.py`，按行读图，决定 15）、整理（`scripts/sheet_triage.py`）、样本集清单（`manifest`，决定 12）。
 - 评测：`scripts/eval_chords.py`（`--sheets` 按清单读曲库样本集，`--anonymize-sheets` 隐去歌名）、`scripts/analyze_chords.py`（错误分析）。
 
 ## 4. 怎么跑

@@ -7,10 +7,10 @@
 
 本步只搭骨架，不接任何模型、不读音频内容。做完后应当有：
 
-1. 可安装的 Python 包 `opencapo` + 格式化 / lint / 类型检查 / 测试工具链 + GitHub Actions CI。
+1. 可安装的 Python 包 `openbapo` + 格式化 / lint / 类型检查 / 测试工具链 + GitHub Actions CI。
 2. 数据模型：`Beat`、`Tempo`、`Key`、`Chord`、`Note`、`LyricSyllable`、顶层 `Analysis`，带 JSON 序列化 / 反序列化。
 3. 调整参数对象 `Arrangement`。
-4. 空的 CLI：`opencapo analyze <audio> --out <json>`，跑通参数解析并输出合法的空 `Analysis`。
+4. 空的 CLI：`openbapo analyze <audio> --out <json>`，跑通参数解析并输出合法的空 `Analysis`。
 
 **本步不做**：分轨 / 节拍 / 和弦等任何推理（第 1、2 步）；编配换算（变调夹、指法库、节奏型库，第 3 步）；渲染；Discord；数据库与队列。
 
@@ -23,9 +23,9 @@
 
 ```
 pyproject.toml
-src/opencapo/
+src/openbapo/
     __init__.py          # __version__
-    __main__.py          # python -m opencapo
+    __main__.py          # python -m openbapo
     cli.py               # argparse 入口
     model/
         __init__.py      # 对外导出全部模型
@@ -42,8 +42,8 @@ tests/
 ```
 
 - 采用 `src/` 布局，避免测试误用未安装的源码。
-- 数据模型放 `opencapo.model`，把 `opencapo.analysis` 这个名字留给第 1 步起的分析流水线；之后的 `opencapo.arrange`、`opencapo.render` 同理。Discord 适配层第 6 步再建，且只依赖 `opencapo` 的公开接口。
-- 核心安装保持轻量：本步运行时依赖只有 `pydantic`。第 1 步起的 torch / 模型依赖放进可选依赖组（如 `opencapo[analysis]`），这样编配 + 渲染可以在没有 GPU 依赖的环境里装和测。
+- 数据模型放 `openbapo.model`，把 `openbapo.analysis` 这个名字留给第 1 步起的分析流水线；之后的 `openbapo.arrange`、`openbapo.render` 同理。Discord 适配层第 6 步再建，且只依赖 `openbapo` 的公开接口。
+- 核心安装保持轻量：本步运行时依赖只有 `pydantic`。第 1 步起的 torch / 模型依赖放进可选依赖组（如 `openbapo[analysis]`），这样编配 + 渲染可以在没有 GPU 依赖的环境里装和测。
 
 ## 3. 工具链
 
@@ -119,10 +119,10 @@ tests/
 ## 5. CLI
 
 ```
-opencapo analyze <audio> --out <json> [--title TEXT] [--artist TEXT]
+openbapo analyze <audio> --out <json> [--title TEXT] [--artist TEXT]
 ```
 
-- 用标准库 `argparse`，不引入 click / typer。`python -m opencapo` 等价于 `opencapo`（`[project.scripts]` 注册）。
+- 用标准库 `argparse`，不引入 click / typer。`python -m openbapo` 等价于 `openbapo`（`[project.scripts]` 注册）。
 - 本步行为：检查文件存在、扩展名属于需求 5.1 的六种（mp3 / m4a / ogg / opus / wav / flac）→ 构造空 `Analysis`（只填 `title` / `artist`）→ 写到 `--out`。`--out -` 写到标准输出。
 - 失败不静默：文件不存在、格式不支持、输出文件写不进去时，向 stderr 输出一句可读的原因，退出码 1；参数错误由 argparse 处理，退出码 2。
 - 8 分钟时长上限要解码音频才能判断，放到第 1 步。
@@ -189,4 +189,4 @@ opencapo analyze <audio> --out <json> [--title TEXT] [--artist TEXT]
 | `pytest` 通过 | CI 的测试步骤 |
 | CI 在 PR 上自动跑并通过 | 本步 PR 页面上的 CI 检查为绿 |
 | 数据模型有单元测试，JSON 往返无损 | `tests/test_model_*.py`、`tests/test_roundtrip.py`（金样 + hypothesis 属性测试） |
-| 一首示例音频跑 `opencapo analyze` 能输出合法（可为空）的 JSON | `tests/test_cli.py` + CI 冒烟步骤：生成的 wav → `opencapo analyze` → `Analysis.from_json` 校验通过 |
+| 一首示例音频跑 `openbapo analyze` 能输出合法（可为空）的 JSON | `tests/test_cli.py` + CI 冒烟步骤：生成的 wav → `openbapo analyze` → `Analysis.from_json` 校验通过 |

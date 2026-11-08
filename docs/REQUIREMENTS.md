@@ -1,4 +1,4 @@
-# OpenCapo 需求文档（阶段 1）
+# OpenBapo 需求文档（阶段 1）
 
 > 版本：v0.4（定稿）。本文档只描述**做什么、做到什么程度**；实现方案见 `docs/plans/`。
 > 只覆盖阶段 1，阶段 1 不做的功能统一放在第 10 节"后续开发"。
@@ -8,7 +8,7 @@
 
 市面上的"听歌扒谱"工具（Capo、Lamucal、Chordify、Moises）都是闭源收费产品。国内吉他谱平台的弹唱谱全靠人工编配，覆盖不到的歌（尤其是英文歌）就没有谱。
 
-OpenCapo 的目标：
+OpenBapo 的目标：
 
 - 用户上传一首歌的音频，几分钟后得到一张**吉他弹唱谱**：和弦图 + 六线谱节奏型 + 简谱 + 歌词。谱子采用简谱式弹唱谱排版，**中文 / 英文歌曲均支持**。
 - 用户可以调整指法调、节奏型、和弦，粘贴歌词重新对齐，导出 PDF / 图片 / MusicXML。
@@ -44,7 +44,7 @@ OpenCapo 的目标：
 
 来源：各产品官网 / 应用商店描述、第三方评测、Hybrid-Net 仓库（Lamucal 的模型结构）。个别细节可能有出入。
 
-| 能力 | Capo (macOS/iOS) | Lamucal (Web/App) | Chordify | Moises | **OpenCapo 阶段 1** |
+| 能力 | Capo (macOS/iOS) | Lamucal (Web/App) | Chordify | Moises | **OpenBapo 阶段 1** |
 |---|---|---|---|---|---|
 | 运行位置 | 本地 | 服务器 | 服务器 | 服务器 | 服务器 |
 | 入口 | 桌面软件 | 网页 / App | 网页 / App | 网页 / App | Discord |
