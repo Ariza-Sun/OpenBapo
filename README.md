@@ -3,53 +3,53 @@
 [![CI](https://github.com/Ariza-Sun/OpenCapo/actions/workflows/ci.yml/badge.svg)](https://github.com/Ariza-Sun/OpenCapo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**听歌出弹唱谱的开源工具。** 上传一首歌，得到一张吉他弹唱谱：和弦图、六线谱节奏型、简谱旋律和歌词。演唱调、指法调、节奏型都可以换，导出 PNG / PDF / MusicXML。中文、英文歌曲都支持，最终以 Discord Bot 的形式提供。
+**Turn a song into a guitar play-along sheet.** Upload a recording and get chord diagrams, a strumming tab, the vocal melody in numbered notation (jianpu) and the lyrics on one sheet. Change the singing key, the fingering key or the strum pattern, and export to PNG, PDF or MusicXML. Works for Chinese and English songs, delivered as a Discord bot.
 
-> ⚠️ **开发中。** 目前可用的是命令行分析工具：从音频中识别节拍、BPM、和弦与调性，输出 JSON。编配、出谱和 Discord Bot 还在路上，进度见下文。
+> ⚠️ **Work in progress.** What works today is the command-line analyser: it finds the beats, tempo, chords and key of a recording and writes them as JSON. Arranging, sheet rendering and the Discord bot are still to come; see [Progress](#progress).
 
-## 为什么做这个
+## Why
 
-"听歌扒谱"类产品（Capo、Chordify、Moises 等）都是闭源收费的；国内吉他谱平台的弹唱谱靠人工编配，冷门歌、英文歌常常没有谱。OpenCapo 想做一个任何人都能自己部署的开源替代，输出吉他弹唱者熟悉的简谱式弹唱谱。
+Tools that transcribe chords from audio (Capo, Chordify, Moises and others) are closed and paid. Guitar play-along sheets on Chinese tab sites are arranged by hand, so less popular songs and most English songs have none. OpenCapo aims to be an open, self-hostable alternative that produces the numbered-notation play-along sheet Chinese guitarists are used to.
 
-## 进度
+## Progress
 
-| 步 | 内容 | 状态 |
+| Step | What | Status |
 |---|---|---|
-| 0 | 项目骨架、数据模型、命令行 | ✅ 完成 |
-| 1 | 分轨、节拍、BPM、拍号 | ✅ 完成 |
-| 2 | 和弦、调性 | ✅ 完成 |
-| 3 | 编配：变调夹、指法调、和弦简化、节奏型 | ⏳ 下一步 |
-| 4 | 渲染与导出：和弦图、六线谱、简谱，PNG / PDF / MusicXML | — |
-| 5 | 歌词：粘贴对齐与识别 | — |
-| 6 | Discord Bot | — |
-| 7 | 人声旋律 → 简谱 | — |
+| 0 | Project skeleton, data model, CLI | ✅ Done |
+| 1 | Source separation, beats, tempo, time signature | ✅ Done |
+| 2 | Chords and key | ✅ Done |
+| 3 | Arranging: capo, fingering key, chord simplification, strum patterns | ⏳ Next |
+| 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | — |
+| 5 | Lyrics: alignment of pasted lyrics, and recognition | — |
+| 6 | Discord bot | — |
+| 7 | Vocal melody to jianpu | — |
 
-完整计划见 [路线图](docs/ROADMAP.md)，需求见 [需求文档](docs/REQUIREMENTS.md)。
+The full plan is in the [roadmap](docs/ROADMAP.md) and the [requirements](docs/REQUIREMENTS.md) (both in Chinese).
 
-## 快速开始
+## Quick start
 
-需要 Python ≥ 3.11 和 `ffmpeg`。模型在 GPU 上运行较快，CPU 也能跑。
+You need Python 3.11 or newer and `ffmpeg`. A GPU makes the models faster, but a CPU works.
 
 ```bash
 git clone https://github.com/Ariza-Sun/OpenCapo.git
 cd OpenCapo
 python -m venv .venv && source .venv/bin/activate
 
-# 先按 pytorch.org 的说明装与你的 CUDA 匹配的 torch 和 torchaudio；纯 CPU：
+# Install torch and torchaudio for your CUDA version first (see pytorch.org); for CPU only:
 pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
 pip install -e ".[analysis]"
 
-opencapo analyze 你的歌.mp3 --out analysis.json
+opencapo analyze your-song.mp3 --out analysis.json
 ```
 
-模型权重在首次运行时自动下载。手头没有音频的话，可以先用仓库自带的脚本合成一段 C–F–G7–Am 和弦进行试一下：
+Model weights are downloaded on first use. No audio at hand? Synthesise a C–F–G7–Am progression with the bundled script and analyse that:
 
 ```bash
 python scripts/make_tone.py demo.wav --progression 120 --seconds 16
 opencapo analyze demo.wav --out demo.json
 ```
 
-输出包含拍点与强拍、BPM、拍号、调性，以及落在拍上的和弦序列（根音用 0–11 表示 C–B，另有和弦性质、转位低音、置信度）。下面是 `demo.json` 的节选：
+The output holds the beats and downbeats, tempo, time signature, key, and a chord sequence aligned to the beats. Roots are pitch classes (0 = C … 11 = B); each chord also has a quality, an inversion bass and a confidence. An excerpt of `demo.json`:
 
 ```json
 {
@@ -65,83 +65,83 @@ opencapo analyze demo.wav --out demo.json
 }
 ```
 
-这段进行每轮都停在 Am，所以调性判成 A 小调（C 大调的关系小调），置信度很低，表示两者几乎打平。
+Every loop of this progression ends on Am, so the key comes out as A minor, the relative minor of C major. The very low confidence says the two were nearly tied.
 
-常用选项：`--device cpu|cuda`、`--timing -` 打印各环节耗时、`--chord-experts lvchordia` 只用一个和弦模型。
+Useful options: `--device cpu|cuda`, `--timing -` to print the time spent in each stage, and `--chord-experts lvchordia` to use a single chord model.
 
-## 工作原理
+## How it works
 
 ```
-音频 ──解码──▶ 分轨（Demucs）──▶ 节拍 / 强拍 / BPM（Beat This!）
-                    │
-                    ▼
-           和弦：BTC + lv-chordia + 色度模板 + 低音检测
-           在拍网格上融合，Viterbi 平滑
-                    │
-                    ▼
-           调性：和弦统计 + 色度模板互校
-                    │
-                    ▼
-     编配 → 渲染 → Discord（开发中）
+audio ─decode─▶ source separation (Demucs) ─▶ beats / downbeats / tempo (Beat This!)
+                          │
+                          ▼
+          chords: BTC + lv-chordia + chroma templates + bass line,
+          fused on the beat grid and smoothed with Viterbi
+                          │
+                          ▼
+          key: chord statistics cross-checked with chroma templates
+                          │
+                          ▼
+          arranging → rendering → Discord   (in progress)
 ```
 
-- **按拍决策。** 两个深度学习和弦模型和两个规则专家各自给出逐拍的后验，融合层在拍网格上加权投票，再用 Viterbi 平滑：强拍换和弦代价低、小节中间代价高。所以每个和弦的起止都落在拍上。
-- **分轨只在内部用。** 分轨音频是中间产物，处理完即删除，不存储、不下发。
-- **分析与编配分离。** 模型推理只跑一次，生成的 JSON 可以反复编配、出谱，后者是秒级的纯计算。
+- **Decisions on the beat.** Two deep-learning chord models and two rule-based experts each give a posterior per beat. A fusion layer votes on the beat grid, then Viterbi smoothing makes chord changes cheap on downbeats and expensive mid-bar, so every chord starts and ends on a beat.
+- **Stems stay internal.** Separated stems are an intermediate product, deleted after analysis; they are never stored or returned.
+- **Analysis apart from arranging.** Model inference runs once. The resulting JSON can be re-arranged and re-rendered any number of times, which is plain computation taking seconds.
 
-## 准确率
+## Accuracy
 
-数字由仓库里的脚本生成，见 [docs/benchmarks](docs/benchmarks/README.md)。RTX 3090 上测得：
+Every number comes from a script in this repository; see [docs/benchmarks](docs/benchmarks/README.md). Measured on an RTX 3090.
 
-| 任务 | 数据 | 结果 |
+| Task | Data | Result |
 |---|---|---|
-| 节拍 | GTZAN（998 首） | 拍点 F-measure **0.891**，强拍 0.786 |
-| 和弦（大小三和弦级别） | 220 首中文 / 英文流行歌的吉他谱，渲染成合成音频 | **0.974** |
-| 和弦（大小三和弦级别） | AAM 合成全乐队（500 首） | **0.947** |
-| 和弦（大小三和弦级别） | GuitarSet 原声吉他伴奏（90 段） | 0.775 |
-| 调性 | 同上 220 首吉他谱（关系大小调算对） | **0.936** |
-| 调性 | GuitarSet 伴奏 / AAM 单一调性曲目 | 0.789 / 0.931 |
-| 速度 | 4 分钟歌曲，分轨 + 节拍 + 和弦 + 调性 | 13.4 秒 |
+| Beats | GTZAN (998 tracks) | beat F-measure **0.891**, downbeat 0.786 |
+| Chords (major/minor) | 220 Chinese and English pop songs: guitar sheets rendered to audio | **0.974** |
+| Chords (major/minor) | AAM, synthetic full-band mixes (500 tracks) | **0.947** |
+| Chords (major/minor) | GuitarSet, acoustic guitar comping (90 excerpts) | 0.775 |
+| Key | the same 220 guitar sheets (relative major/minor counted as correct) | **0.936** |
+| Key | GuitarSet comping / AAM single-key tracks | 0.789 / 0.931 |
+| Speed | 4-minute song: separation, beats, chords and key | 13.4 s |
 
-需要注意的两点：
+Two caveats:
 
-- 吉他谱那组用的是从谱子渲染的合成音频，没有人声和真实混音，分数应看作真实录音的上限。
-- GuitarSet 上偏低的部分集中在 Funk 和爵士伴奏，这是现有开源和弦模型的弱项。
+- The 220-song set is rendered from guitar sheets, with no vocals and no real mix. Treat its scores as an upper bound for real recordings.
+- The GuitarSet gap is mostly funk and jazz comping, a known weak spot of the open chord models available today.
 
-## 项目结构
+## Repository layout
 
 ```
 src/opencapo/
-  model/      数据模型：Beat、Tempo、Key、Chord、Analysis，JSON 序列化
-  analysis/   分析流水线：解码、分轨、节拍、和弦与调性（chords/）
-  sheet/      谱子文本格式、渲染器、识谱：评测用的样本生成器
-scripts/      评测、计时、识谱、样本渲染脚本
-tests/        单元测试；标记为 models 的测试会加载真模型
-docs/         需求、路线图、各步实现计划、评测结果
+  model/      data model: Beat, Tempo, Key, Chord, Analysis; JSON round-trip
+  analysis/   analysis pipeline: decoding, separation, beats, chords and key (chords/)
+  sheet/      text sheet format, renderer and sheet reader: the evaluation sample generator
+scripts/      evaluation, timing, sheet reading and rendering scripts
+tests/        unit tests; tests marked `models` load the real models
+docs/         requirements, roadmap, per-step plans and benchmark results (in Chinese)
 ```
 
-## 开发
+## Development
 
 ```bash
 pip install -e ".[dev]"
-ruff format --check . && ruff check . && mypy && pytest   # 提交前全绿
-pip install -e ".[dev,analysis]" && pytest -m models      # 真模型的端到端测试
+ruff format --check . && ruff check . && mypy && pytest   # must pass before a push
+pip install -e ".[dev,analysis]" && pytest -m models      # end-to-end tests with the real models
 ```
 
-- torch 与 torchaudio 要来自同一个构建。lv-chordia 声明依赖 `torch>=2.13`，在只能装旧版 torch 的机器上，pip 会把 torch 换掉，解决办法见 [docs/benchmarks/README.md](docs/benchmarks/README.md)。
-- 设计决定和取舍记录在 [docs/plans/](docs/plans/) 各步的实现计划里。动手前先读对应那一步。
+- torch and torchaudio must come from the same build. lv-chordia declares `torch>=2.13`, so on machines limited to an older torch, pip will replace it; [docs/benchmarks/README.md](docs/benchmarks/README.md) shows how to avoid that.
+- Design decisions and trade-offs are recorded in each step's plan under [docs/plans/](docs/plans/). Read the plan for the step you are working on first.
 
-欢迎提 Issue 和 PR。文档用中文，代码、标识符和提交信息用英文。
+Issues and pull requests are welcome. Code, identifiers and commit messages are in English; the design documents are in Chinese.
 
-## 模型与许可证
+## Models and licences
 
-本仓库代码以 [MIT](LICENSE) 许可发布。用到的模型权重不随代码分发，首次运行时从各自来源下载：
+The code in this repository is released under the [MIT licence](LICENSE). Model weights are not distributed with it; each is downloaded from its source on first use.
 
-| 用途 | 模型 | 权重许可证 |
+| Use | Model | Weight licence |
 |---|---|---|
-| 分轨 | Demucs `htdemucs` | 未声明，**按非商业使用对待** |
-| 节拍 | Beat This! | MIT |
-| 和弦 | BTC | 未单独声明（随 MIT 代码仓库分发） |
-| 和弦 | lv-chordia | 未单独声明（随 MIT 代码仓库分发） |
+| Source separation | Demucs `htdemucs` | not stated; **treat as non-commercial** |
+| Beats | Beat This! | MIT |
+| Chords | BTC | not stated separately (shipped in an MIT code repository) |
+| Chords | lv-chordia | not stated separately (shipped in an MIT code repository) |
 
-详细说明和训练数据见 [docs/plans/backend.md](docs/plans/backend.md) 第 2.1 节。商用或公开部署前，请自行核对各权重的许可证。OpenCapo 只输出谱子，不提供分轨或变调后的音频。
+Details and training data are in section 2.1 of [docs/plans/backend.md](docs/plans/backend.md). Check each licence yourself before commercial use or a public deployment. OpenCapo outputs sheets only; it never returns separated, re-pitched or re-timed audio.
