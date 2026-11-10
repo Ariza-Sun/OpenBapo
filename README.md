@@ -5,7 +5,7 @@
 
 **Turn a song into a guitar play-along sheet.** Upload a recording and get chord diagrams, a strumming tab, the vocal melody in numbered notation (jianpu) and the lyrics on one sheet. Change the singing key, the fingering key or the strum pattern, and export to PNG, PDF or MusicXML. Works for Chinese and English songs, delivered as a Discord bot.
 
-> ⚠️ **Work in progress.** What works today is the command-line analyser: it finds the beats, tempo, chords and key of a recording and writes them as JSON. Arranging, sheet rendering and the Discord bot are still to come; see [Progress](#progress).
+> ⚠️ **Work in progress.** What works today is the command line: `analyze` finds the beats, tempo, chords and key of a recording and writes them as JSON; `arrange` turns that into the sheet's content (capo, chord names and shapes in a fingering key of your choice, a strum pattern, the header) as JSON. Sheet rendering and the Discord bot are still to come; see [Progress](#progress).
 
 ## Why
 
@@ -18,8 +18,8 @@ Tools that transcribe chords from audio (Capo, Chordify, Moises and others) are 
 | 0 | Project skeleton, data model, CLI | ✅ Done |
 | 1 | Source separation, beats, tempo, time signature | ✅ Done |
 | 2 | Chords and key | ✅ Done |
-| 3 | Arranging: capo, fingering key, chord simplification, strum patterns | ⏳ Next |
-| 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | — |
+| 3 | Arranging: capo, fingering key, chord simplification, strum patterns | ✅ Done |
+| 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | ⏳ Next |
 | 5 | Lyrics: alignment of pasted lyrics, and recognition | — |
 | 6 | Discord bot | — |
 | 7 | Vocal melody to jianpu | — |
@@ -69,6 +69,15 @@ Every loop of this progression ends on Am, so the key comes out as A minor, the 
 
 Useful options: `--device cpu|cuda`, `--timing -` to print the time spent in each stage, and `--chord-experts lvchordia` to use a single chord model.
 
+Then arrange it for the guitar:
+
+```bash
+openbapo arrange demo.json --out sheet.json                      # easiest fingering key, auto strum
+openbapo arrange demo.json --out sheet.json --transpose -2 --fingering-key G --strum folk
+```
+
+The sheet JSON holds the header (`原调 C · 演唱调 bB · G 调指法 夹 3 品`), every chord per bar as written in the fingering key with its diagram, the strum pattern with its mnemonic (`下 下上 上下上`), the list of fingering keys with their capos, and which chords the analysis was unsure about. Transposing changes the capo, not the chord names; changing the fingering key rewrites the names but not the sound.
+
 ## How it works
 
 ```
@@ -112,8 +121,9 @@ Two caveats:
 
 ```
 src/openbapo/
-  model/      data model: Beat, Tempo, Key, Chord, Analysis; JSON round-trip
+  model/      data model: Beat, Tempo, Key, Chord, Analysis, Arrangement; JSON round-trip
   analysis/   analysis pipeline: decoding, separation, beats, chords and key (chords/)
+  arrange/    arranging: keys and capo, chord names, shape and strum libraries (data/), the sheet
   sheet/      text sheet format, renderer and sheet reader: the evaluation sample generator
 scripts/      evaluation, timing, sheet reading and rendering scripts
 tests/        unit tests; tests marked `models` load the real models

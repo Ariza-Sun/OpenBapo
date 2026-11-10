@@ -71,6 +71,8 @@ select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF"]
 "src/openbapo/sheet/triage.py" = ["RUF001", "RUF002", "RUF003"]  # the triage table is Chinese
 "tests/test_sheet_omr.py" = ["RUF001", "RUF002", "RUF003"]
 "src/openbapo/arrange/strums.py" = ["RUF001", "RUF002", "RUF003"]
+"src/openbapo/arrange/sheet.py" = ["RUF001", "RUF002", "RUF003"]  # warnings and the header are Chinese
+"tests/test_arrange_sheet.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/test_arrange_strums.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/test_sheet_triage.py" = ["RUF001", "RUF002", "RUF003"]
 # The benchmark scripts write Chinese Markdown, where full-width punctuation is correct.

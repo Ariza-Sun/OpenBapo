@@ -1,7 +1,7 @@
 # 第 3 步实现计划：编配引擎
 
 > 对应：`docs/ROADMAP.md` 第 3 步；需求 `docs/REQUIREMENTS.md` 5.3（编配）、5.5（调整能力）、9（换算验收）；`docs/plans/backend.md` 第 3 节。
-> 状态：实施中（2026-11-11 起）。负责人决定见第 8 节。
+> 状态：实现完成，待负责人审阅 PR（2026-11-11）。负责人决定见第 8 节。
 
 ## 1. 目标与范围
 
@@ -173,13 +173,13 @@ ArrangedSheet
 3. 指法库生成脚本 + JSON + `shapes.py` + 测试。
 4. 节奏型库 JSON + `strums.py` + 测试。
 5. `sheet.py` 装配 + 不变量测试 + CLI。
-6. 文档：`backend.md` 第 3 节对照、README 进度、本计划第 11 节；问负责人是否开 PR。
+6. 文档：`backend.md` 第 3 节对照、README 进度、本计划第 11 节；问负责人是否开 PR。（已做）
 
 ## 11. 验收对照
 
 | 验收项（ROADMAP 第 3 步） | 如何证明 | 状态 |
 |---|---|---|
-| 12 演唱调 × 12 指法调换算有单元测试全覆盖；负品数不出现在候选里 | `test_arrange_keys.py` 参数化 144 组 + 候选表断言 | 待做 |
-| 指法库覆盖 12 根音 × 14 种性质，每个至少一种按法；缺失项有测试报出 | `test_arrange_shapes.py` | 待做 |
-| 给定 `Analysis` + `Arrangement` 得到完整的可渲染结构 | `test_arrange_sheet.py`、`openbapo arrange` | 待做 |
-| 只改演唱调不改指法调时和弦名不变 | `test_arrange_sheet.py` 不变量 | 待做 |
+| 12 演唱调 × 12 指法调换算有单元测试全覆盖；负品数不出现在候选里 | `test_arrange_keys.py`：`test_capo_covers_every_key_pair` 参数化 144 组；`test_no_negative_capo_and_recommended_first` 遍历 24 个演唱调 × 候选表 | 已做 |
+| 指法库覆盖 12 根音 × 14 种性质，每个至少一种按法；缺失项有测试报出 | `test_arrange_shapes.py`：`shapes.missing() == []`，每种按法的音级逐一核对；`scripts/make_shapes.py --check` 保证 JSON 与生成脚本一致 | 已做（346 种按法） |
+| 给定 `Analysis` + `Arrangement` 得到完整的可渲染结构 | `test_arrange_sheet.py`（跨小节和弦、空拍、低置信、小调、缺调性 / 缺拍网格的降级、JSON 往返）；`openbapo arrange` 在合成和弦进行与《曾经的你》的渲染音频上跑通 | 已做 |
+| 只改演唱调不改指法调时和弦名不变 | `test_arrange_sheet.py::test_transposing_keeps_the_chord_names_when_the_fingering_key_is_fixed`（−6 … +6 全部偏移） | 已做 |

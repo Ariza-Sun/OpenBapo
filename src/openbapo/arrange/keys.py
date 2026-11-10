@@ -82,3 +82,16 @@ def fingering_options(sung_tonic: int, mode: Mode) -> list[FingeringOption]:
 
 def default_fingering(sung_tonic: int, mode: Mode) -> FingeringOption:
     return fingering_options(sung_tonic, mode)[0]
+
+
+def parse_key_name(text: str) -> tuple[int, Mode]:
+    """``G``, ``Em``, ``#F``, ``F#``, ``bB`` -> (tonic, mode)."""
+    import re
+
+    match = re.fullmatch(r"\s*([#b]?)([A-Ga-g])([#b]?)(m|min)?\s*", text)
+    if not match:
+        raise ValueError(f"not a key name: {text!r}")
+    before, letter, after, minor = match.groups()
+    base = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}[letter.upper()]
+    shift = sum(1 if a == "#" else -1 for a in before + after if a)
+    return (base + shift) % 12, Mode.MINOR if minor else Mode.MAJOR

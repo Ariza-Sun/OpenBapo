@@ -39,7 +39,52 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_CHORD_EXPERTS,
         help=f"comma list of chord experts ({', '.join(CHORD_EXPERTS)}); 'none' skips chords",
     )
+
+    arrange = commands.add_parser("arrange", help="arrange an analysis JSON into a sheet JSON")
+    arrange.add_argument("analysis", type=Path, help="analysis JSON from `openbapo analyze`")
+    arrange.add_argument("--out", required=True, help="output JSON path, or - for standard output")
+    arrange.add_argument("--transpose", type=int, default=0, help="semitones from the original key")
+    arrange.add_argument(
+        "--fingering-key", help="chord shapes' key, e.g. C, G, Em (default: lowest capo)"
+    )
+    arrange.add_argument("--strum", default="auto", help="strum pattern id, 'auto' or 'none'")
+    arrange.add_argument("--no-simplify", action="store_true", help="keep 7ths, slash chords ...")
     return parser
+
+
+def run_arrange(args: argparse.Namespace) -> None:
+    from openbapo.arrange import arrange, parse_key_name
+    from openbapo.model import Analysis, Arrangement, Mode
+
+    if not args.analysis.is_file():
+        raise InputError(f"analysis file not found: {args.analysis}")
+    try:
+        analysis = Analysis.from_json(args.analysis.read_text(encoding="utf-8"))
+    except ValueError as e:
+        raise InputError(f"{args.analysis} is not an analysis JSON: {e}") from e
+    fingering = None
+    if args.fingering_key:
+        try:
+            fingering, named_mode = parse_key_name(args.fingering_key)
+        except ValueError as e:
+            raise InputError(str(e)) from e
+        # "C shapes" for a minor song means A minor shapes (and the other way
+        # round): the fingering key's mode follows the song.
+        if analysis.key is not None and named_mode != analysis.key.mode:
+            fingering = (fingering + (9 if named_mode == Mode.MAJOR else 3)) % 12
+    try:
+        arrangement = Arrangement(
+            transpose=args.transpose,
+            fingering_key=fingering,
+            strum_pattern=args.strum,
+            simplify_chords=not args.no_simplify,
+        )
+    except ValueError as e:
+        raise InputError(str(e)) from e
+    sheet = arrange(analysis, arrangement)
+    write_output(sheet.to_json(), args.out)
+    for warning in sheet.warnings:
+        print(f"openbapo: note: {warning}", file=sys.stderr)
 
 
 def build_chord_stage(spec: str, device: str) -> "ChordStage | None":
@@ -105,6 +150,9 @@ def main(
     """Run the CLI. The keyword arguments let tests inject fakes in place of the models."""
     args = build_parser().parse_args(argv)
     try:
+        if args.command == "arrange":
+            run_arrange(args)
+            return 0
         check_input(args.audio)
         # The analysis extra is checked before anything that imports it, so a
         # core-only install gets an install hint rather than an ImportError.
