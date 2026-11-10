@@ -19,7 +19,6 @@ own; what still fails is listed for review.
 
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass, field
 from fractions import Fraction
@@ -193,21 +192,6 @@ class Check:
 class Assembled:
     text: str
     problems: list[Check] = field(default_factory=list)
-
-
-def parse_reading(index: int, text: str, crop: str = "") -> BarReading:
-    """The reader's JSON (possibly wrapped in prose or a code fence) -> BarReading."""
-    start, end = text.find("{"), text.rfind("}")
-    if start < 0 or end < 0:
-        raise SheetError(f"bar {index}: no JSON object in reading: {text[:80]!r}")
-    data = json.loads(text[start : end + 1])
-    return BarReading(
-        index=index,
-        chords=str(data.get("chords", "")).strip(),
-        melody=str(data.get("melody", "")).strip(),
-        notes=str(data.get("notes", "")).strip(),
-        crop=crop,
-    )
 
 
 def check_readings(readings: list[BarReading], beats_per_bar: int) -> list[Check]:
