@@ -62,8 +62,8 @@ def test_svg_pages_show_the_sheet() -> None:
     assert ">Am<" not in svg
     assert "有 1 个和弦可能不准" in svg
     assert svg.count("<circle") > 10  # diagram dots
-    # the folk pattern: 6 strokes per bar, each stroke an arrow
-    assert svg.count(">↓<") + svg.count(">↑<") == 5 * 6
+    # the folk pattern: 6 strokes per bar, each an arrow through the strings
+    assert svg.count("<path") == 5 * 6
     assert "1 / 1" in svg
 
 
@@ -72,14 +72,16 @@ def test_rendering_follows_the_arrangement() -> None:
     g_shapes = render_svg(arrange(SONG, Arrangement(fingering_key=7)))[0]
     assert ">G<" in g_shapes and ">Em?<" in g_shapes and ">Am" not in g_shapes
     assert "G 调指法 夹 5 品" in g_shapes
-    assert base.count(">×<") == g_shapes.count(">×<") or base.count(">×<") > 0  # same strokes
+    assert base.count("<path") == g_shapes.count("<path")  # same strokes in another key
     quarter = render_svg(arrange(SONG, Arrangement(strum_pattern="quarter-down")))[0]
-    assert quarter.count(">↓<") == 5 * 4 and ">↑<" not in quarter
+    assert quarter.count("<path") == 5 * 4
     none = render_svg(arrange(SONG, Arrangement(strum_pattern="none")))[0]
-    assert ">↓<" not in none and none.count(">×<") < base.count(">×<")
+    assert none.count("<path") == 6  # one strum per chord change
     assert "节奏型：" not in none
+    mute = render_svg(arrange(SONG, Arrangement(strum_pattern="mute")))[0]
+    assert mute.count('r="1.1"') == 5 * 2  # the two muted strokes per bar carry a dot
     arpeggio = render_svg(arrange(SONG, Arrangement(strum_pattern="arp-53231323")))[0]
-    assert ">↓<" not in arpeggio and arpeggio.count('fill="white"') >= 5 * 8  # fret numbers
+    assert "<path" not in arpeggio and arpeggio.count(">×<") >= 5 * 8  # one x per plucked string
     full = render_svg(arrange(SONG, Arrangement(simplify_chords=False)))[0]
     assert ">G/B<" in full and ">Fmaj7<" in full and ">G7<" in full
 

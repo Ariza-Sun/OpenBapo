@@ -102,27 +102,39 @@ def _stem(out: list[str], box: BarBox, x: float, lowest_index: int) -> None:
     out.append(_line(x, _string_y(box, lowest_index) + 2, x, box.top + L.STEM_Y, 0.8))
 
 
+def _arrow(out: list[str], box: BarBox, x: float, low: int, high: int, upward: bool) -> None:
+    """A strum: a line through the sounded strings with an arrowhead.
+
+    Chinese play-along sheets point the arrow toward the high strings (up the
+    staff) for a down-strum and toward the low strings for an up-strum.
+    """
+    y_low, y_high = _string_y(box, low) + 1.5, _string_y(box, high) - 1.5
+    out.append(_line(x, y_low, x, y_high, 0.9))
+    tip, base = (y_high, y_high + 4.0) if upward else (y_low, y_low - 4.0)
+    out.append(
+        f'<path d="M{x:.1f},{tip:.1f} L{x - 2.4:.1f},{base:.1f} L{x + 2.4:.1f},{base:.1f} Z" '
+        f'fill="{INK}"/>'
+    )
+
+
 def _event_marks(out: list[str], box: BarBox, x: float, event: StrumEvent, shape: Shape) -> None:
     if event.stroke is not None:
         strings = _sounded(shape)
         if not strings:
             return
-        for i in strings:
-            out.append(_text(x, _string_y(box, i) + 2.3, "×", 7))
-        _stem(out, box, x, strings[0])
-        label = {"down": "↓", "up": "↑", "mute": "切"}[event.stroke]
-        out.append(_text(x, box.top + L.STAFF_Y - 3, label, 6.5 if event.stroke != "mute" else 5))
+        # A down-strum hits every sounded string; an up-strum the top few.
+        low = strings[0] if event.stroke != "up" else strings[max(0, len(strings) - 4)]
+        _arrow(out, box, x, low, strings[-1], upward=event.stroke != "up")
+        if event.stroke == "mute":  # a dot beside the arrow: muted strum
+            mid = (_string_y(box, low) + _string_y(box, strings[-1])) / 2
+            out.append(f'<circle cx="{x + 3.6:.1f}" cy="{mid:.1f}" r="1.1" fill="{INK}"/>')
+        _stem(out, box, x, low)  # the stem continues the arrow's line, without a gap
         return
     picked = [i for i in (_string_index(r, shape) for r in event.strings) if i is not None]
     if not picked:
         return
-    for i in picked:
-        fret = shape.frets[i]
-        y = _string_y(box, i)
-        out.append(
-            f'<rect x="{x - 3.2:.1f}" y="{y - 3.4:.1f}" width="6.4" height="6.8" fill="white"/>'
-        )
-        out.append(_text(x, y + 2.4, str(fret), 6.5))
+    for i in picked:  # a plucked string is marked with x on its line
+        out.append(_text(x, _string_y(box, i) + 2.3, "×", 7))
     _stem(out, box, x, min(picked))
 
 
@@ -141,14 +153,13 @@ def tab_bar(
     chords = box.bar.chords
     if not chords:
         return
-    if pattern is None:
+    if pattern is None:  # chord changes only: one down-strum where each chord starts
         for c in chords:
             shape = shapes[c.shape]
             strings = _sounded(shape)
             if strings:
                 x = box.beat_x(float(c.beat))
-                for i in strings:
-                    out.append(_text(x, _string_y(box, i) + 2.3, "×", 7))
+                _arrow(out, box, x, strings[0], strings[-1], upward=True)
                 _stem(out, box, x, strings[0])
         return
     # Each event sounds the chord in force at its beat.
