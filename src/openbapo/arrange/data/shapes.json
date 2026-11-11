@@ -1,0 +1,5538 @@
+[
+ {
+  "root": 0,
+  "quality": "maj",
+  "frets": [
+   null,
+   3,
+   2,
+   0,
+   1,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 0,
+  "quality": "maj",
+  "frets": [
+   null,
+   3,
+   5,
+   5,
+   5,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "maj",
+  "frets": [
+   8,
+   10,
+   10,
+   9,
+   8,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "min",
+  "frets": [
+   null,
+   3,
+   5,
+   5,
+   4,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "min",
+  "frets": [
+   8,
+   10,
+   10,
+   8,
+   8,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "7",
+  "frets": [
+   null,
+   3,
+   2,
+   3,
+   1,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 0,
+  "quality": "7",
+  "frets": [
+   null,
+   3,
+   5,
+   3,
+   5,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "7",
+  "frets": [
+   8,
+   10,
+   8,
+   9,
+   8,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "maj7",
+  "frets": [
+   null,
+   3,
+   2,
+   0,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 0,
+  "quality": "maj7",
+  "frets": [
+   null,
+   3,
+   5,
+   4,
+   5,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "maj7",
+  "frets": [
+   8,
+   10,
+   9,
+   9,
+   8,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "min7",
+  "frets": [
+   null,
+   3,
+   5,
+   3,
+   4,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "min7",
+  "frets": [
+   8,
+   10,
+   8,
+   8,
+   8,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "maj6",
+  "frets": [
+   null,
+   3,
+   2,
+   2,
+   1,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 0,
+  "quality": "maj6",
+  "frets": [
+   null,
+   3,
+   5,
+   5,
+   5,
+   5
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "maj6",
+  "frets": [
+   8,
+   10,
+   10,
+   9,
+   10,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "min6",
+  "frets": [
+   null,
+   3,
+   5,
+   5,
+   4,
+   5
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "min6",
+  "frets": [
+   8,
+   10,
+   10,
+   8,
+   10,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "sus2",
+  "frets": [
+   null,
+   3,
+   5,
+   5,
+   3,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   10,
+   12,
+   13,
+   10
+  ],
+  "base_fret": 10,
+  "barre": null,
+  "difficulty": 3,
+  "source": "D-form"
+ },
+ {
+  "root": 0,
+  "quality": "sus4",
+  "frets": [
+   null,
+   3,
+   3,
+   0,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 2,
+  "source": "open"
+ },
+ {
+  "root": 0,
+  "quality": "sus4",
+  "frets": [
+   null,
+   3,
+   5,
+   5,
+   6,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "sus4",
+  "frets": [
+   8,
+   10,
+   10,
+   10,
+   8,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "5",
+  "frets": [
+   null,
+   3,
+   5,
+   5,
+   null,
+   null
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "5",
+  "frets": [
+   8,
+   10,
+   10,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "dim",
+  "frets": [
+   null,
+   3,
+   4,
+   5,
+   4,
+   null
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "aug",
+  "frets": [
+   null,
+   3,
+   6,
+   5,
+   5,
+   null
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "aug",
+  "frets": [
+   8,
+   null,
+   10,
+   9,
+   9,
+   null
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "dim7",
+  "frets": [
+   null,
+   3,
+   4,
+   2,
+   4,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "dim7",
+  "frets": [
+   8,
+   null,
+   10,
+   11,
+   10,
+   11
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 0,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   3,
+   4,
+   3,
+   4,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 0,
+  "quality": "hdim7",
+  "frets": [
+   8,
+   9,
+   10,
+   8,
+   11,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "maj",
+  "frets": [
+   null,
+   4,
+   6,
+   6,
+   6,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "maj",
+  "frets": [
+   9,
+   11,
+   11,
+   10,
+   9,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "min",
+  "frets": [
+   null,
+   4,
+   6,
+   6,
+   5,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "min",
+  "frets": [
+   9,
+   11,
+   11,
+   9,
+   9,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "7",
+  "frets": [
+   null,
+   4,
+   6,
+   4,
+   6,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "7",
+  "frets": [
+   9,
+   11,
+   9,
+   10,
+   9,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "maj7",
+  "frets": [
+   null,
+   4,
+   6,
+   5,
+   6,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "maj7",
+  "frets": [
+   9,
+   11,
+   10,
+   10,
+   9,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "min7",
+  "frets": [
+   null,
+   4,
+   6,
+   4,
+   5,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "min7",
+  "frets": [
+   9,
+   11,
+   9,
+   9,
+   9,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "maj6",
+  "frets": [
+   null,
+   4,
+   6,
+   6,
+   6,
+   6
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "maj6",
+  "frets": [
+   9,
+   11,
+   11,
+   10,
+   11,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "min6",
+  "frets": [
+   null,
+   4,
+   6,
+   6,
+   5,
+   6
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "min6",
+  "frets": [
+   9,
+   11,
+   11,
+   9,
+   11,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "sus2",
+  "frets": [
+   null,
+   4,
+   6,
+   6,
+   4,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   11,
+   13,
+   14,
+   11
+  ],
+  "base_fret": 11,
+  "barre": null,
+  "difficulty": 3,
+  "source": "D-form"
+ },
+ {
+  "root": 1,
+  "quality": "sus4",
+  "frets": [
+   null,
+   4,
+   6,
+   6,
+   7,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "sus4",
+  "frets": [
+   9,
+   11,
+   11,
+   11,
+   9,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "5",
+  "frets": [
+   null,
+   4,
+   6,
+   6,
+   null,
+   null
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "5",
+  "frets": [
+   9,
+   11,
+   11,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "dim",
+  "frets": [
+   null,
+   4,
+   5,
+   6,
+   5,
+   null
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "aug",
+  "frets": [
+   null,
+   4,
+   7,
+   6,
+   6,
+   null
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "aug",
+  "frets": [
+   9,
+   null,
+   11,
+   10,
+   10,
+   null
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "dim7",
+  "frets": [
+   null,
+   4,
+   5,
+   3,
+   5,
+   null
+  ],
+  "base_fret": 3,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "dim7",
+  "frets": [
+   9,
+   null,
+   11,
+   12,
+   11,
+   12
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 1,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   4,
+   5,
+   4,
+   5,
+   null
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 1,
+  "quality": "hdim7",
+  "frets": [
+   9,
+   10,
+   11,
+   9,
+   12,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "maj",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   3,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "maj",
+  "frets": [
+   null,
+   5,
+   7,
+   7,
+   7,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "maj",
+  "frets": [
+   10,
+   12,
+   12,
+   11,
+   10,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "min",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   3,
+   1
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "min",
+  "frets": [
+   null,
+   5,
+   7,
+   7,
+   6,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "min",
+  "frets": [
+   10,
+   12,
+   12,
+   10,
+   10,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "7",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   1,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "7",
+  "frets": [
+   null,
+   5,
+   7,
+   5,
+   7,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "7",
+  "frets": [
+   10,
+   12,
+   10,
+   11,
+   10,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "maj7",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "maj7",
+  "frets": [
+   null,
+   5,
+   7,
+   6,
+   7,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "maj7",
+  "frets": [
+   10,
+   12,
+   11,
+   11,
+   10,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "min7",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "min7",
+  "frets": [
+   null,
+   5,
+   7,
+   5,
+   6,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "min7",
+  "frets": [
+   10,
+   12,
+   10,
+   10,
+   10,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "maj6",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   0,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "maj6",
+  "frets": [
+   null,
+   5,
+   7,
+   7,
+   7,
+   7
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "maj6",
+  "frets": [
+   10,
+   12,
+   12,
+   11,
+   12,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "min6",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   0,
+   1
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "min6",
+  "frets": [
+   null,
+   5,
+   7,
+   7,
+   6,
+   7
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "min6",
+  "frets": [
+   10,
+   12,
+   12,
+   10,
+   12,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   3,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "sus2",
+  "frets": [
+   null,
+   5,
+   7,
+   7,
+   5,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "sus4",
+  "frets": [
+   null,
+   null,
+   0,
+   2,
+   3,
+   3
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 2,
+  "quality": "sus4",
+  "frets": [
+   null,
+   5,
+   7,
+   7,
+   8,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "sus4",
+  "frets": [
+   10,
+   12,
+   12,
+   12,
+   10,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "5",
+  "frets": [
+   null,
+   5,
+   7,
+   7,
+   null,
+   null
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "5",
+  "frets": [
+   10,
+   12,
+   12,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "dim",
+  "frets": [
+   null,
+   5,
+   6,
+   7,
+   6,
+   null
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "aug",
+  "frets": [
+   null,
+   5,
+   8,
+   7,
+   7,
+   null
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "aug",
+  "frets": [
+   10,
+   null,
+   12,
+   11,
+   11,
+   null
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "dim7",
+  "frets": [
+   null,
+   5,
+   6,
+   4,
+   6,
+   null
+  ],
+  "base_fret": 4,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "dim7",
+  "frets": [
+   10,
+   null,
+   12,
+   13,
+   12,
+   13
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 2,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   5,
+   6,
+   5,
+   6,
+   null
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 2,
+  "quality": "hdim7",
+  "frets": [
+   10,
+   11,
+   12,
+   10,
+   13,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "maj",
+  "frets": [
+   null,
+   6,
+   8,
+   8,
+   8,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "maj",
+  "frets": [
+   11,
+   13,
+   13,
+   12,
+   11,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "min",
+  "frets": [
+   null,
+   6,
+   8,
+   8,
+   7,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "min",
+  "frets": [
+   11,
+   13,
+   13,
+   11,
+   11,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "7",
+  "frets": [
+   null,
+   6,
+   8,
+   6,
+   8,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "7",
+  "frets": [
+   11,
+   13,
+   11,
+   12,
+   11,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "maj7",
+  "frets": [
+   null,
+   6,
+   8,
+   7,
+   8,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "maj7",
+  "frets": [
+   11,
+   13,
+   12,
+   12,
+   11,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "min7",
+  "frets": [
+   null,
+   6,
+   8,
+   6,
+   7,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "min7",
+  "frets": [
+   11,
+   13,
+   11,
+   11,
+   11,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "maj6",
+  "frets": [
+   null,
+   6,
+   8,
+   8,
+   8,
+   8
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "maj6",
+  "frets": [
+   11,
+   13,
+   13,
+   12,
+   13,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "min6",
+  "frets": [
+   null,
+   6,
+   8,
+   8,
+   7,
+   8
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "min6",
+  "frets": [
+   11,
+   13,
+   13,
+   11,
+   13,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   1,
+   3,
+   4,
+   1
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 2,
+  "source": "D-form"
+ },
+ {
+  "root": 3,
+  "quality": "sus2",
+  "frets": [
+   null,
+   6,
+   8,
+   8,
+   6,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "sus4",
+  "frets": [
+   null,
+   6,
+   8,
+   8,
+   9,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "sus4",
+  "frets": [
+   11,
+   13,
+   13,
+   13,
+   11,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "5",
+  "frets": [
+   null,
+   6,
+   8,
+   8,
+   null,
+   null
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "5",
+  "frets": [
+   11,
+   13,
+   13,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "dim",
+  "frets": [
+   null,
+   6,
+   7,
+   8,
+   7,
+   null
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "aug",
+  "frets": [
+   null,
+   6,
+   9,
+   8,
+   8,
+   null
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "aug",
+  "frets": [
+   11,
+   null,
+   13,
+   12,
+   12,
+   null
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "dim7",
+  "frets": [
+   null,
+   6,
+   7,
+   5,
+   7,
+   null
+  ],
+  "base_fret": 5,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "dim7",
+  "frets": [
+   11,
+   null,
+   13,
+   14,
+   13,
+   14
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 3,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   6,
+   7,
+   6,
+   7,
+   null
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 3,
+  "quality": "hdim7",
+  "frets": [
+   11,
+   12,
+   13,
+   11,
+   14,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 0,
+  "difficulty": 4,
+  "source": "E-form"
+ },
+ {
+  "root": 4,
+  "quality": "maj",
+  "frets": [
+   0,
+   2,
+   2,
+   1,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 4,
+  "quality": "maj",
+  "frets": [
+   null,
+   7,
+   9,
+   9,
+   9,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "min",
+  "frets": [
+   0,
+   2,
+   2,
+   0,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 4,
+  "quality": "min",
+  "frets": [
+   null,
+   7,
+   9,
+   9,
+   8,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "7",
+  "frets": [
+   0,
+   2,
+   0,
+   1,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 4,
+  "quality": "7",
+  "frets": [
+   null,
+   7,
+   9,
+   7,
+   9,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "maj7",
+  "frets": [
+   0,
+   2,
+   1,
+   1,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 4,
+  "quality": "maj7",
+  "frets": [
+   null,
+   7,
+   9,
+   8,
+   9,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "min7",
+  "frets": [
+   0,
+   2,
+   0,
+   0,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 4,
+  "quality": "min7",
+  "frets": [
+   null,
+   7,
+   9,
+   7,
+   8,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "maj6",
+  "frets": [
+   0,
+   2,
+   2,
+   1,
+   2,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 4,
+  "quality": "maj6",
+  "frets": [
+   null,
+   7,
+   9,
+   9,
+   9,
+   9
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "min6",
+  "frets": [
+   0,
+   2,
+   2,
+   0,
+   2,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 4,
+  "quality": "min6",
+  "frets": [
+   null,
+   7,
+   9,
+   9,
+   8,
+   9
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   2,
+   4,
+   5,
+   2
+  ],
+  "base_fret": 2,
+  "barre": null,
+  "difficulty": 2,
+  "source": "D-form"
+ },
+ {
+  "root": 4,
+  "quality": "sus2",
+  "frets": [
+   null,
+   7,
+   9,
+   9,
+   7,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "sus4",
+  "frets": [
+   0,
+   2,
+   2,
+   2,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 4,
+  "quality": "sus4",
+  "frets": [
+   null,
+   7,
+   9,
+   9,
+   10,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "5",
+  "frets": [
+   0,
+   2,
+   2,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 4,
+  "quality": "5",
+  "frets": [
+   null,
+   7,
+   9,
+   9,
+   null,
+   null
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "dim",
+  "frets": [
+   null,
+   7,
+   8,
+   9,
+   8,
+   null
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "aug",
+  "frets": [
+   0,
+   null,
+   2,
+   1,
+   1,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 4,
+  "quality": "aug",
+  "frets": [
+   null,
+   7,
+   10,
+   9,
+   9,
+   null
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "dim7",
+  "frets": [
+   null,
+   7,
+   8,
+   6,
+   8,
+   null
+  ],
+  "base_fret": 6,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "dim7",
+  "frets": [
+   0,
+   null,
+   2,
+   3,
+   2,
+   3
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 4,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   7,
+   8,
+   7,
+   8,
+   null
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 4,
+  "quality": "hdim7",
+  "frets": [
+   0,
+   1,
+   2,
+   0,
+   3,
+   0
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "maj",
+  "frets": [
+   null,
+   null,
+   3,
+   2,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 4,
+  "difficulty": 2,
+  "source": "open"
+ },
+ {
+  "root": 5,
+  "quality": "maj",
+  "frets": [
+   1,
+   3,
+   3,
+   2,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "maj",
+  "frets": [
+   null,
+   8,
+   10,
+   10,
+   10,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "min",
+  "frets": [
+   1,
+   3,
+   3,
+   1,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "min",
+  "frets": [
+   null,
+   8,
+   10,
+   10,
+   9,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "7",
+  "frets": [
+   1,
+   3,
+   1,
+   2,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "7",
+  "frets": [
+   null,
+   8,
+   10,
+   8,
+   10,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "maj7",
+  "frets": [
+   null,
+   null,
+   3,
+   2,
+   1,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 5,
+  "quality": "maj7",
+  "frets": [
+   1,
+   3,
+   2,
+   2,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "maj7",
+  "frets": [
+   null,
+   8,
+   10,
+   9,
+   10,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "min7",
+  "frets": [
+   1,
+   3,
+   1,
+   1,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "min7",
+  "frets": [
+   null,
+   8,
+   10,
+   8,
+   9,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "maj6",
+  "frets": [
+   1,
+   3,
+   3,
+   2,
+   3,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "maj6",
+  "frets": [
+   null,
+   8,
+   10,
+   10,
+   10,
+   10
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "min6",
+  "frets": [
+   1,
+   3,
+   3,
+   1,
+   3,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "min6",
+  "frets": [
+   null,
+   8,
+   10,
+   10,
+   9,
+   10
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   3,
+   5,
+   6,
+   3
+  ],
+  "base_fret": 3,
+  "barre": null,
+  "difficulty": 2,
+  "source": "D-form"
+ },
+ {
+  "root": 5,
+  "quality": "sus2",
+  "frets": [
+   null,
+   8,
+   10,
+   10,
+   8,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "sus4",
+  "frets": [
+   1,
+   3,
+   3,
+   3,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "sus4",
+  "frets": [
+   null,
+   8,
+   10,
+   10,
+   11,
+   8
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "5",
+  "frets": [
+   1,
+   3,
+   3,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "5",
+  "frets": [
+   null,
+   8,
+   10,
+   10,
+   null,
+   null
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "dim",
+  "frets": [
+   null,
+   8,
+   9,
+   10,
+   9,
+   null
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "aug",
+  "frets": [
+   1,
+   null,
+   3,
+   2,
+   2,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "aug",
+  "frets": [
+   null,
+   8,
+   11,
+   10,
+   10,
+   null
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "dim7",
+  "frets": [
+   null,
+   8,
+   9,
+   7,
+   9,
+   null
+  ],
+  "base_fret": 7,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 5,
+  "quality": "dim7",
+  "frets": [
+   1,
+   null,
+   3,
+   4,
+   3,
+   4
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "hdim7",
+  "frets": [
+   1,
+   2,
+   3,
+   1,
+   4,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 5,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   8,
+   9,
+   8,
+   9,
+   null
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "maj",
+  "frets": [
+   2,
+   4,
+   4,
+   3,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "maj",
+  "frets": [
+   null,
+   9,
+   11,
+   11,
+   11,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "min",
+  "frets": [
+   2,
+   4,
+   4,
+   2,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "min",
+  "frets": [
+   null,
+   9,
+   11,
+   11,
+   10,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "7",
+  "frets": [
+   2,
+   4,
+   2,
+   3,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "7",
+  "frets": [
+   null,
+   9,
+   11,
+   9,
+   11,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "maj7",
+  "frets": [
+   2,
+   4,
+   3,
+   3,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "maj7",
+  "frets": [
+   null,
+   9,
+   11,
+   10,
+   11,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "min7",
+  "frets": [
+   2,
+   4,
+   2,
+   2,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "min7",
+  "frets": [
+   null,
+   9,
+   11,
+   9,
+   10,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "maj6",
+  "frets": [
+   2,
+   4,
+   4,
+   3,
+   4,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "maj6",
+  "frets": [
+   null,
+   9,
+   11,
+   11,
+   11,
+   11
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "min6",
+  "frets": [
+   2,
+   4,
+   4,
+   2,
+   4,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "min6",
+  "frets": [
+   null,
+   9,
+   11,
+   11,
+   10,
+   11
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   4,
+   6,
+   7,
+   4
+  ],
+  "base_fret": 4,
+  "barre": null,
+  "difficulty": 2,
+  "source": "D-form"
+ },
+ {
+  "root": 6,
+  "quality": "sus2",
+  "frets": [
+   null,
+   9,
+   11,
+   11,
+   9,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "sus4",
+  "frets": [
+   2,
+   4,
+   4,
+   4,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "sus4",
+  "frets": [
+   null,
+   9,
+   11,
+   11,
+   12,
+   9
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "5",
+  "frets": [
+   2,
+   4,
+   4,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "5",
+  "frets": [
+   null,
+   9,
+   11,
+   11,
+   null,
+   null
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "dim",
+  "frets": [
+   null,
+   9,
+   10,
+   11,
+   10,
+   null
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "aug",
+  "frets": [
+   2,
+   null,
+   4,
+   3,
+   3,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "aug",
+  "frets": [
+   null,
+   9,
+   12,
+   11,
+   11,
+   null
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "dim7",
+  "frets": [
+   2,
+   null,
+   4,
+   5,
+   4,
+   5
+  ],
+  "base_fret": 2,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "dim7",
+  "frets": [
+   null,
+   9,
+   10,
+   8,
+   10,
+   null
+  ],
+  "base_fret": 8,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 6,
+  "quality": "hdim7",
+  "frets": [
+   2,
+   3,
+   4,
+   2,
+   5,
+   2
+  ],
+  "base_fret": 2,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 6,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   9,
+   10,
+   9,
+   10,
+   null
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "maj",
+  "frets": [
+   3,
+   2,
+   0,
+   0,
+   0,
+   3
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 7,
+  "quality": "maj",
+  "frets": [
+   3,
+   5,
+   5,
+   4,
+   3,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "maj",
+  "frets": [
+   null,
+   10,
+   12,
+   12,
+   12,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "min",
+  "frets": [
+   3,
+   5,
+   5,
+   3,
+   3,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "min",
+  "frets": [
+   null,
+   10,
+   12,
+   12,
+   11,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "7",
+  "frets": [
+   3,
+   2,
+   0,
+   0,
+   0,
+   1
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 7,
+  "quality": "7",
+  "frets": [
+   3,
+   5,
+   3,
+   4,
+   3,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "7",
+  "frets": [
+   null,
+   10,
+   12,
+   10,
+   12,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "maj7",
+  "frets": [
+   3,
+   2,
+   0,
+   0,
+   0,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 7,
+  "quality": "maj7",
+  "frets": [
+   3,
+   5,
+   4,
+   4,
+   3,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "maj7",
+  "frets": [
+   null,
+   10,
+   12,
+   11,
+   12,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "min7",
+  "frets": [
+   3,
+   5,
+   3,
+   3,
+   3,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "min7",
+  "frets": [
+   null,
+   10,
+   12,
+   10,
+   11,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "maj6",
+  "frets": [
+   3,
+   2,
+   0,
+   0,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 7,
+  "quality": "maj6",
+  "frets": [
+   3,
+   5,
+   5,
+   4,
+   5,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "maj6",
+  "frets": [
+   null,
+   10,
+   12,
+   12,
+   12,
+   12
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "min6",
+  "frets": [
+   3,
+   5,
+   5,
+   3,
+   5,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "min6",
+  "frets": [
+   null,
+   10,
+   12,
+   12,
+   11,
+   12
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   5,
+   7,
+   8,
+   5
+  ],
+  "base_fret": 5,
+  "barre": null,
+  "difficulty": 2,
+  "source": "D-form"
+ },
+ {
+  "root": 7,
+  "quality": "sus2",
+  "frets": [
+   null,
+   10,
+   12,
+   12,
+   10,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "sus4",
+  "frets": [
+   3,
+   3,
+   0,
+   0,
+   1,
+   3
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 2,
+  "source": "open"
+ },
+ {
+  "root": 7,
+  "quality": "sus4",
+  "frets": [
+   3,
+   5,
+   5,
+   5,
+   3,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "sus4",
+  "frets": [
+   null,
+   10,
+   12,
+   12,
+   13,
+   10
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "5",
+  "frets": [
+   3,
+   5,
+   5,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "5",
+  "frets": [
+   null,
+   10,
+   12,
+   12,
+   null,
+   null
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "dim",
+  "frets": [
+   null,
+   10,
+   11,
+   12,
+   11,
+   null
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "aug",
+  "frets": [
+   3,
+   null,
+   5,
+   4,
+   4,
+   null
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "aug",
+  "frets": [
+   null,
+   10,
+   13,
+   12,
+   12,
+   null
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "dim7",
+  "frets": [
+   3,
+   null,
+   5,
+   6,
+   5,
+   6
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "dim7",
+  "frets": [
+   null,
+   10,
+   11,
+   9,
+   11,
+   null
+  ],
+  "base_fret": 9,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 7,
+  "quality": "hdim7",
+  "frets": [
+   3,
+   4,
+   5,
+   3,
+   6,
+   3
+  ],
+  "base_fret": 3,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 7,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   10,
+   11,
+   10,
+   11,
+   null
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "maj",
+  "frets": [
+   4,
+   6,
+   6,
+   5,
+   4,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "maj",
+  "frets": [
+   null,
+   11,
+   13,
+   13,
+   13,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "min",
+  "frets": [
+   4,
+   6,
+   6,
+   4,
+   4,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "min",
+  "frets": [
+   null,
+   11,
+   13,
+   13,
+   12,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "7",
+  "frets": [
+   4,
+   6,
+   4,
+   5,
+   4,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "7",
+  "frets": [
+   null,
+   11,
+   13,
+   11,
+   13,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "maj7",
+  "frets": [
+   4,
+   6,
+   5,
+   5,
+   4,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "maj7",
+  "frets": [
+   null,
+   11,
+   13,
+   12,
+   13,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "min7",
+  "frets": [
+   4,
+   6,
+   4,
+   4,
+   4,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "min7",
+  "frets": [
+   null,
+   11,
+   13,
+   11,
+   12,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "maj6",
+  "frets": [
+   4,
+   6,
+   6,
+   5,
+   6,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "maj6",
+  "frets": [
+   null,
+   11,
+   13,
+   13,
+   13,
+   13
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "min6",
+  "frets": [
+   4,
+   6,
+   6,
+   4,
+   6,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "min6",
+  "frets": [
+   null,
+   11,
+   13,
+   13,
+   12,
+   13
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   6,
+   8,
+   9,
+   6
+  ],
+  "base_fret": 6,
+  "barre": null,
+  "difficulty": 2,
+  "source": "D-form"
+ },
+ {
+  "root": 8,
+  "quality": "sus2",
+  "frets": [
+   null,
+   11,
+   13,
+   13,
+   11,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "sus4",
+  "frets": [
+   4,
+   6,
+   6,
+   6,
+   4,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "sus4",
+  "frets": [
+   null,
+   11,
+   13,
+   13,
+   14,
+   11
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 4,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "5",
+  "frets": [
+   4,
+   6,
+   6,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "5",
+  "frets": [
+   null,
+   11,
+   13,
+   13,
+   null,
+   null
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "dim",
+  "frets": [
+   null,
+   11,
+   12,
+   13,
+   12,
+   null
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "aug",
+  "frets": [
+   4,
+   null,
+   6,
+   5,
+   5,
+   null
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "aug",
+  "frets": [
+   null,
+   11,
+   14,
+   13,
+   13,
+   null
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "dim7",
+  "frets": [
+   4,
+   null,
+   6,
+   7,
+   6,
+   7
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "dim7",
+  "frets": [
+   null,
+   11,
+   12,
+   10,
+   12,
+   null
+  ],
+  "base_fret": 10,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 8,
+  "quality": "hdim7",
+  "frets": [
+   4,
+   5,
+   6,
+   4,
+   7,
+   4
+  ],
+  "base_fret": 4,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 8,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   11,
+   12,
+   11,
+   12,
+   null
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 9,
+  "quality": "maj",
+  "frets": [
+   null,
+   0,
+   2,
+   2,
+   2,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "maj",
+  "frets": [
+   5,
+   7,
+   7,
+   6,
+   5,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "min",
+  "frets": [
+   null,
+   0,
+   2,
+   2,
+   1,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "min",
+  "frets": [
+   5,
+   7,
+   7,
+   5,
+   5,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "7",
+  "frets": [
+   null,
+   0,
+   2,
+   0,
+   2,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "7",
+  "frets": [
+   5,
+   7,
+   5,
+   6,
+   5,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "maj7",
+  "frets": [
+   null,
+   0,
+   2,
+   1,
+   2,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "maj7",
+  "frets": [
+   5,
+   7,
+   6,
+   6,
+   5,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "min7",
+  "frets": [
+   null,
+   0,
+   2,
+   0,
+   1,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "min7",
+  "frets": [
+   5,
+   7,
+   5,
+   5,
+   5,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "maj6",
+  "frets": [
+   null,
+   0,
+   2,
+   2,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 2,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "maj6",
+  "frets": [
+   5,
+   7,
+   7,
+   6,
+   7,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "min6",
+  "frets": [
+   null,
+   0,
+   2,
+   2,
+   1,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "min6",
+  "frets": [
+   5,
+   7,
+   7,
+   5,
+   7,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "sus2",
+  "frets": [
+   null,
+   0,
+   2,
+   2,
+   0,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   7,
+   9,
+   10,
+   7
+  ],
+  "base_fret": 7,
+  "barre": null,
+  "difficulty": 2,
+  "source": "D-form"
+ },
+ {
+  "root": 9,
+  "quality": "sus4",
+  "frets": [
+   null,
+   0,
+   2,
+   2,
+   3,
+   0
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "sus4",
+  "frets": [
+   5,
+   7,
+   7,
+   7,
+   5,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "5",
+  "frets": [
+   null,
+   0,
+   2,
+   2,
+   null,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 9,
+  "quality": "5",
+  "frets": [
+   5,
+   7,
+   7,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "dim",
+  "frets": [
+   null,
+   0,
+   1,
+   2,
+   1,
+   null
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 1,
+  "source": "open"
+ },
+ {
+  "root": 9,
+  "quality": "aug",
+  "frets": [
+   null,
+   0,
+   3,
+   2,
+   2,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 9,
+  "quality": "aug",
+  "frets": [
+   5,
+   null,
+   7,
+   6,
+   6,
+   null
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "dim7",
+  "frets": [
+   5,
+   null,
+   7,
+   8,
+   7,
+   8
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 9,
+  "quality": "dim7",
+  "frets": [
+   null,
+   12,
+   13,
+   11,
+   13,
+   null
+  ],
+  "base_fret": 11,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 9,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   0,
+   1,
+   0,
+   1,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 9,
+  "quality": "hdim7",
+  "frets": [
+   5,
+   6,
+   7,
+   5,
+   8,
+   5
+  ],
+  "base_fret": 5,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "maj",
+  "frets": [
+   null,
+   1,
+   3,
+   3,
+   3,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "maj",
+  "frets": [
+   6,
+   8,
+   8,
+   7,
+   6,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "min",
+  "frets": [
+   null,
+   1,
+   3,
+   3,
+   2,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "min",
+  "frets": [
+   6,
+   8,
+   8,
+   6,
+   6,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "7",
+  "frets": [
+   null,
+   1,
+   3,
+   1,
+   3,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "7",
+  "frets": [
+   6,
+   8,
+   6,
+   7,
+   6,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "maj7",
+  "frets": [
+   null,
+   1,
+   3,
+   2,
+   3,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "maj7",
+  "frets": [
+   6,
+   8,
+   7,
+   7,
+   6,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "min7",
+  "frets": [
+   null,
+   1,
+   3,
+   1,
+   2,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "min7",
+  "frets": [
+   6,
+   8,
+   6,
+   6,
+   6,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "maj6",
+  "frets": [
+   null,
+   1,
+   3,
+   3,
+   3,
+   3
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "maj6",
+  "frets": [
+   6,
+   8,
+   8,
+   7,
+   8,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "min6",
+  "frets": [
+   null,
+   1,
+   3,
+   3,
+   2,
+   3
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "min6",
+  "frets": [
+   6,
+   8,
+   8,
+   6,
+   8,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "sus2",
+  "frets": [
+   null,
+   1,
+   3,
+   3,
+   1,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   8,
+   10,
+   11,
+   8
+  ],
+  "base_fret": 8,
+  "barre": null,
+  "difficulty": 3,
+  "source": "D-form"
+ },
+ {
+  "root": 10,
+  "quality": "sus4",
+  "frets": [
+   null,
+   1,
+   3,
+   3,
+   4,
+   1
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "sus4",
+  "frets": [
+   6,
+   8,
+   8,
+   8,
+   6,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "5",
+  "frets": [
+   null,
+   1,
+   3,
+   3,
+   null,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "5",
+  "frets": [
+   6,
+   8,
+   8,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "dim",
+  "frets": [
+   null,
+   1,
+   2,
+   3,
+   2,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "aug",
+  "frets": [
+   null,
+   1,
+   4,
+   3,
+   3,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "aug",
+  "frets": [
+   6,
+   null,
+   8,
+   7,
+   7,
+   null
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "dim7",
+  "frets": [
+   null,
+   1,
+   2,
+   0,
+   2,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "dim7",
+  "frets": [
+   6,
+   null,
+   8,
+   9,
+   8,
+   9
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 10,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   1,
+   2,
+   1,
+   2,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 10,
+  "quality": "hdim7",
+  "frets": [
+   6,
+   7,
+   8,
+   6,
+   9,
+   6
+  ],
+  "base_fret": 6,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "maj",
+  "frets": [
+   null,
+   2,
+   4,
+   4,
+   4,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "maj",
+  "frets": [
+   7,
+   9,
+   9,
+   8,
+   7,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "min",
+  "frets": [
+   null,
+   2,
+   4,
+   4,
+   3,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "min",
+  "frets": [
+   7,
+   9,
+   9,
+   7,
+   7,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "7",
+  "frets": [
+   null,
+   2,
+   1,
+   2,
+   0,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 2,
+  "source": "open"
+ },
+ {
+  "root": 11,
+  "quality": "7",
+  "frets": [
+   null,
+   2,
+   4,
+   2,
+   4,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "7",
+  "frets": [
+   7,
+   9,
+   7,
+   8,
+   7,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "maj7",
+  "frets": [
+   null,
+   2,
+   4,
+   3,
+   4,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "maj7",
+  "frets": [
+   7,
+   9,
+   8,
+   8,
+   7,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "min7",
+  "frets": [
+   null,
+   2,
+   0,
+   2,
+   0,
+   2
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 2,
+  "source": "open"
+ },
+ {
+  "root": 11,
+  "quality": "min7",
+  "frets": [
+   null,
+   2,
+   4,
+   2,
+   3,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "min7",
+  "frets": [
+   7,
+   9,
+   7,
+   7,
+   7,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "maj6",
+  "frets": [
+   null,
+   2,
+   4,
+   4,
+   4,
+   4
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "maj6",
+  "frets": [
+   7,
+   9,
+   9,
+   8,
+   9,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "min6",
+  "frets": [
+   null,
+   2,
+   4,
+   4,
+   3,
+   4
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "min6",
+  "frets": [
+   7,
+   9,
+   9,
+   7,
+   9,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "sus2",
+  "frets": [
+   null,
+   2,
+   4,
+   4,
+   2,
+   2
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "sus2",
+  "frets": [
+   null,
+   null,
+   9,
+   11,
+   12,
+   9
+  ],
+  "base_fret": 9,
+  "barre": null,
+  "difficulty": 3,
+  "source": "D-form"
+ },
+ {
+  "root": 11,
+  "quality": "sus4",
+  "frets": [
+   null,
+   2,
+   4,
+   4,
+   5,
+   2
+  ],
+  "base_fret": 2,
+  "barre": 1,
+  "difficulty": 3,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "sus4",
+  "frets": [
+   7,
+   9,
+   9,
+   9,
+   7,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "5",
+  "frets": [
+   null,
+   2,
+   4,
+   4,
+   null,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "5",
+  "frets": [
+   7,
+   9,
+   9,
+   null,
+   null,
+   null
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "dim",
+  "frets": [
+   null,
+   2,
+   3,
+   4,
+   3,
+   null
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 2,
+  "source": "open"
+ },
+ {
+  "root": 11,
+  "quality": "aug",
+  "frets": [
+   null,
+   2,
+   5,
+   4,
+   4,
+   null
+  ],
+  "base_fret": 2,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "aug",
+  "frets": [
+   7,
+   null,
+   9,
+   8,
+   8,
+   null
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 2,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "dim7",
+  "frets": [
+   null,
+   2,
+   3,
+   1,
+   3,
+   null
+  ],
+  "base_fret": 1,
+  "barre": 1,
+  "difficulty": 2,
+  "source": "A-form"
+ },
+ {
+  "root": 11,
+  "quality": "dim7",
+  "frets": [
+   7,
+   null,
+   9,
+   10,
+   9,
+   10
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ },
+ {
+  "root": 11,
+  "quality": "hdim7",
+  "frets": [
+   null,
+   2,
+   3,
+   2,
+   3,
+   null
+  ],
+  "base_fret": 1,
+  "barre": null,
+  "difficulty": 2,
+  "source": "open"
+ },
+ {
+  "root": 11,
+  "quality": "hdim7",
+  "frets": [
+   7,
+   8,
+   9,
+   7,
+   10,
+   7
+  ],
+  "base_fret": 7,
+  "barre": 0,
+  "difficulty": 3,
+  "source": "E-form"
+ }
+]

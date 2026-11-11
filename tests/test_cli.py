@@ -132,3 +132,33 @@ def test_module_entry_point_reports_usage() -> None:
         [sys.executable, "-m", "openbapo", "--version"], capture_output=True, text=True, check=True
     )
     assert proc.stdout.startswith("openbapo ")
+
+
+def test_arrange_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    from test_arrange_sheet import SONG
+
+    from openbapo.arrange import ArrangedSheet
+
+    src = tmp_path / "analysis.json"
+    src.write_text(SONG.to_json(), encoding="utf-8")
+    out = tmp_path / "sheet.json"
+    args = ["arrange", str(src), "--out", str(out), "--transpose", "2", "--fingering-key", "C"]
+    assert main(args) == 0
+    sheet = ArrangedSheet.from_json(out.read_text(encoding="utf-8"))
+    assert sheet.header.capo == 2 and sheet.header.sung_key == "D"
+    minor = tmp_path / "minor.json"
+    minor.write_text(
+        SONG.model_copy(
+            update={"key": SONG.key.model_copy(update={"mode": "minor", "tonic": 9})}
+        ).to_json(),
+        encoding="utf-8",
+    )
+    assert main(["arrange", str(minor), "--out", str(out), "--fingering-key", "G"]) == 0
+    relative = ArrangedSheet.from_json(out.read_text(encoding="utf-8"))
+    assert relative.header.fingering_key == "Em" and relative.warnings == ()
+    assert main(["arrange", str(src), "--out", "-", "--strum", "nope"]) == 0
+    captured = capsys.readouterr()
+    assert '"capo": 0' in captured.out and "note: 节奏型" in captured.err
+    assert main(["arrange", str(src), "--out", str(out), "--fingering-key", "H"]) == 1
+    assert main(["arrange", str(tmp_path / "missing.json"), "--out", str(out)]) == 1
+    assert main(["arrange", str(src), "--out", str(out), "--transpose", "9"]) == 1
