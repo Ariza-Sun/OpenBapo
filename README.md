@@ -5,7 +5,7 @@
 
 **Turn a song into a guitar play-along sheet.** Upload a recording and get chord diagrams, a strumming tab, the vocal melody in numbered notation (jianpu) and the lyrics on one sheet. Change the singing key, the fingering key or the strum pattern, and export to PNG, PDF or MusicXML. Works for Chinese and English songs, delivered as a Discord bot.
 
-> ⚠️ **Work in progress.** What works today is the command line: `analyze` finds the beats, tempo, chords and key of a recording and writes them as JSON; `arrange` turns that into the sheet's content (capo, chord names and shapes in a fingering key of your choice, a strum pattern, the header) as JSON. Sheet rendering and the Discord bot are still to come; see [Progress](#progress).
+> ⚠️ **Work in progress.** What works today is the command line: `analyze` finds the beats, tempo, chords and key of a recording; `arrange` turns that into the sheet's content (capo, chord names and shapes in a fingering key of your choice, a strum pattern, the header); `render` draws it as PNG / PDF and exports MusicXML. The melody line, lyrics and the Discord bot are still to come; see [Progress](#progress).
 
 ## Why
 
@@ -19,8 +19,8 @@ Tools that transcribe chords from audio (Capo, Chordify, Moises and others) are 
 | 1 | Source separation, beats, tempo, time signature | ✅ Done |
 | 2 | Chords and key | ✅ Done |
 | 3 | Arranging: capo, fingering key, chord simplification, strum patterns | ✅ Done |
-| 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | ⏳ Next |
-| 5 | Lyrics: alignment of pasted lyrics, and recognition | — |
+| 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | ✅ Done (jianpu notes and lyrics arrive with steps 5 and 7) |
+| 5 | Lyrics: alignment of pasted lyrics, and recognition | ⏳ Next |
 | 6 | Discord bot | — |
 | 7 | Vocal melody to jianpu | — |
 
@@ -78,6 +78,15 @@ openbapo arrange demo.json --out sheet.json --transpose -2 --fingering-key G --s
 
 The sheet JSON holds the header (`原调 C · 演唱调 bB · G 调指法 夹 3 品`), every chord per bar as written in the fingering key with its diagram, the strum pattern with its mnemonic (`下 下上 上下上`), the list of fingering keys with their capos, and which chords the analysis was unsure about. Transposing changes the capo, not the chord names; changing the fingering key rewrites the names but not the sound.
 
+Finally draw it:
+
+```bash
+pip install -e ".[render]"        # cairosvg + pypdf; needs libcairo (Debian / Ubuntu: apt install libcairo2)
+openbapo render sheet.json --png sheet.png --pdf sheet.pdf --musicxml sheet.musicxml
+```
+
+`sheet.png` is the first page (chord diagrams, the strum pattern on a tab staff, the jianpu and lyric lines, the header); the PDF has every page; the MusicXML opens in MuseScore or Guitar Pro for fine editing. PNG text uses the system's CJK font (`fonts-noto-cjk` on Linux).
+
 ## How it works
 
 ```
@@ -111,6 +120,7 @@ Every number comes from a script in this repository; see [docs/benchmarks](docs/
 | Key | the same 220 guitar sheets (relative major/minor counted as correct) | **0.936** |
 | Key | GuitarSet comping / AAM single-key tracks | 0.789 / 0.931 |
 | Speed | 4-minute song: separation, beats, chords and key | 13.4 s |
+| Speed | 4-minute song: arranging and rendering (SVG, PNG, PDF, MusicXML, CPU) | 2.1 s |
 
 Two caveats:
 
@@ -124,6 +134,7 @@ src/openbapo/
   model/      data model: Beat, Tempo, Key, Chord, Analysis, Arrangement; JSON round-trip
   analysis/   analysis pipeline: decoding, separation, beats, chords and key (chords/)
   arrange/    arranging: keys and capo, chord names, shape and strum libraries (data/), the sheet
+  render/     rendering: page layout, SVG drawing, PNG / PDF export, MusicXML
   sheet/      text sheet format, renderer and sheet reader: the evaluation sample generator
 scripts/      evaluation, timing, sheet reading and rendering scripts
 tests/        unit tests; tests marked `models` load the real models

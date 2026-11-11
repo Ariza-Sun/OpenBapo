@@ -21,6 +21,11 @@ sheets = [
     "pillow>=10",
     "pypdfium2>=4",
 ]
+# Rendering PNG / PDF from the SVG pages (needs the system libcairo).
+render = [
+    "cairosvg>=2.7",
+    "pypdf>=4",
+]
 # Model inference. Kept out of the core package so arranging and rendering
 # install without torch; also needs the ffmpeg command-line tools.
 analysis = [
@@ -41,6 +46,7 @@ analysis = [
 dev = [
     "hypothesis>=6.100",
     "librosa>=0.10",  # the rule-based chord experts are tested on CPU
+    "music21>=9",  # reads the MusicXML export back in tests
     "mypy>=1.10",
     "numpy>=1.26",
     "pytest>=8",
@@ -72,7 +78,9 @@ select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF"]
 "tests/test_sheet_omr.py" = ["RUF001", "RUF002", "RUF003"]
 "src/openbapo/arrange/strums.py" = ["RUF001", "RUF002", "RUF003"]
 "src/openbapo/arrange/sheet.py" = ["RUF001", "RUF002", "RUF003"]  # warnings and the header are Chinese
+"src/openbapo/render/svg.py" = ["RUF001", "RUF002", "RUF003"]  # the sheet's labels are Chinese
 "tests/test_arrange_sheet.py" = ["RUF001", "RUF002", "RUF003"]
+"tests/test_render.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/test_arrange_strums.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/test_sheet_triage.py" = ["RUF001", "RUF002", "RUF003"]
 # The benchmark scripts write Chinese Markdown, where full-width punctuation is correct.
@@ -111,3 +119,7 @@ addopts = ["--strict-markers", "-m", "not models"]
 markers = [
     "models: needs model weights and the analysis extra; run with `pytest -m models`",
 ]
+
+[[tool.mypy.overrides]]
+module = ["cairosvg", "cairosvg.*", "music21", "music21.*"]
+ignore_missing_imports = true

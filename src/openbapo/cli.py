@@ -49,7 +49,43 @@ def build_parser() -> argparse.ArgumentParser:
     )
     arrange.add_argument("--strum", default="auto", help="strum pattern id, 'auto' or 'none'")
     arrange.add_argument("--no-simplify", action="store_true", help="keep 7ths, slash chords ...")
+
+    render = commands.add_parser("render", help="render a sheet JSON to SVG / PNG / PDF / MusicXML")
+    render.add_argument("sheet", type=Path, help="sheet JSON from `openbapo arrange`")
+    render.add_argument("--svg", type=Path, help="directory for page-1.svg, page-2.svg ...")
+    render.add_argument("--png", type=Path, help="first page as PNG")
+    render.add_argument("--pdf", type=Path, help="all pages as PDF")
+    render.add_argument("--musicxml", type=Path, help="MusicXML for MuseScore / Guitar Pro")
+    render.add_argument("--dpi", type=int, default=150, help="PNG resolution")
     return parser
+
+
+def run_render(args: argparse.Namespace) -> None:
+    from openbapo.arrange import ArrangedSheet
+    from openbapo.render import render_musicxml, render_svg, svg_pages_to_pdf, svg_to_png
+
+    if not any((args.svg, args.png, args.pdf, args.musicxml)):
+        raise InputError("nothing to write: pass --svg, --png, --pdf and / or --musicxml")
+    if not args.sheet.is_file():
+        raise InputError(f"sheet file not found: {args.sheet}")
+    try:
+        sheet = ArrangedSheet.from_json(args.sheet.read_text(encoding="utf-8"))
+    except ValueError as e:
+        raise InputError(f"{args.sheet} is not a sheet JSON: {e}") from e
+    try:
+        pages = render_svg(sheet)
+        if args.svg:
+            args.svg.mkdir(parents=True, exist_ok=True)
+            for n, page in enumerate(pages, start=1):
+                (args.svg / f"page-{n}.svg").write_text(page, encoding="utf-8")
+        if args.png:
+            args.png.write_bytes(svg_to_png(pages[0], dpi=args.dpi))
+        if args.pdf:
+            args.pdf.write_bytes(svg_pages_to_pdf(pages))
+        if args.musicxml:
+            args.musicxml.write_text(render_musicxml(sheet), encoding="utf-8")
+    except OSError as e:
+        raise InputError(f"cannot write output: {e}") from e
 
 
 def run_arrange(args: argparse.Namespace) -> None:
@@ -152,6 +188,9 @@ def main(
     try:
         if args.command == "arrange":
             run_arrange(args)
+            return 0
+        if args.command == "render":
+            run_render(args)
             return 0
         check_input(args.audio)
         # The analysis extra is checked before anything that imports it, so a
