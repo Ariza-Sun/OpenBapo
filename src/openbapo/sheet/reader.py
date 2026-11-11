@@ -386,7 +386,3 @@ def read_sheet(
     seconds = time.perf_counter() - started
     log(f"{sheet_path}: {len(ordered)} bars, {len(problems)} to review, {seconds:.0f} s")
     return ReadResult(sheet_path, ordered, problems, doubtful, unsettled, seconds, header)
-
-
-def safe_stem(text: str) -> str:
-    return re.sub(r"[^\w\-]+", "_", text).strip("_") or "sheet"

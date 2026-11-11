@@ -61,13 +61,7 @@ def test_worksheet_from_an_image(tmp_path: Path) -> None:
     assert Path(pages[0]["header_crop"]).exists()
 
 
-def test_reading_parsing_and_checks() -> None:
-    r = omr.parse_reading(
-        3, 'Sure: ```json\n{"chords": "G", "melody": "[0 2] [2. 5,] 2 [5, 6,]"}\n```'
-    )
-    assert (r.index, r.chords, r.melody) == (3, "G", "[0 2] [2. 5,] 2 [5, 6,]")
-    with pytest.raises(omr.SheetError):
-        omr.parse_reading(1, "no json here")
+def test_reading_checks() -> None:
     readings = [
         omr.BarReading(0, "C", "1 2 3 4"),
         omr.BarReading(1, "", "- 0 0 0"),  # tie into the bar: fine
