@@ -73,12 +73,12 @@ API 层
 
 | 层 | 做法 |
 |---|---|
-| 和弦图 | 自绘 SVG（指法库直接给出按法，绘制简单） |
-| 六线谱（节奏型 / 和弦变化点） | 自绘 SVG，或 alphaTab / Verovio 渲染 MusicXML 的 tab 部分 |
-| 简谱 | **自绘 SVG**（主流库不支持简谱） |
-| 歌词 | 自绘，音节对齐到简谱音符的 x 坐标 |
-| 页面 | SVG → PNG（第一页预览）/ PDF（多页） |
-| MusicXML | music21 生成；含和弦符号、六线谱、歌词音节 |
+| 和弦图 | 自绘 SVG（`openbapo.render.svg.chord_diagram`，第 4 步） |
+| 六线谱（节奏型 / 和弦变化点） | 自绘 SVG：扫弦画 × + 符干 / 符杠 + 上下箭头，分解画品位数字，"无"节奏型只画和弦变化点（第 4 步决定 1，不用 alphaTab / Verovio） |
+| 简谱 | **自绘 SVG**（主流库不支持简谱）；第 4 步画出行与小节线，音符的时值记号第 7 步 |
+| 歌词 | 自绘，音节按起始时间对齐到拍的 x 坐标（第 5 步接真歌词） |
+| 页面 | A4，每行 4 小节；SVG → PNG（cairosvg，第一页预览）/ PDF（逐页 cairosvg + pypdf 合并，矢量多页）。可选依赖组 `openbapo[render]` |
+| MusicXML | 标准库直接写（第 4 步决定 2，不用 music21 生成）：和弦符号按发声音高、TAB 谱表写节奏型的弦 / 品、变调夹作为移调；music21 只在测试里读回校验 |
 
 排版标准：`docs/reference/desperado-sheet.webp`。
 
