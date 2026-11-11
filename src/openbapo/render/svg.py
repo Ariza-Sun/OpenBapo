@@ -64,12 +64,8 @@ def chord_diagram(x: float, y: float, shape: Shape) -> list[str]:
                 f'<circle cx="{sx:.1f}" cy="{nut - 3.5:.1f}" r="1.7" '
                 f'fill="none" stroke="{INK}" stroke-width="0.6"/>'
             )
-    if shape.barre is not None:
-        barred = [f for f in shape.frets[shape.barre :] if f]
-        if barred:
-            row = min(barred) - shape.base_fret
-            by = nut + (row + 0.5) * gap_y
-            out.append(_line(x + shape.barre * gap_x, by, x + 5 * gap_x, by, 3.2))
+    # A barre is shown the way Chinese sheets show it: a dot on every string it
+    # holds down (the frets already list them), no bar drawn across.
     for i, fret in enumerate(shape.frets):
         if fret:
             row = fret - shape.base_fret

@@ -56,7 +56,10 @@ OPEN: dict[tuple[int, str], tuple[tuple[int | None, ...], int, int | None]] = {
     (4, "sus4"): ((0, 2, 2, 2, 0, 0), 1, None),
     (4, "maj6"): ((0, 2, 2, 1, 2, 0), 1, None),
     (4, "min6"): ((0, 2, 2, 0, 2, 0), 1, None),
-    (5, "maj"): ((X, X, 3, 2, 1, 1), 2, 4),
+    # The full barre F is the F Chinese play-along sheets teach and print; the
+    # four-string F stays in the library as an alternative.
+    (5, "maj"): ((1, 3, 3, 2, 1, 1), 2, 0),
+    (5, "min"): ((1, 3, 3, 1, 1, 1), 2, 0),
     (5, "maj7"): ((X, X, 3, 2, 1, 0), 1, None),
     (7, "maj"): ((3, 2, 0, 0, 0, 3), 1, None),
     (7, "7"): ((3, 2, 0, 0, 0, 1), 1, None),
@@ -157,7 +160,12 @@ def build() -> list[dict[str, object]]:
             return
         seen.add((root, quality, frets))
         sounded = [f for f in frets if f is not None and f > 0]
-        base = min(sounded) if sounded and max(sounded) > 4 else 1
+        # The diagram starts at the lowest fretted note unless open strings
+        # ring (then at the nut), as the sheets print a Bm at "2".
+        open_strings = any(f == 0 for f in frets)
+        base = min(sounded) if sounded and not open_strings and min(sounded) > 1 else 1
+        if sounded and max(sounded) - base > 4:
+            base = max(sounded) - 4
         shapes.append({
             "root": root, "quality": quality, "frets": list(frets), "base_fret": base,
             "barre": barre, "difficulty": difficulty, "source": source,
@@ -165,6 +173,7 @@ def build() -> list[dict[str, object]]:
 
     for (root, quality), (frets, difficulty, barre) in OPEN.items():
         add(root, quality, frets, difficulty, barre, "open")
+    add(5, "maj", (X, X, 3, 2, 1, 1), 3, 4, "open")  # the small F
     for form, (root_string, barre, by_quality) in TEMPLATES.items():
         for root in range(12):
             r = (root - TUNING[root_string]) % 12
