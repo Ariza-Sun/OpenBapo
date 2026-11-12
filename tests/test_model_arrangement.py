@@ -12,7 +12,6 @@ def test_defaults() -> None:
     assert reset.fingering_key is None
     assert reset.strum_pattern == STRUM_AUTO
     assert reset.simplify_chords is True
-    assert reset.lyrics_text is None
 
 
 @pytest.mark.parametrize("transpose", [-6, 0, 6])
@@ -36,13 +35,12 @@ def test_out_of_range(kw: dict[str, Any]) -> None:
 
 
 def test_only_user_adjustable_fields() -> None:
-    # Capo override and per-chord edits are out of scope for phase 1.
+    # Capo override, per-chord edits and lyrics edits are out of scope for phase 1.
     assert set(Arrangement.model_fields) == {
         "transpose",
         "fingering_key",
         "strum_pattern",
         "simplify_chords",
-        "lyrics_text",
     }
     with pytest.raises(ValidationError):
         Arrangement(capo=3)  # type: ignore[call-arg]
