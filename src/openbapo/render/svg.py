@@ -201,11 +201,41 @@ def jianpu_bar(
             out.append(f'<circle cx="{x:.1f}" cy="{y + dy:.1f}" r="0.8" fill="{INK}"/>')
 
 
+LYRIC_SIZE = 7.5
+LYRIC_MIN_SIZE = 5.0
+
+
+def _text_width(s: str, size: float) -> float:
+    """Rough advance width: CJK glyphs are square, Latin ones about half as wide."""
+    return sum(size if ord(c) > 0x2E7F else 0.55 * size for c in s)
+
+
 def lyric_bar(out: list[str], box: BarBox, sheet: ArrangedSheet) -> None:
+    """Each syllable centred under its start; crowded bars shrink the text rather than overlap."""
+    syllables = [s for s in sheet.lyrics if box.bar.start <= s.start < box.bar.end]
+    if not syllables:
+        return
+    wanted = [box.time_x(s.start) for s in syllables]
+    room = box.right - box.left - 2.0
+    natural = sum(_text_width(s.text, LYRIC_SIZE) + 1.0 for s in syllables)
+    size = max(LYRIC_MIN_SIZE, LYRIC_SIZE * min(1.0, room / natural))
+    widths = [_text_width(s.text, size) for s in syllables]
+    xs: list[float] = []
+    edge = box.left + 1.0
+    for x, w in zip(wanted, widths, strict=True):
+        x = max(x, edge + w / 2)
+        xs.append(x)
+        edge = x + w / 2 + 1.0
+    # Pushed past the bar line: slide the run back left as far as the bar allows.
+    overflow = edge - 1.0 - (box.right - 1.0)
+    if overflow > 0:
+        xs = [x - overflow for x in xs]
+        floor = box.left + 1.0 + widths[0] / 2
+        if xs[0] < floor:
+            xs = [x + floor - xs[0] for x in xs]
     y = box.top + L.LYRIC_Y
-    for syl in sheet.lyrics:
-        if box.bar.start <= syl.start < box.bar.end:
-            out.append(_text(box.time_x(syl.start), y, syl.text, 7.5))
+    for s, x in zip(syllables, xs, strict=True):
+        out.append(_text(x, y, s.text, round(size, 1)))
 
 
 def system_lines(out: list[str], system: System, sheet: ArrangedSheet) -> None:

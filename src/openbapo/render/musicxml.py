@@ -162,6 +162,7 @@ def render_musicxml(sheet: ArrangedSheet) -> str:
     p1 = _sub(root, "part", id="P1")
     p2 = _sub(root, "part", id="P2")
     bars = sheet.bars or ()
+    line_starts = _line_starts(sheet)
     for n, bar in enumerate(bars):
         m1 = _sub(p1, "measure", number=str(n + 1))
         m2 = _sub(p2, "measure", number=str(n + 1))
@@ -205,6 +206,13 @@ def render_musicxml(sheet: ArrangedSheet) -> str:
             if bass_name:
                 sounding_bass = (parse_key_name(bass_name)[0] + h.capo) % 12
             _harmony(m1, c.name, (shape.root + h.capo) % 12, sounding_bass, float(c.beat))
+        # Lyrics, one line per text direction at its first syllable, until the
+        # melody (step 7) gives the syllables notes to sit under.
+        for beat, text in line_starts.get(n, []):
+            direction = _sub(m1, "direction", placement="below")
+            _sub(_sub(direction, "direction-type"), "words", text)
+            if beat:
+                _sub(direction, "offset", str(int(beat * DIVISIONS)))
         whole, kind = _duration_type(float(beats))
         _rest(m1, whole, kind if beats in (1, 2, 4) else "whole")
         for _beat, length, event, shape_name in _tab_events(bar, sheet.strum):
@@ -225,6 +233,42 @@ def render_musicxml(sheet: ArrangedSheet) -> str:
         '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" '
         '"http://www.musicxml.org/dtds/partwise.dtd">\n' + body + "\n"
     )
+
+
+def lyric_lines(sheet: ArrangedSheet) -> list[tuple[float, str]]:
+    """(start time, text) per lyric line; English syllables ending in "-" join the next one."""
+    lines: dict[int, list[str]] = {}
+    starts: dict[int, float] = {}
+    for syl in sheet.lyrics:
+        parts = lines.setdefault(syl.line_index, [])
+        starts.setdefault(syl.line_index, syl.start)
+        if parts and not parts[-1].endswith("-") and _latin(parts[-1]) and _latin(syl.text):
+            parts.append(" ")
+        parts.append(syl.text)
+    return [
+        (starts[i], "".join(p[:-1] if p.endswith("-") else p for p in lines[i]))
+        for i in sorted(lines)
+    ]
+
+
+def _latin(s: str) -> bool:
+    return any(c.isascii() and c.isalnum() for c in s)
+
+
+def _line_starts(sheet: ArrangedSheet) -> dict[int, list[tuple[float, str]]]:
+    """Bar index -> (beat offset, line text) for every lyric line starting in that bar."""
+    out: dict[int, list[tuple[float, str]]] = {}
+    for start, text in lyric_lines(sheet):
+        for n, bar in enumerate(sheet.bars):
+            if bar.start <= start < bar.end or (n == len(sheet.bars) - 1 and start >= bar.start):
+                span = bar.end - bar.start
+                beat = (start - bar.start) / span * bar.beats if span > 0 else 0.0
+                out.setdefault(n, []).append((min(beat, bar.beats - 0.25), text))
+                break
+        else:
+            if sheet.bars:
+                out.setdefault(0, []).append((0.0, text))
+    return out
 
 
 def _fifths(tonic: int, mode: Mode) -> int:
