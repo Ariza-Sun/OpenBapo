@@ -12,6 +12,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.7,<3",
+    "pyphen>=0.14",  # English syllables for lyrics; used under its MPL 1.1 option
 ]
 
 [project.optional-dependencies]
@@ -81,6 +82,8 @@ select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF"]
 "src/openbapo/render/svg.py" = ["RUF001", "RUF002", "RUF003"]  # the sheet's labels are Chinese
 "tests/test_arrange_sheet.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/test_render.py" = ["RUF001", "RUF002", "RUF003"]
+"tests/test_lyrics_text.py" = ["RUF001", "RUF002", "RUF003"]
+"src/openbapo/lyrics/text.py" = ["RUF001", "RUF002", "RUF003"]  # Chinese section labels and punctuation
 "tests/test_arrange_strums.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/test_sheet_triage.py" = ["RUF001", "RUF002", "RUF003"]
 # The benchmark scripts write Chinese Markdown, where full-width punctuation is correct.
@@ -100,6 +103,7 @@ module = [
     "librosa.*",
     "lv_chordia.*",
     "pypdfium2",
+    "pyphen",
     "pypdfium2.*",
     "scipy.*",
     "torch",
