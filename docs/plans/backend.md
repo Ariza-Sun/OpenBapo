@@ -36,8 +36,8 @@ API 层
 | 和弦 | 混音去鼓（bass + other）+ 拍网格 | `Chord`（含转位、置信度） | BTC、ChordFormer、autochord |
 | 调性 | `Chord` 序列 + 音频 | `Key` | **已定：规则法**（第 2 步）：色度模板（Krumhansl 轮廓）与分窗和弦统计互校，关系大小调按主和弦时长与首尾和弦投票；不依赖 essentia |
 | 人声旋律 | vocals | 音高曲线 → 切分 → 量化到拍网格 → `Note` | RMVPE / CREPE 提取音高；音符切分与量化自写 |
-| 歌词识别 | vocals | 文本（用户提供歌词时跳过） | faster-whisper |
-| 歌词对齐 | vocals + 文本 | `LyricSyllable` | WhisperX 的 wav2vec2 强制对齐；中文对齐模型需单独评估；英文音节切分 pyphen / CMUdict；音节挂到 `Note` 用时间最近匹配 + 单调约束 |
+| 歌词识别 | vocals | 文本（用户提供歌词时跳过） | **已定：faster-whisper `large-v3`**（第 5 步），只识别 Silero VAD 判为有人声的区间 |
+| 歌词对齐 | vocals + 文本 | `LyricSyllable` | **已定：wav2vec2 CTC 强制对齐**（第 5 步；英文 LibriSpeech 模型，中文 XLSR-53 中文微调模型）；英文音节切分 pyphen；音节挂到 `Note` 用时间最近匹配 + 单调约束（第 7 步） |
 
 分轨结果只在流水线内部使用，任务完成后与原音频一起删除。
 
@@ -54,12 +54,11 @@ API 层
 | 和弦（E2） | lv-chordia（openmirlab/lv-chordia，Jiang 等 ISMIR 2019 的五网络集成） | MIT | **未单独声明**：五份权重随 MIT 仓库分发 | 论文在 Billboard / Isophonics / RWC 上报数，训练集待核 | 第 2 步接入；从 GitHub 安装（`analysis` 依赖组直接引用） |
 | 调性 / 低音 / 色度（E3–E5） | 无权重（规则） | — | — | — | 第 2 步，纯代码 |
 | 人声活动 | Silero VAD（snakers4/silero-vad，PyPI `silero-vad`） | MIT | **MIT** | 多语种语音与噪声语料（作者未逐项列出） | 第 5 步接入；权重随 PyPI 包分发 |
-| 歌词识别 | Whisper `large-v3`，faster-whisper（CTranslate2）转换版 `Systran/faster-whisper-large-v3` | MIT（faster-whisper、stable-ts） | **MIT**（OpenAI Whisper 仓库；Hugging Face 模型卡标 Apache 2.0，两者都允许商用） | OpenAI 未公开的约 500 万小时弱标注网络音频 | 第 5 步接入；首次运行从 Hugging Face 下载 |
-| 歌词对齐（候选 A，英文） | wav2vec2 `WAV2VEC2_ASR_LARGE_LV60K_960H`（torchaudio，源自 fairseq） | BSD（torchaudio） | **MIT**（fairseq） | Libri-Light 6 万小时预训练 + LibriSpeech 960 小时微调 | 第 5 步开发集比较中；首次运行从 download.pytorch.org 下载 |
-| 歌词对齐（候选 A，中文） | `jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn` | Apache 2.0（transformers） | **Apache 2.0** | XLSR-53 预训练 + Common Voice zh-CN 微调 | 第 5 步开发集比较中；首次运行从 Hugging Face 下载 |
-| 歌词对齐（候选 C） | MMS 强制对齐 `MMS_FA`（torchaudio，Meta） | BSD（torchaudio） | **CC BY-NC 4.0（非商用）** | MMS 1100 多种语言的朗读语料 | 第 5 步开发集比较中；若选用须先经负责人同意（`step-5.md` 决定 2） |
+| 歌词识别 | Whisper `large-v3`，faster-whisper（CTranslate2）转换版 `Systran/faster-whisper-large-v3` | MIT（faster-whisper） | **MIT**（OpenAI Whisper 仓库；Hugging Face 模型卡标 Apache 2.0，两者都允许商用） | OpenAI 未公开的约 500 万小时弱标注网络音频 | 第 5 步接入；首次运行从 Hugging Face 下载 |
+| 歌词对齐（英文） | wav2vec2 `WAV2VEC2_ASR_LARGE_LV60K_960H`（torchaudio，源自 fairseq） | BSD（torchaudio） | **MIT**（fairseq） | Libri-Light 6 万小时预训练 + LibriSpeech 960 小时微调 | 第 5 步接入（开发集比较胜出，见 `docs/benchmarks/step-5-lyrics-dev.md`）；首次运行从 download.pytorch.org 下载 |
+| 歌词对齐（中文） | `jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn`（固定 commit 99ccb27） | Apache 2.0（transformers） | **Apache 2.0** | XLSR-53 预训练 + Common Voice zh-CN 微调 | 第 5 步接入；首次运行从 Hugging Face 下载，校验 SHA-256 后以 `weights_only=True` 读取 |
 
-未接入但评估过的候选：madmom 的模型文件为 **CC BY-NC-SA 4.0**（README 明示），只可作评测基线，不打包；all-in-one 权重许可证未声明；BS-RoFormer 社区权重许可证各异、部分为 CC-BY-NC-SA；crema（BSD-2）只能在 Keras 2 上运行，与 Python 3.12+ 的 TensorFlow 不兼容，第 2 步按环境原因淘汰；accordoai 为本科论文级实验、只用 Beatles 训练，未进入对比。
+未接入但评估过的候选：第 5 步的 MMS 强制对齐（**CC BY-NC 4.0**）与 stable-ts 的 Whisper 词时间（MIT）在开发集上不如 wav2vec2，只留在 `scripts/lyrics_candidates.py` 供复现；madmom 的模型文件为 **CC BY-NC-SA 4.0**（README 明示），只可作评测基线，不打包；all-in-one 权重许可证未声明；BS-RoFormer 社区权重许可证各异、部分为 CC-BY-NC-SA；crema（BSD-2）只能在 Keras 2 上运行，与 Python 3.12+ 的 TensorFlow 不兼容，第 2 步按环境原因淘汰；accordoai 为本科论文级实验、只用 Beatles 训练，未进入对比。
 
 ## 3. 编配
 
@@ -109,7 +108,7 @@ API 层
 
 ## 7. 开放问题
 
-1. 中文歌词强制对齐模型的选择与效果评估。
+1. ~~中文歌词强制对齐模型的选择与效果评估。~~ 第 5 步已定（见第 2 节）。
 2. 人声音符切分 / 量化算法（滑音、颤音、装饰音的处理）；是否引入现成的歌声转录模型。
 3. 和弦模型的最终选型：按 `step-2.md` 的多专家方案，在 GuitarSet 与 AAM 上实测各候选单独与融合后的准确率与推理速度。
 4. 简谱排版规则细节（换行、连音线跨行、高低八度点）。
