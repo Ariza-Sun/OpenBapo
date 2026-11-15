@@ -26,7 +26,7 @@
 ```
 src/openbapo/lyrics/            # 纯文本，无模型依赖
     text.py                     # 歌词 → 行 → 词 → 音节；语言按字符集判断
-    syllables.py                # 英文音节切分（CMUdict + pyphen）
+    syllables.py                # 英文音节切分（pyphen）
 src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
     activity.py                 # 人声活动检测
     recognize.py                # faster-whisper 识别
@@ -39,7 +39,7 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 ### 2.2 音节与行
 
 - 中文：每个汉字一个音节；行内的英文单词按英文规则切。
-- 英文：先查 CMUdict 得音节数，再用 pyphen 的断字位置把单词拆成相应段数；查不到的词只用 pyphen；渲染时同一单词的非末音节带连字符（`beau-ti-ful`）。
+- 英文：用 pyphen（MPL 1.1 许可选项）的断字位置把单词拆成音节；同一单词的非末音节带连字符（`beau-ti-ful`）。不用 CMUdict：音节只用于显示，时间在单词内按字母数等分，排版断字已够；常见 Python 封装为 GPL，也不宜引入。短词 pyphen 不拆（`awake` 整体显示），可以接受。
 - 对齐器在"字 / 词"粒度上出时间；英文单词内的音节时间按字母数在单词时长内等分（MusicXML 和渲染只需要起始时间，误差限在一个单词内）。
 - 行号沿用所附歌词的分行；识别结果的分行按 faster-whisper 的分段，再在长停顿处切开。
 
@@ -62,11 +62,11 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 | B. Whisper 对齐（stable-ts） | 把已知文本喂给 Whisper，用交叉注意力定词时间；中英同一模型 | MIT |
 | C. MMS 强制对齐 | 多语言 CTC，中文先转拼音 | **CC BY-NC 4.0** |
 
-长歌处理：先用人声活动区间把整首切成段，段内对齐，段间按顺序约束；某行对不上时用前后行插值并记警告。
+长歌处理：CTC 候选对整首一次性做强制对齐（行序天然单调），声学模型按 ≤ 30 秒分块推理；人声活动区间以外的帧强制为空白标签，歌词不会落到纯伴奏段。模型词表拼不出的字（如生僻字）不计时，由前后字插值并记警告。
 
 ### 2.6 渲染
 
-- SVG：已有 `lyric_bar`，补：音节按起始时间落到拍网格的 x；同一小节内音节过密时缩小字号或省略号截断（不重叠）；低置信（对齐分数低）的音节用灰色。
+- SVG：已有 `lyric_bar`，补：音节按起始时间落到拍网格的 x；同一小节内音节过密时缩小字号（最小 5 pt），并依次右推，不重叠。不做低置信灰显：`LyricSyllable` 没有置信度字段，为此改数据模型不值得。
 - MusicXML：歌词要挂在音符上，而旋律第 7 步才有。本步把每行歌词写成该行起始拍上的文字标注（`direction/words`），MuseScore 里可见可改；第 7 步再改成音符下的音节歌词。
 
 ## 3. 测试集（决定 1）
@@ -76,11 +76,11 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 | 用途 | 数据 | 内容 | 行起始时间的来源 |
 |---|---|---|---|
 | 英文验收 | JamendoLyrics（`en`，20 首） | 真实成品歌，CC 授权音频 | 数据集的人工行级标注 |
-| 中文验收 | GTSinger 中文正常唱法组，≥ 5 首不同的歌 | 专业歌手干声；数据按乐句切成小段，按序拼回整首 | 每个小段的开头即一行的起点（段内人工逐字标注给出第一个字的时间） |
-| 中文验收（加伴奏版） | 同上，混入纯器乐（AAM / GTZAN 器乐曲） | 合成的带伴奏版本，跑完整的"分轨 → 对齐"；段间空档是纯伴奏 | 同上 |
-| 中文参考（不设门槛） | MIR-1K 中带人工逐字时间的 17 段 | 业余演唱 + 真实卡拉 OK 伴奏 | 由逐字时间与歌词分行推出，规则写在脚本里 |
-| 纯音乐 | AAM、GuitarSet、GTZAN 古典 / 爵士 | 无人声 | — |
-| 开发集（选模型、定阈值） | GTSinger 中、英文里未进验收集的歌 | 干声 + 加伴奏版 | 同中文验收 |
+| 中文验收 | GTSinger 中文正常唱法组，10 首不同的歌 | 专业歌手干声；数据按乐句切成小段，按序拼回整首（段间随机插 0.5–2.5 秒） | 人工逐字时间。一行 = 两次停顿之间的字：每个小段开头、以及 ≥ 0.4 秒的换气 / 静音标记处断行；不足 3 个字的行并入前一行 |
+| 中文验收（加伴奏版） | 同上，人声与 AAM 器乐曲等响度（人声 / 伴奏 0 dB）混合，前加 8 秒前奏、后加 4 秒尾奏 | 合成的带伴奏版本，跑完整的"分轨 → 对齐"；段间空档是纯伴奏 | 同上 |
+| 中文参考（不设门槛） | MIR-1K 中带人工逐字时间的 17 段 | 业余演唱 + 真实卡拉 OK 伴奏（左右声道相加成混音） | 人工逐字时间；相邻两字间隔 ≥ 0.4 秒处断行，其余同上 |
+| 纯音乐 | AAM、GTZAN 古典 / 爵士（验收 20 首，开发 10 首，互不重叠） | 无人声 | — |
+| 开发集（选模型、定阈值） | GTSinger 未进验收集的中文 10 首、英文 10 首 | 干声 + 加伴奏版 | 同中文验收 |
 
 ## 4. 验收数字
 
@@ -103,7 +103,7 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 
 ## 5. 依赖
 
-`analysis` 可选组新增：`faster-whisper`、`silero-vad`（或 torch hub 加载）、`opencc-python-reimplemented`（或同类纯 Python 简繁转换）、对齐器所需的包（视决定 2 的结果）；核心组新增 `pyphen`、CMUdict 数据（`cmudict` 包）。每个模型权重在 `backend.md` 2.1 节登记许可证。
+`analysis` 可选组新增：`faster-whisper`（MIT）、`stable-ts`（MIT）、`silero-vad`（MIT）、`opencc-python-reimplemented`（Apache 2.0，简繁转换）、`transformers`（Apache 2.0，中文 wav2vec2）、`pypinyin`（MIT，MMS 候选用）；对齐器选定后删掉用不到的。核心组新增 `pyphen`。评测另需 `jiwer`（`scripts/requirements-eval.txt`）。每个模型权重在 `backend.md` 2.1 节登记许可证。
 
 ## 6. 与前后步骤的接口
 
