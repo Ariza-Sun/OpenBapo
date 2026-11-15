@@ -1,0 +1,152 @@
+[
+ {
+  "threshold": 0.3,
+  "min_silence_s": 0.3,
+  "instrumental_voiced_s": [
+   0,
+   0,
+   0,
+   1.0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "dry": {
+   "recall": 0.9804158314306004,
+   "precision": 0.9354292595312679
+  },
+  "mix": {
+   "recall": 0.9821769748710901,
+   "precision": 0.9315570755888232
+  },
+  "instrumental_no_lyrics": 1.0
+ },
+ {
+  "threshold": 0.3,
+  "min_silence_s": 1.0,
+  "instrumental_voiced_s": [
+   0,
+   0,
+   0,
+   1.6,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "dry": {
+   "recall": 0.981294459439715,
+   "precision": 0.9136320772104934
+  },
+  "mix": {
+   "recall": 0.9835818405040093,
+   "precision": 0.9074096614215978
+  },
+  "instrumental_no_lyrics": 1.0
+ },
+ {
+  "threshold": 0.5,
+  "min_silence_s": 0.3,
+  "instrumental_voiced_s": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "dry": {
+   "recall": 0.9625618210675299,
+   "precision": 0.9429828712685658
+  },
+  "mix": {
+   "recall": 0.9568530235112949,
+   "precision": 0.9417690027513366
+  },
+  "instrumental_no_lyrics": 1.0
+ },
+ {
+  "threshold": 0.5,
+  "min_silence_s": 1.0,
+  "instrumental_voiced_s": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "dry": {
+   "recall": 0.9652323196895554,
+   "precision": 0.9190218628095419
+  },
+  "mix": {
+   "recall": 0.9587062198384462,
+   "precision": 0.9204506525834073
+  },
+  "instrumental_no_lyrics": 1.0
+ },
+ {
+  "threshold": 0.7,
+  "min_silence_s": 0.3,
+  "instrumental_voiced_s": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "dry": {
+   "recall": 0.9312143626280172,
+   "precision": 0.9497415626023331
+  },
+  "mix": {
+   "recall": 0.9183758554519882,
+   "precision": 0.951028965908111
+  },
+  "instrumental_no_lyrics": 1.0
+ },
+ {
+  "threshold": 0.7,
+  "min_silence_s": 1.0,
+  "instrumental_voiced_s": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "dry": {
+   "recall": 0.9360730313345943,
+   "precision": 0.9293185157982672
+  },
+  "mix": {
+   "recall": 0.9235268081419618,
+   "precision": 0.9286978544953348
+  },
+  "instrumental_no_lyrics": 1.0
+ }
+]
