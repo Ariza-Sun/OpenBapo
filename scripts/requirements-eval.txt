@@ -1,3 +1,5 @@
 # Only for the evaluation scripts (scripts/eval_*.py); not a package dependency.
 mir_eval>=0.7
 jiwer>=3  # CER / WER in scripts/eval_lyrics.py
+stable-ts>=2.17  # the Whisper aligner candidate (scripts/lyrics_candidates.py)
+pypinyin  # the MMS aligner candidate reads Chinese as pinyin

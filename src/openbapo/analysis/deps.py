@@ -14,7 +14,7 @@ ANALYSIS_PACKAGES = (
     "beat_this",
     "lv_chordia",
     "faster_whisper",
-    "stable_whisper",
+    "transformers",
     "silero_vad",
 )
 

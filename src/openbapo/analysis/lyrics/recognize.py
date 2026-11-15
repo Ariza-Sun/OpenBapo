@@ -56,11 +56,10 @@ class RecognizeParams:
 
 
 def load_whisper(model: str = DEFAULT_WHISPER_MODEL, device: str = AUTO) -> object:
-    """A faster-whisper model wrapped by stable-ts, so it can also align (see align.py)."""
-    import stable_whisper
+    from faster_whisper import WhisperModel
 
     device = resolve_device(device)
-    return stable_whisper.load_faster_whisper(
+    return WhisperModel(
         model, device=device, compute_type="float16" if device == "cuda" else "int8"
     )
 

@@ -96,3 +96,10 @@ def test_forced_align_places_tokens_where_the_labels_are() -> None:
         out[0] is not None and out[0][0] == pytest.approx(0.40) and out[0][1] == pytest.approx(0.50)
     )
     assert out[2] is not None and out[2][0] == pytest.approx(1.20)
+
+
+def test_ctc_targets_put_the_separator_between_words() -> None:
+    model = letters_model()
+    model.labels = {**model.labels, "|": 3}
+    model.separator = "|"
+    assert ctc_targets(model, tokenize("ab ba abc ab")) == [[1, 2, 3], [2, 1, 3], [], [1, 2]]

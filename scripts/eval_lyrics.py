@@ -130,7 +130,8 @@ def hallucinated(entry: dict[str, Any], recognition: Any) -> list[str]:
 def summarise(rows: list[dict[str, Any]], aligners: list[str]) -> dict[str, Any]:
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
-        groups[f"{row['set']}/{row['condition']}"].append(row)
+        lang = f"/{row['lang']}" if row["lang"] else ""
+        groups[f"{row['set']}{lang}/{row['condition']}"].append(row)
     out: dict[str, Any] = {}
     for key, items in sorted(groups.items()):
         g: dict[str, Any] = {"songs": len(items)}
@@ -218,6 +219,7 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--split", choices=("dev", "test"), required=True)
     parser.add_argument("--sets", help="comma-separated sets to run (default: all in the split)")
+    parser.add_argument("--lang", choices=("zh", "en"), help="only songs in this language")
     parser.add_argument("--aligners", default="wav2vec2,whisper,mms")
     parser.add_argument("--no-recognition", action="store_true")
     parser.add_argument("--device", default="auto")
@@ -225,9 +227,11 @@ def main() -> int:
     parser.add_argument("--out", default="docs/benchmarks/step-5-lyrics")
     args = parser.parse_args()
 
+    from lyrics_candidates import WhisperAligner, mms_aligner
+
     from openbapo.analysis.device import resolve_device
     from openbapo.analysis.lyrics.activity import SileroActivity
-    from openbapo.analysis.lyrics.align import WhisperAligner, mms_aligner, wav2vec2_aligner
+    from openbapo.analysis.lyrics.align import wav2vec2_aligner
     from openbapo.analysis.lyrics.recognize import WhisperRecognizer, load_whisper
     from openbapo.analysis.separate import DemucsSeparator
 
@@ -239,6 +243,8 @@ def main() -> int:
     if args.sets:
         wanted = set(args.sets.split(","))
         entries = [e for e in entries if e["set"] in wanted]
+    if args.lang:
+        entries = [e for e in entries if e["lang"] == args.lang]
     if args.limit:
         seen: dict[str, int] = defaultdict(int)
         kept = []
@@ -254,7 +260,7 @@ def main() -> int:
     factories = {
         "wav2vec2": lambda: wav2vec2_aligner(device),
         "mms": lambda: mms_aligner(device),
-        "whisper": lambda: WhisperAligner(whisper),
+        "whisper": lambda: WhisperAligner(device),
     }
     aligners = {n: factories[n]() for n in names}
     activity = SileroActivity()

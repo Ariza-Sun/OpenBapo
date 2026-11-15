@@ -1,15 +1,10 @@
 """Lyrics alignment: lines of lyrics + vocal stem -> a time span per token.
 
-Three candidates (docs/plans/step-5.md, 2.5); the one in use is chosen on the
-development set:
-
-- `CtcAligner` with a wav2vec2 model per language: torchaudio's LibriSpeech
-  model for English (MIT), an XLSR-53 Chinese fine-tune for Chinese
-  (Apache 2.0). This is WhisperX's alignment.
-- `CtcAligner` with Meta's MMS forced-alignment model, Chinese read as
-  pinyin. **The MMS weights are CC BY-NC 4.0.**
-- `WhisperAligner`: stable-ts feeds the known text to Whisper and times
-  the words from its cross-attention (MIT).
+CTC forced alignment with a wav2vec2 model per language: torchaudio's
+LibriSpeech model for English (MIT), an XLSR-53 Chinese fine-tune for Chinese
+(Apache 2.0), as in WhisperX. It beat Meta's MMS aligner and Whisper's own
+word timing on the step-5 development set (docs/benchmarks/step-5-lyrics-dev.md);
+those two candidates live on in scripts/lyrics_candidates.py.
 
 CTC alignment runs over the whole song at once, so a line cannot be placed
 before the line above it. Frames outside the voiced regions are forced to
@@ -33,6 +28,8 @@ from openbapo.lyrics import Line, Token
 CHUNK_S = 30.0  # longest stretch of audio given to a wav2vec2 model at once
 REGION_PAD_S = 0.3
 ZH_CTC_MODEL = "jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn"
+ZH_CTC_REVISION = "99ccb2737be22b8bb50dcfcc39ad4d567fb90cfd"
+ZH_CTC_SHA256 = "de031fd4b29e0c0667e5346450fadfe1326c89936b888b59c4ede608db763ee4"
 
 
 @dataclass(frozen=True)
@@ -73,14 +70,21 @@ class CtcModel:
     blank: int
     frame_s: float
     spell: Callable[[Token], list[str]]  # token -> label strings; [] when unknown
+    # Word-boundary label the model was trained to emit between words ("|" for
+    # the LibriSpeech wav2vec2); appended to every word but the last.
+    separator: str | None = None
 
 
 def ctc_targets(model: CtcModel, tokens: Sequence[Token]) -> list[list[int]]:
     out = []
-    for token in tokens:
+    for k, token in enumerate(tokens):
         spelled = model.spell(token)
         ids = [model.labels[s] for s in spelled if s in model.labels]
-        out.append(ids if len(ids) == len(spelled) else [])
+        if len(ids) != len(spelled):
+            ids = []
+        if ids and model.separator is not None and k < len(tokens) - 1:
+            ids.append(model.labels[model.separator])
+        out.append(ids)
     return out
 
 
@@ -204,17 +208,35 @@ def wav2vec2_english(device: str = AUTO) -> CtcModel:
     def spell(token: Token) -> list[str]:
         return list(token.spoken.upper()) if token.lang == "en" else []
 
-    return CtcModel(_torch_forward(net, device, normalize=False), labels, 0, 0.02, spell)
+    forward = _torch_forward(net, device, normalize=False)
+    return CtcModel(forward, labels, 0, 0.02, spell, separator="|")
 
 
 def wav2vec2_chinese(device: str = AUTO) -> CtcModel:
-    from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+    """The Chinese model at a fixed revision, its weights checked against their SHA-256.
+
+    The repository has only a pickled `pytorch_model.bin`, which recent
+    transformers refuse to read on torch < 2.6; reading it here with
+    `weights_only=True` after the checksum keeps every supported torch working.
+    """
+    import hashlib
+
+    import torch
+    from huggingface_hub import hf_hub_download
+    from transformers import Wav2Vec2Config, Wav2Vec2CTCTokenizer, Wav2Vec2ForCTC
 
     device = resolve_device(device)
-    processor = Wav2Vec2Processor.from_pretrained(ZH_CTC_MODEL)  # type: ignore[no-untyped-call]
-    net = Wav2Vec2ForCTC.from_pretrained(ZH_CTC_MODEL).to(device).eval()
-    vocab = processor.tokenizer.get_vocab()
-    blank = int(processor.tokenizer.pad_token_id)
+    tokenizer = Wav2Vec2CTCTokenizer.from_pretrained(ZH_CTC_MODEL, revision=ZH_CTC_REVISION)
+    config = Wav2Vec2Config.from_pretrained(ZH_CTC_MODEL, revision=ZH_CTC_REVISION)
+    path = hf_hub_download(ZH_CTC_MODEL, "pytorch_model.bin", revision=ZH_CTC_REVISION)
+    with open(path, "rb") as f:
+        if hashlib.file_digest(f, "sha256").hexdigest() != ZH_CTC_SHA256:
+            raise RuntimeError(f"{path} does not match the expected checksum; delete it and retry")
+    net = Wav2Vec2ForCTC(config)
+    net.load_state_dict(torch.load(path, map_location="cpu", weights_only=True))
+    net = net.to(device).eval()  # type: ignore[arg-type]
+    vocab = tokenizer.get_vocab()
+    blank = int(tokenizer.pad_token_id)
 
     def spell(token: Token) -> list[str]:
         if token.lang == "zh":
@@ -224,98 +246,8 @@ def wav2vec2_chinese(device: str = AUTO) -> CtcModel:
     return CtcModel(_torch_forward(net, device, normalize=True), vocab, blank, 0.02, spell)
 
 
-def mms(device: str = AUTO) -> CtcModel:
-    """MMS forced aligner (CC BY-NC 4.0 weights); Chinese spelled as toneless pinyin."""
-    import torchaudio
-    from pypinyin import lazy_pinyin
-
-    device = resolve_device(device)
-    bundle = torchaudio.pipelines.MMS_FA
-    net = bundle.get_model(with_star=False).to(device).eval()
-    labels = bundle.get_dict(star=None)
-
-    def spell(token: Token) -> list[str]:
-        text = "".join(lazy_pinyin(token.text)) if token.lang == "zh" else token.spoken
-        return [c for c in text.lower() if c in labels and c != "-"] or []
-
-    return CtcModel(_torch_forward(net, device, normalize=False), labels, 0, 0.02, spell)
-
-
 def wav2vec2_aligner(device: str = AUTO) -> CtcAligner:
     return CtcAligner(
         "wav2vec2",
         {"en": lambda: wav2vec2_english(device), "zh": lambda: wav2vec2_chinese(device)},
     )
-
-
-def mms_aligner(device: str = AUTO) -> CtcAligner:
-    shared: dict[str, CtcModel] = {}
-
-    def load() -> CtcModel:
-        if "m" not in shared:
-            shared["m"] = mms(device)
-        return shared["m"]
-
-    return CtcAligner("mms", {"en": load, "zh": load})
-
-
-DEFAULT_ALIGNER = "wav2vec2"  # chosen on the development set; see docs/benchmarks
-
-
-def default_aligner(whisper: object, device: str = AUTO) -> Aligner:
-    if DEFAULT_ALIGNER == "whisper":
-        return WhisperAligner(whisper)
-    return mms_aligner(device) if DEFAULT_ALIGNER == "mms" else wav2vec2_aligner(device)
-
-
-# --- Whisper (stable-ts) ------------------------------------------------------------
-
-
-class WhisperAligner:
-    """stable-ts alignment with a faster-whisper model (see recognize.load_whisper)."""
-
-    name = "whisper"
-
-    def __init__(self, model: object) -> None:
-        self.model = model
-
-    def align(
-        self,
-        vocals: NDArray[np.float32],
-        lines: Sequence[Line],
-        regions: Sequence[Region] | None = None,
-    ) -> list[TimedToken]:
-        language = song_language(lines)
-        joiner = "" if language == "zh" else " "
-        text = "\n".join(joiner.join(t.text for t in line.tokens) for line in lines)
-        result = self.model.align(vocals, text, language=language)  # type: ignore[attr-defined]
-        if result is None:
-            return [TimedToken(line.index, t, None, None) for line in lines for t in line.tokens]
-        # Walk the result's words and ours over the same character stream.
-        timed_chars: list[tuple[str, float, float, float]] = []
-        for word in result.all_words():
-            chars = [c for c in _norm(word.word)]
-            if not chars:
-                continue
-            step = (word.end - word.start) / len(chars)
-            for k, c in enumerate(chars):
-                timed_chars.append(
-                    (c, word.start + k * step, word.start + (k + 1) * step, word.probability)
-                )
-        out: list[TimedToken] = []
-        pos = 0
-        for line in lines:
-            for token in line.tokens:
-                want = _norm(token.text)
-                if want and "".join(c for c, *_ in timed_chars[pos : pos + len(want)]) == want:
-                    span = timed_chars[pos : pos + len(want)]
-                    pos += len(want)
-                    score = float(np.mean([s for *_, s in span]))
-                    out.append(TimedToken(line.index, token, span[0][1], span[-1][2], score))
-                else:
-                    out.append(TimedToken(line.index, token, None, None))
-        return out
-
-
-def _norm(text: str) -> str:
-    return "".join(c for c in text.lower().replace("\u2019", "'") if c.isalnum() or c == "'")
