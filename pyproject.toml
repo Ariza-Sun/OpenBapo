@@ -34,15 +34,21 @@ analysis = [
     "beat-this>=1.1",
     "demucs>=4.1",
     "einops",
+    "faster-whisper>=1.1",
     "librosa>=0.10",
     "lv-chordia @ git+https://github.com/openmirlab/lv-chordia.git",
     "numpy>=1.26",
+    "opencc-python-reimplemented",  # Traditional -> Simplified Chinese in recognised lyrics
+    "pypinyin",  # Chinese as pinyin for the MMS aligner
     "scipy>=1.10",
+    "silero-vad>=5",
+    "stable-ts>=2.17",
     "rotary-embedding-torch",
     "soxr",
     "torch>=2.1",
     "torchaudio>=2.1",  # imported by beat_this; must match the torch build (CPU / CUDA)
     "tqdm",
+    "transformers>=4.40",  # the Chinese wav2vec2 aligner
 ]
 dev = [
     "hypothesis>=6.100",

@@ -6,7 +6,7 @@ Usage:
         [--device auto] [--limit N] [--out docs/benchmarks/step-5-lyrics]
 
 The manifest comes from scripts/lyrics_testset.py. Needs `pip install -e
-".[analysis,lyrics]" jiwer`. Writes OUT.json (every number, per song) and
+".[analysis]" -r scripts/requirements-eval.txt`. Writes OUT.json (every number, per song) and
 OUT.md (the summary tables); song titles stay out of both.
 
 Protocol:

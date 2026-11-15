@@ -53,6 +53,11 @@ API 层
 | 和弦（E1） | BTC（jayg996/BTC-ISMIR19，`btc_model_large_voca.pt`，commit 2682317） | MIT（模型代码已随本仓库分发，见 `analysis/chords/models/btc_vendor/LICENSE`） | **未声明**：权重随 MIT 仓库分发，作者未单独说明 | Isophonics、Robbie Williams、USPop | 第 2 步接入。权重首次运行从作者仓库的固定 commit 下载到 `~/.cache/openbapo/`，校验 SHA-256 后再反序列化 |
 | 和弦（E2） | lv-chordia（openmirlab/lv-chordia，Jiang 等 ISMIR 2019 的五网络集成） | MIT | **未单独声明**：五份权重随 MIT 仓库分发 | 论文在 Billboard / Isophonics / RWC 上报数，训练集待核 | 第 2 步接入；从 GitHub 安装（`analysis` 依赖组直接引用） |
 | 调性 / 低音 / 色度（E3–E5） | 无权重（规则） | — | — | — | 第 2 步，纯代码 |
+| 人声活动 | Silero VAD（snakers4/silero-vad，PyPI `silero-vad`） | MIT | **MIT** | 多语种语音与噪声语料（作者未逐项列出） | 第 5 步接入；权重随 PyPI 包分发 |
+| 歌词识别 | Whisper `large-v3`，faster-whisper（CTranslate2）转换版 `Systran/faster-whisper-large-v3` | MIT（faster-whisper、stable-ts） | **MIT**（OpenAI Whisper 仓库；Hugging Face 模型卡标 Apache 2.0，两者都允许商用） | OpenAI 未公开的约 500 万小时弱标注网络音频 | 第 5 步接入；首次运行从 Hugging Face 下载 |
+| 歌词对齐（候选 A，英文） | wav2vec2 `WAV2VEC2_ASR_LARGE_LV60K_960H`（torchaudio，源自 fairseq） | BSD（torchaudio） | **MIT**（fairseq） | Libri-Light 6 万小时预训练 + LibriSpeech 960 小时微调 | 第 5 步开发集比较中；首次运行从 download.pytorch.org 下载 |
+| 歌词对齐（候选 A，中文） | `jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn` | Apache 2.0（transformers） | **Apache 2.0** | XLSR-53 预训练 + Common Voice zh-CN 微调 | 第 5 步开发集比较中；首次运行从 Hugging Face 下载 |
+| 歌词对齐（候选 C） | MMS 强制对齐 `MMS_FA`（torchaudio，Meta） | BSD（torchaudio） | **CC BY-NC 4.0（非商用）** | MMS 1100 多种语言的朗读语料 | 第 5 步开发集比较中；若选用须先经负责人同意（`step-5.md` 决定 2） |
 
 未接入但评估过的候选：madmom 的模型文件为 **CC BY-NC-SA 4.0**（README 明示），只可作评测基线，不打包；all-in-one 权重许可证未声明；BS-RoFormer 社区权重许可证各异、部分为 CC-BY-NC-SA；crema（BSD-2）只能在 Keras 2 上运行，与 Python 3.12+ 的 TensorFlow 不兼容，第 2 步按环境原因淘汰；accordoai 为本科论文级实验、只用 Beatles 训练，未进入对比。
 
