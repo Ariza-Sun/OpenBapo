@@ -1,0 +1,35 @@
+{
+  "frozen_at_utc": "2026-11-15T15:00:01.422725+00:00",
+  "activity": {
+    "threshold": 0.5,
+    "min_speech_s": 0.25,
+    "min_silence_s": 0.3,
+    "pad_s": 0.1,
+    "min_total_s": 5.0,
+    "energy_relative_db": null,
+    "energy_floor_db": -50.0,
+    "energy_min_seed_s": 1.0
+  },
+  "ctc_activity_penalty": 2.0,
+  "code_sha256": "967e87536ff85bdafb9b73b8d2cc2112f695d6415129421953257c88297a495e",
+  "manifest_sha256": "116cde94be622a49c90720f667370c605e8b15f0f557711235a54476e7259c4e",
+  "first_run_sha256": "e3f767a83c107635c1f095fefa1a79e9dc4d2f0678e970b25ac85e3b3e77fb83",
+  "dev_reports": [
+    "step-5-activity-real-dev.json",
+    "step-5-alignment-soft-dev.json"
+  ],
+  "selection": "Known-text alignment retains the independently selected energy parameters and finite CTC penalty. Recognition restores the original speech-only policy after the candidate exposed an ASR hallucination regression (10 to 120 English words). No acceptance-song threshold tuning.",
+  "protocol": "Final regression verification on the same acceptance split after a rejected candidate, not a new blind holdout. Actual LyricsStage; missing lines fail; corrected CER. Baseline and failed candidate preserved unchanged.",
+  "alignment_activity": {
+    "threshold": 0.5,
+    "min_speech_s": 0.25,
+    "min_silence_s": 0.3,
+    "pad_s": 0.1,
+    "min_total_s": 5.0,
+    "energy_relative_db": -15.0,
+    "energy_floor_db": -50.0,
+    "energy_min_seed_s": 1.0
+  },
+  "cli_sha256": "c431d01d31e741246db0d45a2e49b73cfb1af1c85782e35a0e906628fa2c0ef4",
+  "candidate_sha256": "ad3135721a9da60637b685145f7c92b79351a31ad97eea15f71de491d094cd58"
+}

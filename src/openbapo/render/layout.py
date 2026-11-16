@@ -22,14 +22,14 @@ BEAT_PAD = 10.0  # inset of the first beat from the bar line
 # Rows inside a system, as y offsets from the system's top.
 NAME_Y = 9.0  # chord-name baseline
 DIAGRAM_Y = 20.0  # diagram top (the x / o marks sit just above it)
-DIAGRAM_W, DIAGRAM_H = 30.0, 35.0
-STAFF_Y = 68.0  # top tab line
-STRING_GAP = 7.0
+DIAGRAM_W, DIAGRAM_H = 23.0, 26.0
+STAFF_Y = 60.0  # top tab line
+STRING_GAP = 5.5
 STAFF_H = STRING_GAP * 5
 STEM_Y = STAFF_Y + STAFF_H + 12.0  # where stems end and beams run
-JIANPU_Y = 134.0  # digit baseline
-LYRIC_Y = 152.0  # lyric baseline
-SYSTEM_H = 164.0
+JIANPU_Y = 118.0  # digit baseline
+LYRIC_Y = 136.0  # lyric baseline
+SYSTEM_H = 149.0
 
 CONTENT_W = PAGE_W - 2 * MARGIN
 

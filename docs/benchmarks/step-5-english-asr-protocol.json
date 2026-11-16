@@ -1,0 +1,57 @@
+{
+  "model": "nemo-parakeet-tdt-0.6b-v2",
+  "model_revision": "0bbb45a3365852604aef28b538a8f066f4ccaa85",
+  "weight_hash_source": "pinned HF LFS IDs; verified from files before candidate inference",
+  "model_files_sha256": {
+    "README.md": "f46710815c425ebadbdbafe7c0337a09070b589f2b1d698568022b4f3f3ce12d",
+    "config.json": "666903c76b9798caf2c210afd4f6cd60b08a8dbf9800ec8d7a3bc0d2148ac466",
+    "decoder_joint-model.onnx": "cbb52a07bd70ab5b67f8439d4b3cd8704b18467b4430bcacb5adabe154b8d191",
+    "encoder-model.onnx": "3987bcd28175d829d12888a996a84e8f62a0e374d9ffd640662c1515adc679d3",
+    "nemo128.onnx": "a9fde1486ebfcc08f328d75ad4610c67835fea58c73ba57e3209a6f6cf019e9f",
+    "vocab.txt": "ec182b70dd42113aff6c5372c75cac58c952443eb22322f57bbd7f53977d497d",
+    "encoder-model.onnx.data": "4dab7362d4874d85965045b1e41b2d61dd2cc0fb25671a7f6b3dc47bf120cc41"
+  },
+  "inputs_sha256": {
+    "manifest.json": "116cde94be622a49c90720f667370c605e8b15f0f557711235a54476e7259c4e",
+    "metadata.jsonl": "16b6a4922f5d3f3c0951b63297b883f4f525bce1abb964ff957b521bf38d21d6",
+    "step-5-gap-review.json": "c26d3467de267314954898657bdbf470c40ae153386eb66c0a2526adb1135665"
+  },
+  "source_sha256": {
+    "scripts/compare_english_asr.py": "313b5943d389c5e37b041397157bfac0e3ae1727b0dded4b624902340586abfd",
+    "scripts/eval_lyrics.py": "57ee4938798ee675a41c998d5e33f304bfc893cd7e413aec6bb231220d60ede3",
+    "scripts/lyrics_gap_review.py": "6b5816d0bcd45d96fff5660aba5b683a261fff221aa0537bbbfd5af7570825dd",
+    "src/openbapo/analysis/lyrics/__init__.py": "9961d45b01b28ecafeb6fceb2cf3e6e4a993458dd5726d2e4cb3d4bb88b5dc3c",
+    "src/openbapo/analysis/lyrics/activity.py": "fbec3610a9af5ac8b01d98d4396d15cfdddd6b171a936402c8ebc2a0fad29bac",
+    "src/openbapo/analysis/lyrics/align.py": "4da7066728350e5013cded9f25e0f0e368b1984a927c7ab79da949e32a7e2572",
+    "src/openbapo/analysis/lyrics/recognize.py": "5c227ff8140250a52e7db5989267b5332c943471264abfbfce8f4468d3e401f9",
+    "src/openbapo/analysis/lyrics/stage.py": "59a196545d0266318893066ef8401e13985cc1180608bda6d08edcb5e1aa0dcb"
+  },
+  "versions": {
+    "onnx-asr": "0.12.0",
+    "onnxruntime-gpu": "1.23.2",
+    "faster-whisper": "1.2.1",
+    "ctranslate2": "4.9.0",
+    "torch": "2.5.1+cu121"
+  },
+  "seed": 0,
+  "language": "en",
+  "activity": {
+    "threshold": 0.5,
+    "min_speech_s": 0.25,
+    "min_silence_s": 0.3,
+    "pad_s": 0.1,
+    "min_total_s": 5.0,
+    "context_gap_s": 30.0,
+    "energy_relative_db": null,
+    "energy_floor_db": -50.0,
+    "energy_min_seed_s": 1.0
+  },
+  "candidate_chunk_max_seconds": 30.0,
+  "candidate_quantization": null,
+  "candidate_providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+  ],
+  "timing": "recognition calls only; excludes load, separation, VAD, alignment, rendering",
+  "decision_rule": "replace only with lower real-English WER, no new confirmed or unresolved gap hallucinations, all instrumental gates passing; development precedes test"
+}

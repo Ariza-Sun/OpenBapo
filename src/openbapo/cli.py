@@ -14,6 +14,7 @@ from openbapo.errors import InputError
 if TYPE_CHECKING:
     from openbapo.analysis.beats import BeatTracker
     from openbapo.analysis.chords.stage import ChordStage
+    from openbapo.analysis.lyrics.stage import LyricsStage
     from openbapo.analysis.separate import Separator
 
 AUDIO_EXTENSIONS = frozenset({".mp3", ".m4a", ".ogg", ".opus", ".wav", ".flac"})
@@ -39,6 +40,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_CHORD_EXPERTS,
         help=f"comma list of chord experts ({', '.join(CHORD_EXPERTS)}); 'none' skips chords",
     )
+    lyrics = analyze.add_mutually_exclusive_group()
+    lyrics.add_argument(
+        "--lyrics",
+        type=Path,
+        help="lyrics text file (UTF-8, one line per line): align, don't recognise",
+    )
+    lyrics.add_argument("--no-lyrics", action="store_true", help="skip the lyrics stage")
 
     arrange = commands.add_parser("arrange", help="arrange an analysis JSON into a sheet JSON")
     arrange.add_argument("analysis", type=Path, help="analysis JSON from `openbapo analyze`")
@@ -150,6 +158,32 @@ def build_chord_stage(spec: str, device: str) -> "ChordStage | None":
     return ChordStage(experts)
 
 
+def build_lyrics_stage(device: str) -> "LyricsStage":
+    from openbapo.analysis.lyrics.activity import ActivityParams, SileroActivity
+    from openbapo.analysis.lyrics.align import wav2vec2_aligner
+    from openbapo.analysis.lyrics.recognize import WhisperRecognizer, load_whisper
+    from openbapo.analysis.lyrics.stage import LyricsStage
+
+    whisper = load_whisper(device=device)
+    return LyricsStage(
+        SileroActivity(ActivityParams(context_gap_s=30.0)),
+        WhisperRecognizer(whisper),
+        wav2vec2_aligner(device),
+        alignment_activity=SileroActivity(ActivityParams(energy_relative_db=-15.0)),
+    )
+
+
+def read_lyrics(path: Path | None) -> str | None:
+    if path is None:
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
+    except FileNotFoundError as e:
+        raise InputError(f"lyrics file not found: {path}") from e
+    except (OSError, UnicodeDecodeError) as e:
+        raise InputError(f"cannot read lyrics file {path} as UTF-8 text: {e}") from e
+
+
 def check_input(audio: Path) -> None:
     if not audio.is_file():
         raise InputError(f"audio file not found: {audio}")
@@ -182,6 +216,7 @@ def main(
     separator: "Separator | None" = None,
     tracker: "BeatTracker | None" = None,
     chord_stage: "ChordStage | None" = None,
+    lyrics_stage: "LyricsStage | None" = None,
 ) -> int:
     """Run the CLI. The keyword arguments let tests inject fakes in place of the models."""
     args = build_parser().parse_args(argv)
@@ -193,6 +228,7 @@ def main(
             run_render(args)
             return 0
         check_input(args.audio)
+        lyrics_text = read_lyrics(args.lyrics)
         # The analysis extra is checked before anything that imports it, so a
         # core-only install gets an install hint rather than an ImportError.
         if separator is None or tracker is None:
@@ -216,6 +252,8 @@ def main(
         ):
             require_analysis_packages()
             chord_stage = build_chord_stage(args.chord_experts, args.device)
+        if lyrics_stage is None and not args.no_lyrics and not _fakes_injected(separator, tracker):
+            lyrics_stage = build_lyrics_stage(args.device)
         result = analyze_file(
             args.audio,
             separator=separator,
@@ -223,8 +261,12 @@ def main(
             chord_stage=chord_stage,
             title=args.title,
             artist=args.artist,
+            lyrics_stage=None if args.no_lyrics else lyrics_stage,
+            lyrics_text=lyrics_text,
         )
         write_output(result.analysis.to_json(), args.out)
+        for note in result.notes:
+            print(f"openbapo: note: {note}", file=sys.stderr)
         if args.timing:
             timing = json.dumps(result.timings.as_dict(), indent=2)
             if args.timing == "-":

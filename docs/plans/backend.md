@@ -7,7 +7,7 @@
 
 ```
 前端（Discord Bot）
-   │  提交任务 / 查状态 / 渲染 / 重对齐歌词 / 导出
+   │  提交任务 / 查状态 / 渲染 / 导出
    ▼
 API 层
    │
@@ -25,7 +25,7 @@ API 层
 设计原则：
 - **分析与渲染分离**。模型推理只在提交任务时跑一次；之后用户每次调整（改和弦、换指法调、换节奏型）只走编配 + 渲染，秒级返回。
 - **核心库与适配层分离**。"音频 → 结构化结果 → 谱"做成独立 Python 包，Discord 只是一个适配层；以后接别的前端不动核心。
-- **调整即参数**。用户能改的只有演唱调偏移、指法调、节奏型、简化开关、歌词文本；都是作用在同一份分析结果上的参数，不修改分析结果本身，因此不需要版本历史，"重置"就是参数归零。精修在专业软件里做（MusicXML 导出）。
+- **调整即参数**。用户能改的只有演唱调偏移、指法调、节奏型、简化开关；都是作用在同一份分析结果上的参数，不修改分析结果本身，因此不需要版本历史，"重置"就是参数归零。精修在专业软件里做（MusicXML 导出）。
 
 ## 2. 分析流水线
 
@@ -36,14 +36,25 @@ API 层
 | 和弦 | 混音去鼓（bass + other）+ 拍网格 | `Chord`（含转位、置信度） | BTC、ChordFormer、autochord |
 | 调性 | `Chord` 序列 + 音频 | `Key` | **已定：规则法**（第 2 步）：色度模板（Krumhansl 轮廓）与分窗和弦统计互校，关系大小调按主和弦时长与首尾和弦投票；不依赖 essentia |
 | 人声旋律 | vocals | 音高曲线 → 切分 → 量化到拍网格 → `Note` | RMVPE / CREPE 提取音高；音符切分与量化自写 |
-| 歌词识别 | vocals | 文本（用户提供歌词时跳过） | faster-whisper |
-| 歌词对齐 | vocals + 文本 | `LyricSyllable` | WhisperX 的 wav2vec2 强制对齐；中文对齐模型需单独评估；英文音节切分 pyphen / CMUdict；音节挂到 `Note` 用时间最近匹配 + 单调约束 |
+| 歌词识别 | vocals | 文本（用户提供歌词时跳过） | **已定：faster-whisper `large-v3`**（第 5 步），只识别 Silero 语音区间；相隔 ≥30 秒的每组检测各需累计 ≥5 秒人声，抑制孤立短误检。可能漏掉孤立短句，开发检查记录损失 3.649 秒真实人声。附歌词对齐不使用该过滤；见第 5 步第 13 节 |
+| 歌词对齐 | vocals + 文本 | `LyricSyllable` | **已定：wav2vec2 CTC 强制对齐**（第 5 步；英文 LibriSpeech 模型，中文 XLSR-53 中文微调模型）；完整人声轨推理，活动区间外施加有限惩罚；附歌词时可用持续能量补回 VAD 漏检，自动识别后的对齐仍用语音检测区间作先验；英文音节切分 pyphen；音节挂到 `Note` 用时间最近匹配 + 单调约束（第 7 步） |
 
 分轨结果只在流水线内部使用，任务完成后与原音频一起删除。
 
 ### 2.1 已接入的模型权重与许可证
 
 每接入一份权重在此登记（CLAUDE.md 要求）。CC-BY-NC 类及许可证不明的显式标出。
+
+英文识别补充实验（2026-11-16，已评测，保留 Whisper 默认）：NVIDIA
+[`parakeet-tdt-0.6b-v2`](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v2/tree/ae9ad07059c7c739ffaf932226a8fe64ae2620b0)
+权重为 **CC-BY-4.0**，作者 NVIDIA；实验使用 Ilya Stupakov 的
+[ONNX 转换](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v2-onnx/tree/0bbb45a3365852604aef28b538a8f066f4ccaa85)
+（同为 CC-BY-4.0，固定上述修订），无量化版本；推理代码
+[`onnx-asr`](https://github.com/istupakov/onnx-asr/blob/main/LICENSE) 为 MIT。
+英文专用 FastConformer-TDT 与 Whisper 分别评测；ONNX 转换的成绩不宣称为官方 NeMo 运行时成绩。
+权重和实验依赖放在仓库外，发布代码不包含权重；保留模型作者、转换者、许可与修订归属。
+70 条比较完成：真实英文 WER 36.3% 对 Whisper 41.5%，但有 16 个未决空隙词且开发集退化，
+未满足更换条件。详情见 `step-5.md` 第 14 节，生产依赖不引入该运行时。
 
 | 环节 | 模型 / 权重 | 代码许可证 | 权重许可证 | 训练数据 | 备注 |
 |---|---|---|---|---|---|
@@ -53,8 +64,12 @@ API 层
 | 和弦（E1） | BTC（jayg996/BTC-ISMIR19，`btc_model_large_voca.pt`，commit 2682317） | MIT（模型代码已随本仓库分发，见 `analysis/chords/models/btc_vendor/LICENSE`） | **未声明**：权重随 MIT 仓库分发，作者未单独说明 | Isophonics、Robbie Williams、USPop | 第 2 步接入。权重首次运行从作者仓库的固定 commit 下载到 `~/.cache/openbapo/`，校验 SHA-256 后再反序列化 |
 | 和弦（E2） | lv-chordia（openmirlab/lv-chordia，Jiang 等 ISMIR 2019 的五网络集成） | MIT | **未单独声明**：五份权重随 MIT 仓库分发 | 论文在 Billboard / Isophonics / RWC 上报数，训练集待核 | 第 2 步接入；从 GitHub 安装（`analysis` 依赖组直接引用） |
 | 调性 / 低音 / 色度（E3–E5） | 无权重（规则） | — | — | — | 第 2 步，纯代码 |
+| 人声活动 | Silero VAD（snakers4/silero-vad，PyPI `silero-vad`） | MIT | **MIT** | 多语种语音与噪声语料（作者未逐项列出） | 第 5 步接入；权重随 PyPI 包分发 |
+| 歌词识别 | Whisper `large-v3`，faster-whisper（CTranslate2）转换版 `Systran/faster-whisper-large-v3` | MIT（faster-whisper） | **MIT**（OpenAI Whisper 仓库；Hugging Face 模型卡标 Apache 2.0，两者都允许商用） | OpenAI 未公开的约 500 万小时弱标注网络音频 | 第 5 步接入；首次运行从 Hugging Face 下载 |
+| 歌词对齐（英文） | wav2vec2 `WAV2VEC2_ASR_LARGE_LV60K_960H`（torchaudio，源自 fairseq） | BSD（torchaudio） | **MIT**（fairseq） | Libri-Light 6 万小时预训练 + LibriSpeech 960 小时微调 | 第 5 步接入（开发集比较胜出，见 `docs/benchmarks/step-5-lyrics-dev.md`）；首次运行从 download.pytorch.org 下载 |
+| 歌词对齐（中文） | `jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn`（固定 commit 99ccb27） | Apache 2.0（transformers） | **Apache 2.0** | XLSR-53 预训练 + Common Voice zh-CN 微调 | 第 5 步接入；首次运行从 Hugging Face 下载，校验 SHA-256 后以 `weights_only=True` 读取 |
 
-未接入但评估过的候选：madmom 的模型文件为 **CC BY-NC-SA 4.0**（README 明示），只可作评测基线，不打包；all-in-one 权重许可证未声明；BS-RoFormer 社区权重许可证各异、部分为 CC-BY-NC-SA；crema（BSD-2）只能在 Keras 2 上运行，与 Python 3.12+ 的 TensorFlow 不兼容，第 2 步按环境原因淘汰；accordoai 为本科论文级实验、只用 Beatles 训练，未进入对比。
+未接入但评估过的候选：第 5 步的 MMS 强制对齐（**CC BY-NC 4.0**）与 stable-ts 的 Whisper 词时间（MIT）在开发集上不如 wav2vec2，只留在 `scripts/lyrics_candidates.py` 供复现；madmom 的模型文件为 **CC BY-NC-SA 4.0**（README 明示），只可作评测基线，不打包；all-in-one 权重许可证未声明；BS-RoFormer 社区权重许可证各异、部分为 CC-BY-NC-SA；crema（BSD-2）只能在 Keras 2 上运行，与 Python 3.12+ 的 TensorFlow 不兼容，第 2 步按环境原因淘汰；accordoai 为本科论文级实验、只用 Beatles 训练，未进入对比。
 
 ## 3. 编配
 
@@ -74,13 +89,14 @@ API 层
 | 层 | 做法 |
 |---|---|
 | 和弦图 | 自绘 SVG（`openbapo.render.svg.chord_diagram`，第 4 步） |
-| 六线谱（节奏型 / 和弦变化点） | 自绘 SVG：扫弦画 × + 符干 / 符杠 + 上下箭头，分解画品位数字，"无"节奏型只画和弦变化点（第 4 步决定 1，不用 alphaTab / Verovio） |
+| 六线谱（节奏型 / 和弦变化点） | 自绘 SVG：扫弦用谱内细线竖箭头，下方独立标节奏；分解在被拨的弦上画 ×；闷音在箭头上方加点。符干 / 符尾 / 符杠 / 延音由共用时值层计算；"无"只标和弦变化及延续（第 4 步第 11–12 节） |
 | 简谱 | **自绘 SVG**（主流库不支持简谱）；第 4 步画出行与小节线，音符的时值记号第 7 步 |
 | 歌词 | 自绘，音节按起始时间对齐到拍的 x 坐标（第 5 步接真歌词） |
 | 页面 | A4，每行 4 小节；SVG → PNG（cairosvg，第一页预览）/ PDF（逐页 cairosvg + pypdf 合并，矢量多页）。可选依赖组 `openbapo[render]` |
 | MusicXML | 标准库直接写（第 4 步决定 2，不用 music21 生成）：和弦符号按发声音高、TAB 谱表写节奏型的弦 / 品、变调夹作为移调；music21 只在测试里读回校验 |
 
 排版标准：`docs/reference/desperado-sheet.webp`。
+扫弦与分解的具体符号同时以负责人本地曲库为依据，见 `docs/plans/step-4.md` 第 12 节。
 
 ## 5. 存储
 
@@ -88,7 +104,7 @@ API 层
 |---|---|---|
 | 原音频、分轨 | 处理完成即删 | 临时盘 |
 | 分析结果 JSON | 30 天 **[待定]** | 对象存储 / 数据库 |
-| 当前调整参数 + 用户粘贴的歌词 | 同上 | 数据库 |
+| 当前调整参数 | 同上 | 数据库 |
 | 渲染产物（PNG / PDF） | 可随时重算，缓存即可 | 对象存储，带过期 |
 | 用户配额计数 | 按天 | Redis / 数据库 |
 
@@ -104,7 +120,7 @@ API 层
 
 ## 7. 开放问题
 
-1. 中文歌词强制对齐模型的选择与效果评估。
+1. ~~中文歌词强制对齐模型的选择与效果评估。~~ 第 5 步已定（见第 2 节）。
 2. 人声音符切分 / 量化算法（滑音、颤音、装饰音的处理）；是否引入现成的歌声转录模型。
 3. 和弦模型的最终选型：按 `step-2.md` 的多专家方案，在 GuitarSet 与 AAM 上实测各候选单独与融合后的准确率与推理速度。
 4. 简谱排版规则细节（换行、连音线跨行、高低八度点）。

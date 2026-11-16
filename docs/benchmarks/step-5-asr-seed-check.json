@@ -1,0 +1,43 @@
+{
+  "split": "dev",
+  "base_seed": 0,
+  "activity_params": {
+    "threshold": 0.5,
+    "min_speech_s": 0.25,
+    "min_silence_s": 0.3,
+    "pad_s": 0.1,
+    "min_total_s": 5.0,
+    "energy_relative_db": -15.0,
+    "energy_floor_db": -50.0,
+    "energy_min_seed_s": 1.0
+  },
+  "summary": {
+    "en/mix": {
+      "songs": 1,
+      "error_rate": 0.14925373134328357,
+      "gap_candidates": 0,
+      "no_words": 0
+    }
+  },
+  "songs": [
+    {
+      "id": "en-dev-02-mix",
+      "words": 61,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 61,
+      "error_rate": 0.14925373134328357,
+      "ref_units": 67
+    }
+  ],
+  "repeat_checks": [
+    {
+      "id": "en-dev-02-mix",
+      "segments": 7,
+      "full_metadata_equal": true,
+      "current_sha256": "411326ed65ff824e3144cf5d150050a17caa57ab2b1330be1d16328bb7a17480",
+      "prior_sha256": "411326ed65ff824e3144cf5d150050a17caa57ab2b1330be1d16328bb7a17480"
+    }
+  ]
+}

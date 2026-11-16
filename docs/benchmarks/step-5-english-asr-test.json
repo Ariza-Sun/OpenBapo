@@ -1,0 +1,3717 @@
+{
+  "protocol": {
+    "model": "nemo-parakeet-tdt-0.6b-v2",
+    "model_revision": "0bbb45a3365852604aef28b538a8f066f4ccaa85",
+    "weight_hash_source": "pinned HF LFS IDs; verified from files before candidate inference",
+    "model_files_sha256": {
+      "README.md": "f46710815c425ebadbdbafe7c0337a09070b589f2b1d698568022b4f3f3ce12d",
+      "config.json": "666903c76b9798caf2c210afd4f6cd60b08a8dbf9800ec8d7a3bc0d2148ac466",
+      "decoder_joint-model.onnx": "cbb52a07bd70ab5b67f8439d4b3cd8704b18467b4430bcacb5adabe154b8d191",
+      "encoder-model.onnx": "3987bcd28175d829d12888a996a84e8f62a0e374d9ffd640662c1515adc679d3",
+      "encoder-model.onnx.data": "4dab7362d4874d85965045b1e41b2d61dd2cc0fb25671a7f6b3dc47bf120cc41",
+      "nemo128.onnx": "a9fde1486ebfcc08f328d75ad4610c67835fea58c73ba57e3209a6f6cf019e9f",
+      "vocab.txt": "ec182b70dd42113aff6c5372c75cac58c952443eb22322f57bbd7f53977d497d"
+    },
+    "inputs_sha256": {
+      "manifest.json": "116cde94be622a49c90720f667370c605e8b15f0f557711235a54476e7259c4e",
+      "metadata.jsonl": "16b6a4922f5d3f3c0951b63297b883f4f525bce1abb964ff957b521bf38d21d6",
+      "step-5-gap-review.json": "c26d3467de267314954898657bdbf470c40ae153386eb66c0a2526adb1135665"
+    },
+    "source_sha256": {
+      "scripts/compare_english_asr.py": "313b5943d389c5e37b041397157bfac0e3ae1727b0dded4b624902340586abfd",
+      "scripts/eval_lyrics.py": "57ee4938798ee675a41c998d5e33f304bfc893cd7e413aec6bb231220d60ede3",
+      "scripts/lyrics_gap_review.py": "6b5816d0bcd45d96fff5660aba5b683a261fff221aa0537bbbfd5af7570825dd",
+      "src/openbapo/analysis/lyrics/__init__.py": "9961d45b01b28ecafeb6fceb2cf3e6e4a993458dd5726d2e4cb3d4bb88b5dc3c",
+      "src/openbapo/analysis/lyrics/activity.py": "fbec3610a9af5ac8b01d98d4396d15cfdddd6b171a936402c8ebc2a0fad29bac",
+      "src/openbapo/analysis/lyrics/align.py": "4da7066728350e5013cded9f25e0f0e368b1984a927c7ab79da949e32a7e2572",
+      "src/openbapo/analysis/lyrics/recognize.py": "5c227ff8140250a52e7db5989267b5332c943471264abfbfce8f4468d3e401f9",
+      "src/openbapo/analysis/lyrics/stage.py": "59a196545d0266318893066ef8401e13985cc1180608bda6d08edcb5e1aa0dcb"
+    },
+    "versions": {
+      "onnx-asr": "0.12.0",
+      "onnxruntime-gpu": "1.23.2",
+      "faster-whisper": "1.2.1",
+      "ctranslate2": "4.9.0",
+      "torch": "2.5.1+cu121"
+    },
+    "seed": 0,
+    "language": "en",
+    "activity": {
+      "threshold": 0.5,
+      "min_speech_s": 0.25,
+      "min_silence_s": 0.3,
+      "pad_s": 0.1,
+      "min_total_s": 5.0,
+      "context_gap_s": 30.0,
+      "energy_relative_db": null,
+      "energy_floor_db": -50.0,
+      "energy_min_seed_s": 1.0
+    },
+    "candidate_chunk_max_seconds": 30.0,
+    "candidate_quantization": null,
+    "candidate_providers": [
+      "CUDAExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "timing": "recognition calls only; excludes load, separation, VAD, alignment, rendering",
+    "decision_rule": "replace only with lower real-English WER, no new confirmed or unresolved gap hallucinations, all instrumental gates passing; development precedes test"
+  },
+  "summary": {
+    "test/instrumental": {
+      "entries": 20,
+      "whisper": {
+        "reference_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": 20,
+        "gap_classifications": {},
+        "median_asr_seconds": 0.0,
+        "total_asr_seconds": 0.0
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": 20,
+        "gap_classifications": {},
+        "median_asr_seconds": 0.0,
+        "total_asr_seconds": 0.0
+      }
+    },
+    "test/real": {
+      "entries": 20,
+      "whisper": {
+        "reference_words": 6237,
+        "substitutions": 566,
+        "deletions": 1965,
+        "insertions": 57,
+        "wer": 0.4149430816097483,
+        "no_lyrics": 0,
+        "gap_classifications": {
+          "reference_supported_vocal": 3
+        },
+        "median_asr_seconds": 9.665890898555517,
+        "total_asr_seconds": 213.3924065567553
+      },
+      "parakeet": {
+        "reference_words": 6237,
+        "substitutions": 858,
+        "deletions": 1318,
+        "insertions": 87,
+        "wer": 0.3628346961680295,
+        "no_lyrics": 0,
+        "gap_classifications": {
+          "reference_supported_vocal": 31,
+          "unresolved": 16
+        },
+        "median_asr_seconds": 7.260035469196737,
+        "total_asr_seconds": 145.2366373706609
+      },
+      "paired_song_bootstrap_wer_delta_95pct": [
+        -0.13212463635677532,
+        0.023589186349800704
+      ],
+      "parakeet_lower_wer_songs": 8
+    }
+  },
+  "songs": [
+    {
+      "id": "en-test-01",
+      "split": "test",
+      "condition": "real",
+      "duration": 242.55691609977325,
+      "audio_sha256": "82da58ddd265f00cc8c6cb137574a48e9512623814f74bdfdaded30a51ffe4eb",
+      "vocals_sha256": "30c4172271e43a1e60b3de9c921fc0d6e64de7492dece2a01142affa01e91397",
+      "seed": 1401557088,
+      "regions": [
+        [
+          32.4,
+          40.2
+        ],
+        [
+          40.6,
+          42.0
+        ],
+        [
+          77.3,
+          79.7
+        ],
+        [
+          80.4,
+          83.7
+        ],
+        [
+          84.8,
+          86.6
+        ],
+        [
+          87.8,
+          90.8
+        ],
+        [
+          96.2,
+          99.0
+        ],
+        [
+          115.9,
+          116.5
+        ],
+        [
+          125.4,
+          127.7
+        ],
+        [
+          128.4,
+          132.0
+        ],
+        [
+          132.8,
+          134.5
+        ],
+        [
+          136.0,
+          136.8
+        ],
+        [
+          137.7,
+          138.3
+        ]
+      ],
+      "separate_seconds": 8.096186473965645,
+      "whisper": {
+        "reference_words": 195,
+        "hypothesis_words": 41,
+        "substitutions": 18,
+        "deletions": 154,
+        "insertions": 0,
+        "wer": 0.882051282051282,
+        "no_lyrics": false,
+        "dropped_segments": 4,
+        "transcript_sha256": "9545e20b86baf546708ec065366f66ab4de9a3c4c039633e2e2f362f0a7ec4ef",
+        "gap_candidates": [],
+        "asr_seconds": 5.78716991096735,
+        "load_seconds": 3.2864079903811216
+      },
+      "parakeet": {
+        "reference_words": 195,
+        "hypothesis_words": 55,
+        "substitutions": 35,
+        "deletions": 140,
+        "insertions": 0,
+        "wer": 0.8974358974358975,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "14a31b79e7344c3ec0504fc03c3c6c6ec6f71ad1d470f4dde05a9a0932aca9df",
+        "gap_candidates": [],
+        "asr_seconds": 4.449052872136235,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-02",
+      "split": "test",
+      "condition": "real",
+      "duration": 221.97845804988663,
+      "audio_sha256": "329370ace77af31c2f4174a25c2c1125c869cf087e8c0c51c982ddef04028321",
+      "vocals_sha256": "542f915ad7d2094f00c4e40828d6bce834ec065adcc27c39a157c0671b9e5989",
+      "seed": 701764834,
+      "regions": [
+        [
+          13.6,
+          17.8
+        ],
+        [
+          19.5,
+          22.9
+        ],
+        [
+          25.6,
+          31.7
+        ],
+        [
+          31.9,
+          34.7
+        ],
+        [
+          37.5,
+          41.7
+        ],
+        [
+          43.6,
+          46.6
+        ],
+        [
+          49.5,
+          58.5
+        ],
+        [
+          60.0,
+          64.5
+        ],
+        [
+          64.9,
+          71.5
+        ],
+        [
+          72.0,
+          82.8
+        ],
+        [
+          84.0,
+          88.2
+        ],
+        [
+          88.3,
+          94.7
+        ],
+        [
+          96.0,
+          106.9
+        ],
+        [
+          108.0,
+          112.5
+        ],
+        [
+          112.9,
+          119.6
+        ],
+        [
+          119.9,
+          133.9
+        ],
+        [
+          156.2,
+          160.1
+        ],
+        [
+          162.2,
+          163.7
+        ],
+        [
+          173.1,
+          183.7
+        ],
+        [
+          183.9,
+          184.4
+        ],
+        [
+          184.8,
+          195.1
+        ]
+      ],
+      "separate_seconds": 5.3777120895683765,
+      "whisper": {
+        "reference_words": 273,
+        "hypothesis_words": 227,
+        "substitutions": 21,
+        "deletions": 47,
+        "insertions": 1,
+        "wer": 0.25274725274725274,
+        "no_lyrics": false,
+        "dropped_segments": 1,
+        "transcript_sha256": "73a95fa3c8e3ddd462f918c2dd59e83d473c8c4a9ff61edca5dc7b5a4e8fa14b",
+        "gap_candidates": [],
+        "asr_seconds": 7.143037965521216,
+        "load_seconds": 4.2111279759556055
+      },
+      "parakeet": {
+        "reference_words": 273,
+        "hypothesis_words": 219,
+        "substitutions": 35,
+        "deletions": 56,
+        "insertions": 2,
+        "wer": 0.34065934065934067,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "eb4978f597409ea30d038894ffe9fcd8ff10669f742251bf322aa4229f69c5ff",
+        "gap_candidates": [],
+        "asr_seconds": 6.764637444168329,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-03",
+      "split": "test",
+      "condition": "real",
+      "duration": 240.56163265306122,
+      "audio_sha256": "beefa48e4520bb290e739faa7c0a91e4e7296fb239577966b2129934ccf86b31",
+      "vocals_sha256": "0ebcc8c54cbc083d9ce91bdab567096c0a4fb0ef5fb37cf125d3bc2de132690d",
+      "seed": 484849381,
+      "regions": [
+        [
+          19.4,
+          20.8
+        ],
+        [
+          22.7,
+          23.5
+        ],
+        [
+          25.6,
+          45.2
+        ],
+        [
+          46.2,
+          50.2
+        ],
+        [
+          50.6,
+          75.2
+        ],
+        [
+          76.7,
+          90.9
+        ],
+        [
+          91.9,
+          94.2
+        ],
+        [
+          95.3,
+          97.2
+        ],
+        [
+          98.3,
+          100.4
+        ],
+        [
+          104.5,
+          107.9
+        ],
+        [
+          108.4,
+          116.0
+        ],
+        [
+          118.0,
+          136.9
+        ],
+        [
+          137.1,
+          151.8
+        ],
+        [
+          153.1,
+          156.4
+        ],
+        [
+          156.7,
+          158.3
+        ],
+        [
+          158.5,
+          159.1
+        ],
+        [
+          159.3,
+          159.9
+        ],
+        [
+          160.1,
+          171.1
+        ],
+        [
+          171.9,
+          174.1
+        ],
+        [
+          175.1,
+          177.5
+        ],
+        [
+          178.4,
+          180.6
+        ],
+        [
+          182.2,
+          196.3
+        ],
+        [
+          197.2,
+          200.0
+        ],
+        [
+          200.6,
+          203.3
+        ],
+        [
+          203.8,
+          207.6
+        ],
+        [
+          208.1,
+          215.4
+        ],
+        [
+          217.1,
+          218.6
+        ],
+        [
+          219.7,
+          228.5
+        ],
+        [
+          229.9,
+          231.3
+        ]
+      ],
+      "separate_seconds": 5.8899207059293985,
+      "whisper": {
+        "reference_words": 356,
+        "hypothesis_words": 353,
+        "substitutions": 25,
+        "deletions": 5,
+        "insertions": 2,
+        "wer": 0.0898876404494382,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "cbb2afbef5661125b77d75f5839d41badee36f079db416b11430ebd0ea0d2c5e",
+        "gap_candidates": [],
+        "asr_seconds": 11.773393731564283,
+        "load_seconds": 3.3126723393797874
+      },
+      "parakeet": {
+        "reference_words": 356,
+        "hypothesis_words": 358,
+        "substitutions": 26,
+        "deletions": 5,
+        "insertions": 7,
+        "wer": 0.10674157303370786,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "3c1e7518bfbe318754885f998bdfe698edf30720e4975464709fd5ed6a44c4df",
+        "gap_candidates": [],
+        "asr_seconds": 9.21091878414154,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-04",
+      "split": "test",
+      "condition": "real",
+      "duration": 192.92165532879818,
+      "audio_sha256": "2172a564b8a695d566435344da37c18e37bae5da3a7ac6f5c9347288dfaa22f6",
+      "vocals_sha256": "27bcaf9541ae81dc4e80ec839d66ea6f26d466a8406abca19489bec013942e03",
+      "seed": 1794262142,
+      "regions": [
+        [
+          15.9,
+          35.8
+        ],
+        [
+          36.1,
+          49.0
+        ],
+        [
+          49.1,
+          52.7
+        ],
+        [
+          52.9,
+          56.4
+        ],
+        [
+          57.2,
+          60.8
+        ],
+        [
+          62.5,
+          63.7
+        ],
+        [
+          69.9,
+          70.5
+        ],
+        [
+          73.9,
+          93.9
+        ],
+        [
+          94.1,
+          107.1
+        ],
+        [
+          107.2,
+          110.8
+        ],
+        [
+          111.0,
+          114.5
+        ],
+        [
+          115.4,
+          117.7
+        ],
+        [
+          118.0,
+          118.6
+        ],
+        [
+          132.3,
+          137.0
+        ],
+        [
+          137.3,
+          145.9
+        ],
+        [
+          146.3,
+          146.8
+        ],
+        [
+          147.3,
+          152.1
+        ],
+        [
+          152.3,
+          155.8
+        ],
+        [
+          156.0,
+          160.2
+        ],
+        [
+          160.4,
+          162.7
+        ],
+        [
+          164.9,
+          166.0
+        ],
+        [
+          168.7,
+          170.1
+        ],
+        [
+          171.5,
+          173.8
+        ]
+      ],
+      "separate_seconds": 4.5920854564756155,
+      "whisper": {
+        "reference_words": 426,
+        "hypothesis_words": 198,
+        "substitutions": 6,
+        "deletions": 228,
+        "insertions": 0,
+        "wer": 0.5492957746478874,
+        "no_lyrics": false,
+        "dropped_segments": 10,
+        "transcript_sha256": "5740294e339e614953430b36a8327e65dca38b21caa7c38208a5639947c7a3ff",
+        "gap_candidates": [
+          {
+            "start": 164.9,
+            "end": 165.18,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 165.18,
+            "end": 165.68,
+            "classification": "reference_supported_vocal"
+          }
+        ],
+        "asr_seconds": 14.10568717494607,
+        "load_seconds": 4.28851667419076
+      },
+      "parakeet": {
+        "reference_words": 426,
+        "hypothesis_words": 276,
+        "substitutions": 34,
+        "deletions": 150,
+        "insertions": 0,
+        "wer": 0.431924882629108,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "96ee76ecd169b6f15e840b4f75219ad1b93741db6f34c1432bf686314004ba8f",
+        "gap_candidates": [
+          {
+            "start": 60.24,
+            "end": 60.480000000000004,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 62.58,
+            "end": 62.98,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 69.98,
+            "end": 70.14,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 70.22,
+            "end": 70.46000000000001,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 118.08,
+            "end": 118.24,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 164.98000000000002,
+            "end": 165.22000000000003,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 165.46,
+            "end": 165.94000000000003,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 168.78,
+            "end": 168.94,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 169.01999999999998,
+            "end": 169.1,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 169.26,
+            "end": 169.58,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 169.66,
+            "end": 170.06,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 171.66,
+            "end": 171.82000000000002,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 172.06,
+            "end": 172.14000000000001,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 172.78,
+            "end": 172.86,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 173.02,
+            "end": 173.10000000000002,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 173.34,
+            "end": 173.66000000000003,
+            "classification": "reference_supported_vocal"
+          }
+        ],
+        "asr_seconds": 7.534739278256893,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-05",
+      "split": "test",
+      "condition": "real",
+      "duration": 233.62498866213153,
+      "audio_sha256": "ebef56766822631b51bada37e403ddcf9ef08d9a902e74b5ec635f7589537c1c",
+      "vocals_sha256": "2d23172d092767af7b42a50cef417aad8a98982328fd2677e8fb6484e860ed4c",
+      "seed": 1513122402,
+      "regions": [
+        [
+          17.8,
+          18.4
+        ],
+        [
+          18.6,
+          20.0
+        ],
+        [
+          20.8,
+          22.4
+        ],
+        [
+          22.8,
+          24.6
+        ],
+        [
+          27.8,
+          28.9
+        ],
+        [
+          29.5,
+          31.4
+        ],
+        [
+          31.8,
+          33.8
+        ],
+        [
+          36.4,
+          38.0
+        ],
+        [
+          38.5,
+          40.4
+        ],
+        [
+          40.9,
+          42.4
+        ],
+        [
+          44.2,
+          49.5
+        ],
+        [
+          50.3,
+          52.8
+        ],
+        [
+          53.5,
+          75.1
+        ],
+        [
+          75.8,
+          79.3
+        ],
+        [
+          79.6,
+          85.2
+        ],
+        [
+          85.9,
+          87.6
+        ],
+        [
+          91.1,
+          91.7
+        ],
+        [
+          91.9,
+          93.6
+        ],
+        [
+          94.4,
+          95.7
+        ],
+        [
+          96.4,
+          100.1
+        ],
+        [
+          100.6,
+          102.5
+        ],
+        [
+          102.9,
+          105.6
+        ],
+        [
+          107.4,
+          109.2
+        ],
+        [
+          109.8,
+          111.5
+        ],
+        [
+          111.9,
+          113.8
+        ],
+        [
+          115.3,
+          117.4
+        ],
+        [
+          117.6,
+          120.6
+        ],
+        [
+          121.6,
+          123.0
+        ],
+        [
+          123.8,
+          146.3
+        ],
+        [
+          146.8,
+          150.5
+        ],
+        [
+          150.7,
+          156.3
+        ],
+        [
+          157.0,
+          159.6
+        ],
+        [
+          160.5,
+          165.1
+        ],
+        [
+          165.6,
+          167.7
+        ],
+        [
+          169.2,
+          175.0
+        ],
+        [
+          177.9,
+          182.1
+        ],
+        [
+          182.5,
+          184.9
+        ],
+        [
+          186.4,
+          192.2
+        ],
+        [
+          192.6,
+          194.1
+        ],
+        [
+          196.9,
+          218.8
+        ],
+        [
+          220.3,
+          221.2
+        ],
+        [
+          221.9,
+          230.7
+        ]
+      ],
+      "separate_seconds": 5.5267387721687555,
+      "whisper": {
+        "reference_words": 319,
+        "hypothesis_words": 275,
+        "substitutions": 14,
+        "deletions": 47,
+        "insertions": 3,
+        "wer": 0.2006269592476489,
+        "no_lyrics": false,
+        "dropped_segments": 6,
+        "transcript_sha256": "14140232a61fb5d501ce22696ead078b042b4011115770f4c528ce0ec4d5c510",
+        "gap_candidates": [],
+        "asr_seconds": 11.314139354974031,
+        "load_seconds": 4.187298869714141
+      },
+      "parakeet": {
+        "reference_words": 319,
+        "hypothesis_words": 294,
+        "substitutions": 25,
+        "deletions": 30,
+        "insertions": 5,
+        "wer": 0.18808777429467086,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "253c256f1d1b9f434a8569ff9807dda090fe7a494fbd59780d41140a70d2df58",
+        "gap_candidates": [
+          {
+            "start": 17.88,
+            "end": 18.04,
+            "classification": "unresolved"
+          },
+          {
+            "start": 91.1,
+            "end": 91.25999999999999,
+            "classification": "unresolved"
+          }
+        ],
+        "asr_seconds": 13.220518765971065,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-06",
+      "split": "test",
+      "condition": "real",
+      "duration": 192.8,
+      "audio_sha256": "dcb3a02dd11827dab6d94da5f20091321288038cd533c7e25f0a0c6b353a9ad5",
+      "vocals_sha256": "09948296576390961e1d2b56c2c770624684f9192399f2ef9a981fcf46fdefe6",
+      "seed": 1673118669,
+      "regions": [
+        [
+          20.0,
+          29.0
+        ],
+        [
+          29.6,
+          38.6
+        ],
+        [
+          39.2,
+          48.3
+        ],
+        [
+          48.5,
+          86.6
+        ],
+        [
+          87.2,
+          134.7
+        ],
+        [
+          135.2,
+          144.3
+        ],
+        [
+          144.8,
+          153.8
+        ],
+        [
+          154.3,
+          174.6
+        ]
+      ],
+      "separate_seconds": 4.565264198929071,
+      "whisper": {
+        "reference_words": 536,
+        "hypothesis_words": 415,
+        "substitutions": 68,
+        "deletions": 125,
+        "insertions": 4,
+        "wer": 0.3675373134328358,
+        "no_lyrics": false,
+        "dropped_segments": 9,
+        "transcript_sha256": "2d8732764d8aadfee59648a7e481ad9487d79aa005a3ec80cb19822b25d20746",
+        "gap_candidates": [],
+        "asr_seconds": 14.581903863698244,
+        "load_seconds": 4.4835706651210785
+      },
+      "parakeet": {
+        "reference_words": 536,
+        "hypothesis_words": 518,
+        "substitutions": 75,
+        "deletions": 21,
+        "insertions": 3,
+        "wer": 0.18470149253731344,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "8043559ee099f030866918e2ff7b150e2e1d69c923ea1739387265be2d35d556",
+        "gap_candidates": [],
+        "asr_seconds": 3.6894847080111504,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-07",
+      "split": "test",
+      "condition": "real",
+      "duration": 183.37333333333333,
+      "audio_sha256": "9a675e89bb3b4882a38c0571475eff6917db4bc1d96ec19e3e910995741ffe99",
+      "vocals_sha256": "ed5da3b0263507e7cd6235e6f694386f7e637aee041da166db4bb01440ea30bb",
+      "seed": 2877555817,
+      "regions": [
+        [
+          7.4,
+          7.8
+        ],
+        [
+          22.7,
+          27.0
+        ],
+        [
+          30.0,
+          34.4
+        ],
+        [
+          37.0,
+          44.4
+        ],
+        [
+          44.8,
+          49.0
+        ],
+        [
+          52.2,
+          56.5
+        ],
+        [
+          57.8,
+          64.5
+        ],
+        [
+          74.5,
+          78.8
+        ],
+        [
+          81.7,
+          86.1
+        ],
+        [
+          88.6,
+          96.2
+        ],
+        [
+          96.5,
+          100.8
+        ],
+        [
+          103.9,
+          108.4
+        ],
+        [
+          110.6,
+          116.2
+        ],
+        [
+          116.8,
+          123.8
+        ],
+        [
+          124.2,
+          131.2
+        ]
+      ],
+      "separate_seconds": 4.409158583730459,
+      "whisper": {
+        "reference_words": 159,
+        "hypothesis_words": 143,
+        "substitutions": 20,
+        "deletions": 20,
+        "insertions": 4,
+        "wer": 0.27672955974842767,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "f1b072a4569be37bbacb9a1f702069e61dc34f41cc37a25f4017aa4d76524b68",
+        "gap_candidates": [],
+        "asr_seconds": 4.762509098276496,
+        "load_seconds": 3.186317941173911
+      },
+      "parakeet": {
+        "reference_words": 159,
+        "hypothesis_words": 139,
+        "substitutions": 28,
+        "deletions": 24,
+        "insertions": 4,
+        "wer": 0.3522012578616352,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "af959d86eae2e64664a824927c9ab67bf9852f1140555a2645daf378e6c56334",
+        "gap_candidates": [
+          {
+            "start": 7.4,
+            "end": 7.720000000000001,
+            "classification": "unresolved"
+          }
+        ],
+        "asr_seconds": 4.676664577797055,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-08",
+      "split": "test",
+      "condition": "real",
+      "duration": 220.71428571428572,
+      "audio_sha256": "bbf602cca363f7055e36ab254b97b754518a680596b0d8502d1a2d11308423a2",
+      "vocals_sha256": "24aec53bdf6595ad3382d5c729c2039dde81155879a3ee540714ea81a3df8d8a",
+      "seed": 2204980664,
+      "regions": [
+        [
+          23.6,
+          28.8
+        ],
+        [
+          29.2,
+          30.7
+        ],
+        [
+          30.9,
+          38.3
+        ],
+        [
+          38.9,
+          41.4
+        ],
+        [
+          42.5,
+          45.2
+        ],
+        [
+          46.2,
+          49.2
+        ],
+        [
+          50.1,
+          52.5
+        ],
+        [
+          54.2,
+          57.5
+        ],
+        [
+          61.6,
+          65.0
+        ],
+        [
+          69.1,
+          74.5
+        ],
+        [
+          76.8,
+          80.4
+        ],
+        [
+          88.2,
+          89.7
+        ],
+        [
+          90.1,
+          91.8
+        ],
+        [
+          92.0,
+          95.6
+        ],
+        [
+          95.9,
+          106.0
+        ],
+        [
+          107.3,
+          109.9
+        ],
+        [
+          111.0,
+          113.9
+        ],
+        [
+          114.9,
+          122.7
+        ],
+        [
+          126.6,
+          130.2
+        ],
+        [
+          134.1,
+          145.8
+        ],
+        [
+          148.4,
+          149.8
+        ],
+        [
+          150.4,
+          153.6
+        ],
+        [
+          154.2,
+          157.8
+        ],
+        [
+          158.0,
+          161.2
+        ],
+        [
+          161.8,
+          165.1
+        ],
+        [
+          165.6,
+          168.8
+        ],
+        [
+          169.4,
+          172.7
+        ],
+        [
+          173.2,
+          176.5
+        ],
+        [
+          177.0,
+          179.5
+        ],
+        [
+          183.7,
+          187.1
+        ],
+        [
+          187.5,
+          190.7
+        ],
+        [
+          191.3,
+          198.5
+        ],
+        [
+          198.9,
+          202.4
+        ],
+        [
+          202.7,
+          205.9
+        ],
+        [
+          206.5,
+          214.1
+        ]
+      ],
+      "separate_seconds": 5.2872494626790285,
+      "whisper": {
+        "reference_words": 294,
+        "hypothesis_words": 297,
+        "substitutions": 33,
+        "deletions": 9,
+        "insertions": 12,
+        "wer": 0.1836734693877551,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "16b150b70a48eeda0edcaec78a0d5ccfd22da5df64cb2877079827faea527422",
+        "gap_candidates": [],
+        "asr_seconds": 10.243780925869942,
+        "load_seconds": 4.170794093981385
+      },
+      "parakeet": {
+        "reference_words": 294,
+        "hypothesis_words": 307,
+        "substitutions": 31,
+        "deletions": 5,
+        "insertions": 18,
+        "wer": 0.1836734693877551,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "dc00acb3e7896e38f5abaee0ea07460998e31f8c2b7d0aacbf6713ad3736d831",
+        "gap_candidates": [],
+        "asr_seconds": 10.912558037787676,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-09",
+      "split": "test",
+      "condition": "real",
+      "duration": 180.06149659863945,
+      "audio_sha256": "84e344829620711e39f9c189f15671f7ffd184946cf03e269c23c6061c05e1eb",
+      "vocals_sha256": "491ca5fa1a4863794f8936fb1c00f2143314b6f175cf81d20153a85f52180ce2",
+      "seed": 1512232494,
+      "regions": [
+        [
+          29.7,
+          32.8
+        ],
+        [
+          33.6,
+          35.7
+        ],
+        [
+          36.8,
+          40.7
+        ],
+        [
+          40.9,
+          54.3
+        ],
+        [
+          54.8,
+          56.7
+        ],
+        [
+          58.1,
+          61.2
+        ],
+        [
+          61.7,
+          64.3
+        ],
+        [
+          65.2,
+          71.4
+        ],
+        [
+          72.5,
+          78.4
+        ],
+        [
+          79.4,
+          85.6
+        ],
+        [
+          85.9,
+          97.0
+        ],
+        [
+          97.4,
+          99.4
+        ],
+        [
+          100.8,
+          107.2
+        ],
+        [
+          107.5,
+          110.2
+        ],
+        [
+          110.8,
+          113.5
+        ],
+        [
+          114.6,
+          118.3
+        ],
+        [
+          118.6,
+          121.3
+        ],
+        [
+          121.6,
+          125.0
+        ],
+        [
+          125.2,
+          128.4
+        ],
+        [
+          142.8,
+          154.1
+        ],
+        [
+          154.3,
+          156.6
+        ],
+        [
+          157.0,
+          160.3
+        ],
+        [
+          160.4,
+          168.1
+        ],
+        [
+          168.5,
+          170.6
+        ]
+      ],
+      "separate_seconds": 4.266908325254917,
+      "whisper": {
+        "reference_words": 216,
+        "hypothesis_words": 213,
+        "substitutions": 12,
+        "deletions": 6,
+        "insertions": 3,
+        "wer": 0.09722222222222222,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "804f10cb5a1590130842dc6b03b2796f7ca6b93522477862e8311f11998aaac0",
+        "gap_candidates": [],
+        "asr_seconds": 7.354042800143361,
+        "load_seconds": 4.263079404830933
+      },
+      "parakeet": {
+        "reference_words": 216,
+        "hypothesis_words": 205,
+        "substitutions": 16,
+        "deletions": 14,
+        "insertions": 3,
+        "wer": 0.1527777777777778,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "02afae84b929abc56823a45dcb057cc40a615277746474769ee31c37a584b990",
+        "gap_candidates": [],
+        "asr_seconds": 7.511243397369981,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-10",
+      "split": "test",
+      "condition": "real",
+      "duration": 219.99566893424037,
+      "audio_sha256": "fcd934d27f95c573d2e7d448d627ade1ade4b15667693b99b7e34b455332c9ac",
+      "vocals_sha256": "52184cf4d512ce8701d957c3bb5e4f2b305394f725109553094f10206f7a3c54",
+      "seed": 1766248908,
+      "regions": [
+        [
+          13.0,
+          14.7
+        ],
+        [
+          15.7,
+          18.8
+        ],
+        [
+          19.5,
+          21.4
+        ],
+        [
+          22.2,
+          23.8
+        ],
+        [
+          25.4,
+          28.3
+        ],
+        [
+          32.0,
+          33.1
+        ],
+        [
+          35.1,
+          40.7
+        ],
+        [
+          41.6,
+          45.7
+        ],
+        [
+          48.1,
+          50.4
+        ],
+        [
+          61.2,
+          62.6
+        ],
+        [
+          64.3,
+          65.1
+        ],
+        [
+          68.3,
+          73.2
+        ],
+        [
+          74.2,
+          76.2
+        ],
+        [
+          84.4,
+          92.4
+        ],
+        [
+          93.5,
+          95.4
+        ],
+        [
+          106.6,
+          109.4
+        ],
+        [
+          109.7,
+          112.5
+        ],
+        [
+          113.0,
+          119.2
+        ],
+        [
+          119.5,
+          122.4
+        ],
+        [
+          130.4,
+          134.0
+        ],
+        [
+          136.1,
+          140.5
+        ],
+        [
+          141.8,
+          142.3
+        ],
+        [
+          142.6,
+          145.2
+        ],
+        [
+          153.3,
+          154.7
+        ],
+        [
+          156.2,
+          157.3
+        ],
+        [
+          165.7,
+          166.9
+        ],
+        [
+          169.0,
+          169.9
+        ],
+        [
+          171.5,
+          173.9
+        ],
+        [
+          182.7,
+          184.6
+        ]
+      ],
+      "separate_seconds": 5.182165497913957,
+      "whisper": {
+        "reference_words": 272,
+        "hypothesis_words": 127,
+        "substitutions": 51,
+        "deletions": 147,
+        "insertions": 2,
+        "wer": 0.7352941176470589,
+        "no_lyrics": false,
+        "dropped_segments": 9,
+        "transcript_sha256": "3a184e58f0484c88c63b7f607e1b16f6e77fc9da487f530aaf26b2a42020c801",
+        "gap_candidates": [],
+        "asr_seconds": 12.169021688401699,
+        "load_seconds": 3.1915510799735785
+      },
+      "parakeet": {
+        "reference_words": 272,
+        "hypothesis_words": 141,
+        "substitutions": 63,
+        "deletions": 133,
+        "insertions": 2,
+        "wer": 0.7279411764705882,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "6436c29dc199b90f9355b3f62b4e2cbdfdd669698cbbcca98737df68c9b440fc",
+        "gap_candidates": [],
+        "asr_seconds": 8.963350838050246,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-11",
+      "split": "test",
+      "condition": "real",
+      "duration": 262.4,
+      "audio_sha256": "8a9a09fe45f8ed9dc55432722190d7a2cad21f869c14f141b507f98aa204cae9",
+      "vocals_sha256": "189187606b3a1ae1cec37be62a657cef29264c450d515d60bb330f0bea9c5f70",
+      "seed": 3125678087,
+      "regions": [
+        [
+          52.0,
+          53.4
+        ],
+        [
+          53.6,
+          55.8
+        ],
+        [
+          57.4,
+          60.0
+        ],
+        [
+          60.5,
+          62.5
+        ],
+        [
+          67.2,
+          68.2
+        ],
+        [
+          71.5,
+          72.7
+        ],
+        [
+          72.9,
+          74.9
+        ],
+        [
+          92.2,
+          94.4
+        ],
+        [
+          97.1,
+          98.4
+        ],
+        [
+          99.3,
+          100.4
+        ],
+        [
+          104.9,
+          107.0
+        ],
+        [
+          108.7,
+          111.0
+        ],
+        [
+          111.5,
+          113.2
+        ]
+      ],
+      "separate_seconds": 8.520862529054284,
+      "whisper": {
+        "reference_words": 149,
+        "hypothesis_words": 25,
+        "substitutions": 5,
+        "deletions": 124,
+        "insertions": 0,
+        "wer": 0.8657718120805369,
+        "no_lyrics": false,
+        "dropped_segments": 2,
+        "transcript_sha256": "aeaf49e7905cc063c95947ac66a87dfe936166848dfd967c54b62fc25ecc47d6",
+        "gap_candidates": [],
+        "asr_seconds": 3.284546697512269,
+        "load_seconds": 4.227537078782916
+      },
+      "parakeet": {
+        "reference_words": 149,
+        "hypothesis_words": 28,
+        "substitutions": 11,
+        "deletions": 121,
+        "insertions": 0,
+        "wer": 0.8859060402684564,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "e1ea3fd36dab38604b9890f9a62c01b52b859aa5e024776040af9983be8206d1",
+        "gap_candidates": [],
+        "asr_seconds": 4.250803099945188,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-12",
+      "split": "test",
+      "condition": "real",
+      "duration": 189.84,
+      "audio_sha256": "80281dbb9a9c311222fa3da80f0765bff8efee46758ba3ab5238b487a16b28af",
+      "vocals_sha256": "707910982fc4d48e198b2fab05429131fe0291e96b27795a219b14de199fbc34",
+      "seed": 1643542008,
+      "regions": [
+        [
+          10.1,
+          14.8
+        ],
+        [
+          16.1,
+          18.5
+        ],
+        [
+          19.5,
+          23.9
+        ],
+        [
+          25.2,
+          27.6
+        ],
+        [
+          28.5,
+          32.3
+        ],
+        [
+          37.8,
+          41.8
+        ],
+        [
+          46.3,
+          48.6
+        ],
+        [
+          48.8,
+          50.9
+        ],
+        [
+          55.5,
+          60.2
+        ],
+        [
+          65.2,
+          66.8
+        ],
+        [
+          67.5,
+          69.5
+        ],
+        [
+          69.8,
+          71.9
+        ],
+        [
+          72.1,
+          73.5
+        ],
+        [
+          74.3,
+          75.9
+        ],
+        [
+          76.6,
+          78.7
+        ],
+        [
+          78.9,
+          81.0
+        ],
+        [
+          81.2,
+          82.6
+        ],
+        [
+          92.4,
+          97.4
+        ],
+        [
+          98.4,
+          100.7
+        ],
+        [
+          101.8,
+          106.2
+        ],
+        [
+          107.5,
+          109.8
+        ],
+        [
+          111.2,
+          114.5
+        ],
+        [
+          120.1,
+          124.6
+        ],
+        [
+          128.9,
+          130.9
+        ],
+        [
+          131.2,
+          132.8
+        ],
+        [
+          138.4,
+          142.4
+        ],
+        [
+          147.5,
+          149.1
+        ],
+        [
+          149.7,
+          151.8
+        ],
+        [
+          152.1,
+          155.7
+        ],
+        [
+          156.6,
+          158.2
+        ],
+        [
+          158.9,
+          161.0
+        ],
+        [
+          161.2,
+          163.3
+        ],
+        [
+          163.5,
+          164.9
+        ]
+      ],
+      "separate_seconds": 4.693409288302064,
+      "whisper": {
+        "reference_words": 190,
+        "hypothesis_words": 173,
+        "substitutions": 26,
+        "deletions": 18,
+        "insertions": 1,
+        "wer": 0.23684210526315788,
+        "no_lyrics": false,
+        "dropped_segments": 4,
+        "transcript_sha256": "432ec92ae889ac1245088a27689c9be8855c8fdf3f905d46265a1775c1e33ee6",
+        "gap_candidates": [],
+        "asr_seconds": 8.640902174636722,
+        "load_seconds": 4.520975222811103
+      },
+      "parakeet": {
+        "reference_words": 190,
+        "hypothesis_words": 177,
+        "substitutions": 26,
+        "deletions": 15,
+        "insertions": 2,
+        "wer": 0.22631578947368422,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "47af167f0ab3ed47feeaaacdc8f32358d48da799f5e16198457294c73ed33a47",
+        "gap_candidates": [
+          {
+            "start": 16.26,
+            "end": 16.419999999999998,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 25.439999999999998,
+            "end": 25.599999999999998,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 98.64,
+            "end": 100.48,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 107.74,
+            "end": 109.26,
+            "classification": "reference_supported_vocal"
+          }
+        ],
+        "asr_seconds": 10.303206223994493,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-13",
+      "split": "test",
+      "condition": "real",
+      "duration": 283.93020408163267,
+      "audio_sha256": "9d51450a081eb62b1d5149ff5199eb5912ba258e51709a459914da121b3dab3e",
+      "vocals_sha256": "b386e0553d80dcd69a58dccd5548135de1ed620eec7e91a3774b29356be91fc1",
+      "seed": 1988369469,
+      "regions": [
+        [
+          40.6,
+          45.0
+        ],
+        [
+          45.5,
+          52.6
+        ],
+        [
+          52.9,
+          55.2
+        ],
+        [
+          55.4,
+          60.0
+        ],
+        [
+          70.1,
+          79.9
+        ],
+        [
+          80.2,
+          84.6
+        ],
+        [
+          85.0,
+          110.2
+        ],
+        [
+          129.6,
+          133.4
+        ],
+        [
+          134.6,
+          138.9
+        ],
+        [
+          139.5,
+          143.6
+        ],
+        [
+          144.4,
+          151.7
+        ],
+        [
+          151.9,
+          154.1
+        ],
+        [
+          154.3,
+          180.6
+        ],
+        [
+          181.7,
+          184.0
+        ],
+        [
+          184.8,
+          185.5
+        ],
+        [
+          238.3,
+          239.0
+        ],
+        [
+          240.9,
+          244.4
+        ],
+        [
+          245.4,
+          249.3
+        ],
+        [
+          250.7,
+          259.7
+        ],
+        [
+          266.4,
+          268.8
+        ],
+        [
+          271.5,
+          273.7
+        ]
+      ],
+      "separate_seconds": 6.789827883243561,
+      "whisper": {
+        "reference_words": 303,
+        "hypothesis_words": 297,
+        "substitutions": 42,
+        "deletions": 13,
+        "insertions": 7,
+        "wer": 0.20462046204620463,
+        "no_lyrics": false,
+        "dropped_segments": 1,
+        "transcript_sha256": "45489142490d51390b80a8fc9411d6dcf0cfc28eb09aa3c151f741be58d59348",
+        "gap_candidates": [],
+        "asr_seconds": 12.489477781578898,
+        "load_seconds": 4.37811622582376
+      },
+      "parakeet": {
+        "reference_words": 303,
+        "hypothesis_words": 233,
+        "substitutions": 36,
+        "deletions": 76,
+        "insertions": 6,
+        "wer": 0.38943894389438943,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "bc7b0ba53f2a6666b904b2a6968a4b517353e9eb2d0d6103aa9bc70980cd77e0",
+        "gap_candidates": [],
+        "asr_seconds": 6.848808169364929,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-14",
+      "split": "test",
+      "condition": "real",
+      "duration": 216.55523809523808,
+      "audio_sha256": "24090af9ca4886bb0551f7c1896c249af3311cce1c585092054ed5c428834d44",
+      "vocals_sha256": "e3446b964d8f7a3311acd29a2a5f31332a2e5f0d19eaa5aea1f53a188d3dc72c",
+      "seed": 2895243653,
+      "regions": [
+        [
+          8.4,
+          14.3
+        ],
+        [
+          17.4,
+          23.2
+        ],
+        [
+          23.4,
+          33.3
+        ],
+        [
+          33.5,
+          34.1
+        ],
+        [
+          34.3,
+          39.9
+        ],
+        [
+          40.8,
+          61.9
+        ],
+        [
+          62.1,
+          63.2
+        ],
+        [
+          63.5,
+          66.8
+        ],
+        [
+          67.1,
+          67.8
+        ],
+        [
+          68.2,
+          96.6
+        ],
+        [
+          97.5,
+          98.9
+        ],
+        [
+          99.4,
+          105.7
+        ],
+        [
+          106.5,
+          114.3
+        ],
+        [
+          114.8,
+          116.8
+        ],
+        [
+          117.4,
+          137.1
+        ],
+        [
+          138.1,
+          141.0
+        ],
+        [
+          142.4,
+          145.4
+        ],
+        [
+          146.6,
+          149.9
+        ],
+        [
+          150.1,
+          150.9
+        ],
+        [
+          151.2,
+          176.4
+        ],
+        [
+          176.6,
+          179.6
+        ],
+        [
+          181.7,
+          184.1
+        ],
+        [
+          186.0,
+          188.3
+        ],
+        [
+          190.4,
+          192.8
+        ],
+        [
+          194.8,
+          196.7
+        ],
+        [
+          199.3,
+          201.0
+        ],
+        [
+          203.9,
+          205.2
+        ]
+      ],
+      "separate_seconds": 5.156630653887987,
+      "whisper": {
+        "reference_words": 458,
+        "hypothesis_words": 373,
+        "substitutions": 60,
+        "deletions": 93,
+        "insertions": 8,
+        "wer": 0.35152838427947597,
+        "no_lyrics": false,
+        "dropped_segments": 8,
+        "transcript_sha256": "4b1ed2e7b66e05b2da87b8c13436d1833d97c3907bd6a7653de0e58f399fde96",
+        "gap_candidates": [],
+        "asr_seconds": 18.647939836606383,
+        "load_seconds": 4.254441415891051
+      },
+      "parakeet": {
+        "reference_words": 458,
+        "hypothesis_words": 376,
+        "substitutions": 66,
+        "deletions": 96,
+        "insertions": 14,
+        "wer": 0.38427947598253276,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "df2c6187a77dc45621b40a71b71da01d485da5063d94d2157d59f7bac1ca498e",
+        "gap_candidates": [],
+        "asr_seconds": 9.139564791694283,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-15",
+      "split": "test",
+      "condition": "real",
+      "duration": 229.2247619047619,
+      "audio_sha256": "ba61876b9680783d6cb75614835645e62918ff162688fc5bbd1d1075f41809b7",
+      "vocals_sha256": "394b2f727e3ab8b2d685aa08b616b260fb4181f38d647d324f0dbfff5026f529",
+      "seed": 256923522,
+      "regions": [
+        [
+          18.3,
+          27.0
+        ],
+        [
+          27.7,
+          34.0
+        ],
+        [
+          35.5,
+          44.2
+        ],
+        [
+          44.9,
+          50.6
+        ],
+        [
+          53.7,
+          54.9
+        ],
+        [
+          55.4,
+          55.8
+        ],
+        [
+          57.4,
+          61.4
+        ],
+        [
+          61.7,
+          69.3
+        ],
+        [
+          70.3,
+          74.4
+        ],
+        [
+          74.6,
+          78.6
+        ],
+        [
+          78.8,
+          86.7
+        ],
+        [
+          86.9,
+          95.6
+        ],
+        [
+          96.1,
+          101.4
+        ],
+        [
+          104.1,
+          105.9
+        ],
+        [
+          106.2,
+          112.7
+        ],
+        [
+          113.1,
+          121.6
+        ],
+        [
+          138.8,
+          154.8
+        ],
+        [
+          155.5,
+          164.4
+        ],
+        [
+          164.6,
+          170.9
+        ],
+        [
+          172.7,
+          181.4
+        ],
+        [
+          182.1,
+          189.1
+        ],
+        [
+          191.5,
+          193.1
+        ],
+        [
+          208.5,
+          209.5
+        ],
+        [
+          212.8,
+          214.0
+        ],
+        [
+          216.1,
+          216.8
+        ]
+      ],
+      "separate_seconds": 5.425928009673953,
+      "whisper": {
+        "reference_words": 163,
+        "hypothesis_words": 150,
+        "substitutions": 16,
+        "deletions": 15,
+        "insertions": 2,
+        "wer": 0.20245398773006135,
+        "no_lyrics": false,
+        "dropped_segments": 1,
+        "transcript_sha256": "2a5cfe7125c42d5a4e9ced05360783a9d083b5a8be463ad3e29e21d4c115408c",
+        "gap_candidates": [],
+        "asr_seconds": 9.088000871241093,
+        "load_seconds": 3.311581151559949
+      },
+      "parakeet": {
+        "reference_words": 163,
+        "hypothesis_words": 157,
+        "substitutions": 34,
+        "deletions": 12,
+        "insertions": 6,
+        "wer": 0.31901840490797545,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "cdb17ae00d447c4d085a16fb7654b5e9d3f1cb270e018d84ad2bcdfa7d95baca",
+        "gap_candidates": [],
+        "asr_seconds": 8.216514486819506,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-16",
+      "split": "test",
+      "condition": "real",
+      "duration": 209.03385487528345,
+      "audio_sha256": "bcfeb4d28b618b7b25c2567b0465dee01b3bd4d2e4034dcacdb88804162d3f87",
+      "vocals_sha256": "4e72ffbceada9cb1f7d616a8e21f32b577abcf511c403f389bae1165baaa2b63",
+      "seed": 1470408802,
+      "regions": [
+        [
+          10.9,
+          21.0
+        ],
+        [
+          21.4,
+          26.3
+        ],
+        [
+          26.9,
+          32.3
+        ],
+        [
+          33.9,
+          44.8
+        ],
+        [
+          45.0,
+          50.1
+        ],
+        [
+          50.5,
+          65.1
+        ],
+        [
+          66.3,
+          75.1
+        ],
+        [
+          75.4,
+          80.6
+        ],
+        [
+          88.9,
+          91.7
+        ],
+        [
+          92.0,
+          97.3
+        ],
+        [
+          97.7,
+          102.7
+        ],
+        [
+          103.2,
+          109.2
+        ],
+        [
+          109.4,
+          111.1
+        ],
+        [
+          111.5,
+          116.5
+        ],
+        [
+          119.5,
+          122.1
+        ],
+        [
+          122.7,
+          127.6
+        ],
+        [
+          128.0,
+          133.4
+        ],
+        [
+          157.9,
+          159.0
+        ],
+        [
+          161.5,
+          166.8
+        ],
+        [
+          169.5,
+          171.0
+        ],
+        [
+          173.8,
+          180.5
+        ],
+        [
+          180.9,
+          185.4
+        ],
+        [
+          189.2,
+          197.0
+        ],
+        [
+          197.4,
+          199.8
+        ],
+        [
+          200.3,
+          201.5
+        ]
+      ],
+      "separate_seconds": 4.899222813546658,
+      "whisper": {
+        "reference_words": 301,
+        "hypothesis_words": 270,
+        "substitutions": 18,
+        "deletions": 32,
+        "insertions": 1,
+        "wer": 0.16943521594684385,
+        "no_lyrics": false,
+        "dropped_segments": 2,
+        "transcript_sha256": "14019415ee11ef63f9e1697fa0367298690c05ff1c0b6a03d44403258f82374a",
+        "gap_candidates": [],
+        "asr_seconds": 12.803148940205574,
+        "load_seconds": 3.5725673120468855
+      },
+      "parakeet": {
+        "reference_words": 301,
+        "hypothesis_words": 268,
+        "substitutions": 28,
+        "deletions": 35,
+        "insertions": 2,
+        "wer": 0.2159468438538206,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "a07c31627cdd172ea9bc4fdbe9edee55c44a706dd8c1a15d9b12890e3d9c3a80",
+        "gap_candidates": [],
+        "asr_seconds": 8.137666895985603,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-17",
+      "split": "test",
+      "condition": "real",
+      "duration": 171.0,
+      "audio_sha256": "380d1f7721374359c300f992f35f2aa44f9c68552d351a4671426accc77779d9",
+      "vocals_sha256": "559ee4359776b0e84c57ae7a9b0b589fbb41a70cbef713b71f2591f5daf09081",
+      "seed": 2449454196,
+      "regions": [
+        [
+          14.7,
+          15.6
+        ],
+        [
+          15.8,
+          17.7
+        ],
+        [
+          17.9,
+          21.2
+        ],
+        [
+          21.4,
+          26.6
+        ],
+        [
+          28.3,
+          38.5
+        ],
+        [
+          38.7,
+          40.5
+        ],
+        [
+          43.8,
+          54.2
+        ],
+        [
+          54.9,
+          55.9
+        ],
+        [
+          60.1,
+          61.4
+        ],
+        [
+          90.7,
+          94.3
+        ],
+        [
+          95.7,
+          132.6
+        ],
+        [
+          133.0,
+          136.2
+        ],
+        [
+          137.4,
+          146.4
+        ],
+        [
+          146.7,
+          149.8
+        ],
+        [
+          150.8,
+          152.9
+        ],
+        [
+          154.7,
+          157.5
+        ],
+        [
+          158.1,
+          160.3
+        ],
+        [
+          162.1,
+          164.2
+        ],
+        [
+          165.0,
+          167.3
+        ],
+        [
+          168.3,
+          169.3
+        ]
+      ],
+      "separate_seconds": 4.093235790729523,
+      "whisper": {
+        "reference_words": 212,
+        "hypothesis_words": 154,
+        "substitutions": 11,
+        "deletions": 59,
+        "insertions": 1,
+        "wer": 0.33490566037735847,
+        "no_lyrics": false,
+        "dropped_segments": 3,
+        "transcript_sha256": "e6b0343baee29b73fe781f8ce64ccc34913107527f8e4006b5f0c9daeeb8bc6d",
+        "gap_candidates": [],
+        "asr_seconds": 7.39171058498323,
+        "load_seconds": 3.182055689394474
+      },
+      "parakeet": {
+        "reference_words": 212,
+        "hypothesis_words": 166,
+        "substitutions": 36,
+        "deletions": 46,
+        "insertions": 0,
+        "wer": 0.3867924528301887,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "aa96e18752bf5b16891c5d4cef6a55a6a28f766c39359bd8da3f61e3c602b43e",
+        "gap_candidates": [
+          {
+            "start": 55.059999999999995,
+            "end": 55.779999999999994,
+            "classification": "unresolved"
+          },
+          {
+            "start": 60.34,
+            "end": 60.66,
+            "classification": "unresolved"
+          },
+          {
+            "start": 60.660000000000004,
+            "end": 61.06,
+            "classification": "unresolved"
+          },
+          {
+            "start": 61.06,
+            "end": 61.3,
+            "classification": "unresolved"
+          },
+          {
+            "start": 135.88,
+            "end": 136.04000000000002,
+            "classification": "unresolved"
+          },
+          {
+            "start": 135.96,
+            "end": 136.04000000000002,
+            "classification": "unresolved"
+          },
+          {
+            "start": 135.96,
+            "end": 136.04000000000002,
+            "classification": "unresolved"
+          },
+          {
+            "start": 149.5,
+            "end": 149.66,
+            "classification": "unresolved"
+          },
+          {
+            "start": 149.57999999999998,
+            "end": 149.66,
+            "classification": "unresolved"
+          },
+          {
+            "start": 149.57999999999998,
+            "end": 149.66,
+            "classification": "unresolved"
+          },
+          {
+            "start": 151.12,
+            "end": 151.36,
+            "classification": "unresolved"
+          },
+          {
+            "start": 151.52,
+            "end": 152.8,
+            "classification": "unresolved"
+          }
+        ],
+        "asr_seconds": 7.008827541023493,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-18",
+      "split": "test",
+      "condition": "real",
+      "duration": 231.22430839002268,
+      "audio_sha256": "5c1db42eb4d71604d7f5f668a876193103596e1fe64a069ece0d0eea031750d8",
+      "vocals_sha256": "dee5f3496ee99cbd788e9400b06d15b3c5611b24f8cb0d7a4724b964561c6de9",
+      "seed": 2364948413,
+      "regions": [
+        [
+          54.5,
+          62.6
+        ],
+        [
+          62.9,
+          68.0
+        ],
+        [
+          70.4,
+          74.3
+        ],
+        [
+          74.7,
+          77.3
+        ],
+        [
+          78.4,
+          79.3
+        ],
+        [
+          80.4,
+          89.5
+        ],
+        [
+          92.8,
+          115.6
+        ],
+        [
+          118.4,
+          127.4
+        ],
+        [
+          128.9,
+          129.7
+        ],
+        [
+          130.9,
+          133.6
+        ],
+        [
+          134.8,
+          143.7
+        ],
+        [
+          143.9,
+          146.0
+        ],
+        [
+          177.5,
+          202.2
+        ],
+        [
+          202.4,
+          207.7
+        ],
+        [
+          208.0,
+          208.7
+        ],
+        [
+          208.8,
+          210.5
+        ],
+        [
+          210.9,
+          214.5
+        ],
+        [
+          214.8,
+          216.6
+        ],
+        [
+          216.8,
+          217.8
+        ]
+      ],
+      "separate_seconds": 5.4822054002434015,
+      "whisper": {
+        "reference_words": 202,
+        "hypothesis_words": 130,
+        "substitutions": 58,
+        "deletions": 73,
+        "insertions": 1,
+        "wer": 0.6534653465346535,
+        "no_lyrics": false,
+        "dropped_segments": 14,
+        "transcript_sha256": "d2f98eecfdd3748cc6b926aae54502ae46c0d6e0f7bcfa5f4e573e01186061f8",
+        "gap_candidates": [],
+        "asr_seconds": 8.194280171766877,
+        "load_seconds": 3.146868735551834
+      },
+      "parakeet": {
+        "reference_words": 202,
+        "hypothesis_words": 166,
+        "substitutions": 62,
+        "deletions": 38,
+        "insertions": 2,
+        "wer": 0.504950495049505,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "f4bf0fe68ab81a56a74ede3c23daba498831f9b53e6ce507bfb82dc620a6ff49",
+        "gap_candidates": [],
+        "asr_seconds": 6.234399791806936,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-19",
+      "split": "test",
+      "condition": "real",
+      "duration": 240.04625850340136,
+      "audio_sha256": "b5bbad56cf1f40dc36556b1f6bfa414a6c5fba6bd48058486c7600c25fb01a7d",
+      "vocals_sha256": "5c84fedf91457e8fabcca001d007ae2e3f4005f5bd0490427a938d95b310381a",
+      "seed": 1085811920,
+      "regions": [
+        [
+          0.4,
+          3.0
+        ],
+        [
+          4.9,
+          5.4
+        ],
+        [
+          5.9,
+          10.9
+        ],
+        [
+          12.3,
+          14.7
+        ],
+        [
+          15.5,
+          16.5
+        ],
+        [
+          16.8,
+          18.3
+        ],
+        [
+          41.3,
+          91.3
+        ],
+        [
+          111.2,
+          161.8
+        ],
+        [
+          170.1,
+          170.6
+        ],
+        [
+          218.7,
+          219.5
+        ],
+        [
+          221.9,
+          222.6
+        ],
+        [
+          227.5,
+          229.1
+        ],
+        [
+          229.6,
+          231.9
+        ],
+        [
+          232.9,
+          235.0
+        ]
+      ],
+      "separate_seconds": 5.711670400574803,
+      "whisper": {
+        "reference_words": 626,
+        "hypothesis_words": 253,
+        "substitutions": 24,
+        "deletions": 376,
+        "insertions": 3,
+        "wer": 0.6437699680511182,
+        "no_lyrics": false,
+        "dropped_segments": 16,
+        "transcript_sha256": "2650e524833df4ef4f1ffc509cf45eaa16401e314e556f44d0b26969aa2a9bc0",
+        "gap_candidates": [
+          {
+            "start": 15.5,
+            "end": 15.86,
+            "classification": "reference_supported_vocal"
+          }
+        ],
+        "asr_seconds": 8.836845714598894,
+        "load_seconds": 4.490260519087315
+      },
+      "parakeet": {
+        "reference_words": 626,
+        "hypothesis_words": 369,
+        "substitutions": 66,
+        "deletions": 263,
+        "insertions": 6,
+        "wer": 0.5351437699680511,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "fc58e605e955c6df78f486c8655e1d3468da79ecc09aae56b056b44233b695ff",
+        "gap_candidates": [
+          {
+            "start": 0.56,
+            "end": 0.64,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 0.64,
+            "end": 2.64,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 4.9,
+            "end": 5.220000000000001,
+            "classification": "unresolved"
+          },
+          {
+            "start": 15.66,
+            "end": 16.459999999999997,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 17.04,
+            "end": 17.119999999999997,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 219.01999999999998,
+            "end": 219.42,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 221.98000000000002,
+            "end": 222.54000000000002,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 227.66,
+            "end": 227.74,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 227.98,
+            "end": 228.94000000000003,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 229.76,
+            "end": 230.32,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 231.04,
+            "end": 231.44,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 234.74,
+            "end": 234.9,
+            "classification": "reference_supported_vocal"
+          }
+        ],
+        "asr_seconds": 5.479401264339685,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "en-test-20",
+      "split": "test",
+      "condition": "real",
+      "duration": 171.2,
+      "audio_sha256": "c7da05309e6eb613601b427a019cd54d157df7ce93bea0924bdef906b5d99cee",
+      "vocals_sha256": "f1141bca201b26957223567d21530570235e2af67cf5c060152acc0635249352",
+      "seed": 3689769507,
+      "regions": [
+        [
+          15.7,
+          64.3
+        ],
+        [
+          67.0,
+          115.4
+        ],
+        [
+          118.2,
+          166.7
+        ]
+      ],
+      "separate_seconds": 4.0849615801125765,
+      "whisper": {
+        "reference_words": 587,
+        "hypothesis_words": 215,
+        "substitutions": 38,
+        "deletions": 374,
+        "insertions": 2,
+        "wer": 0.7052810902896082,
+        "no_lyrics": false,
+        "dropped_segments": 14,
+        "transcript_sha256": "6b1b40d7ca42a950bbe4bcf41c749594bfce9a0a9cde410bfc72cae11911a0fe",
+        "gap_candidates": [],
+        "asr_seconds": 24.78086726926267,
+        "load_seconds": 4.372355151921511
+      },
+      "parakeet": {
+        "reference_words": 587,
+        "hypothesis_words": 554,
+        "substitutions": 125,
+        "deletions": 38,
+        "insertions": 5,
+        "wer": 0.28620102214650767,
+        "no_lyrics": false,
+        "dropped_segments": 0,
+        "transcript_sha256": "017f4414dd18cf1d9aab902838ec673ae07286f32daef441bb5584af486a4949",
+        "gap_candidates": [],
+        "asr_seconds": 2.6842764019966125,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-01",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 178.0598185941043,
+      "audio_sha256": "a1d7eb3a01c5127d03ba4196430ffc263dbe93f2d66ce7d5d48c6ba44cb109af",
+      "vocals_sha256": "adad1e5203646b9d758097a22acfe05b23bbe4b99c79b8e2c7f9c0e6fccc57e9",
+      "seed": 782695126,
+      "regions": [],
+      "separate_seconds": 6.488095430657268,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-02",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 172.933537414966,
+      "audio_sha256": "8b04bd9a75856911889a39d99579bbddcb5d0168d7564515188fb9d4534f4fd6",
+      "vocals_sha256": "8ca41fda3a0ce0b99d3cdf64feb54bb4a4f988b95221807a8e525dd390102f8b",
+      "seed": 3918596831,
+      "regions": [],
+      "separate_seconds": 4.200812131166458,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-03",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 167.88231292517005,
+      "audio_sha256": "69c6f7ad37850dc2aeb5ffad1a88a2c18bf84d11440c62a0c4f46730166e4113",
+      "vocals_sha256": "ee270b60c9db12e192fa316e66236d03e0e63e96fd7fc006334d97dfc707ce95",
+      "seed": 121301930,
+      "regions": [],
+      "separate_seconds": 4.021326329559088,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-04",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 177.26637188208616,
+      "audio_sha256": "768781541ca11700830e2be983affb5489a3c55dcfcd019e214a55528045758f",
+      "vocals_sha256": "768dfff45809e94d2ada79c4265e6eb9b9c826f0fba9a6f7d45994ad4c4dc1b1",
+      "seed": 3949841454,
+      "regions": [],
+      "separate_seconds": 4.230566527694464,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-05",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 128.6226530612245,
+      "audio_sha256": "dd921fba68d27a1fd5f688897aa75e54b25ea0117dc5fce6826b4401990db5c7",
+      "vocals_sha256": "23320ff1f6236985a2a49ef5bfa4943645af5272e79c2e84f00ee99c87e2130d",
+      "seed": 3267585312,
+      "regions": [],
+      "separate_seconds": 3.0882526859641075,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-06",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 149.99378684807257,
+      "audio_sha256": "8a5164e47edc88c7d71e51a55f6a47bdbbe388c02c5efc5dd9be691c4322555d",
+      "vocals_sha256": "44c8d4471f7f8145c38fc7e96e3b11f9d2ee202f1d0361b9ade4e073435d8568",
+      "seed": 3129093938,
+      "regions": [],
+      "separate_seconds": 3.600236013531685,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-07",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 136.05421768707484,
+      "audio_sha256": "7a0ea1d1ca23515f832d9af0822e6eb3e23f0b4211fe7c9fea589d7622b383b0",
+      "vocals_sha256": "abd2eac97d31cba4976a80babd9c807b9cc5be44eaf5b851e74ca3b0ed34299b",
+      "seed": 1356024868,
+      "regions": [],
+      "separate_seconds": 3.2696370761841536,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-08",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 133.2798185941043,
+      "audio_sha256": "0ee751369958b127d248673df2ff998f5fa91477176afa8fd0c9f317f519715d",
+      "vocals_sha256": "86c1aa47553a51a3d3dc4c9328cd3d68a784964111d2f97e8ce1c6659ff6ca3c",
+      "seed": 1080733621,
+      "regions": [],
+      "separate_seconds": 3.1638398356735706,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-09",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 167.16537414965987,
+      "audio_sha256": "ea19dd983182bb6304bf9ff5b008517e60d8ade3be4edfa1a6194b59042e2774",
+      "vocals_sha256": "5fe12a824ee95d1cf2f381f3ba53bbc0da611986419de4fd0835b8b98e349c59",
+      "seed": 3721123577,
+      "regions": [],
+      "separate_seconds": 3.984270105138421,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-10",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 154.5854648526077,
+      "audio_sha256": "afd236761b81001251a61a7e59d7bcf1f0480247abbc32d64b00a286f3e4a9b1",
+      "vocals_sha256": "9827a205f56eb273c974b5686c7ce9fc843e93051f5142f3d7ca8d3a91ec1164",
+      "seed": 2262815888,
+      "regions": [],
+      "separate_seconds": 3.6506217885762453,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-11",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "aa8c03478c73c2e6ba9b5e70343e71340306b0b462d0b68713f6f02b5f33cfa7",
+      "vocals_sha256": "c09ae777bdd12aad9f31233c2336d378e0c8d02d60484cfdcf2659f87478f83e",
+      "seed": 338253016,
+      "regions": [],
+      "separate_seconds": 0.8876749221235514,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-12",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "994fbb10c738be3cb9f6554f973ae31b17184317dc6cfb0dd8908697429fc630",
+      "vocals_sha256": "7bca9d19a7cc2ebaf53a8409a149576351cd9c13c9d4b1c9f064983134bc6891",
+      "seed": 228320002,
+      "regions": [],
+      "separate_seconds": 0.8764009289443493,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-13",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "4e446d99957b5b290cec64e6178bedc10c33b1c259bb04371e588f7c5dea8502",
+      "vocals_sha256": "896eca84dfd352eb3d8d220d37ed6c48cedd0d14bd0a07e23d5e55134444226b",
+      "seed": 1378119389,
+      "regions": [],
+      "separate_seconds": 0.8918102141469717,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-14",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "f21fdbbc09c00176bec28e932dab845840ad12399c9230d28d49cb94170e2184",
+      "vocals_sha256": "9280e8c92ba6e1d8003f4f8a1d56a1f8c0acdabb2a2b8f99335d65a1b2f0f4ee",
+      "seed": 2188714707,
+      "regions": [],
+      "separate_seconds": 0.8747402131557465,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-15",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "a75a128ec0bca57837ae3ac8e128ca9c1d66e932b803528b6b13c4a7c687e442",
+      "vocals_sha256": "71fcea3ffc4344b3d79d517795caef8bffac78ac3d282fa292e4db7d6ee44dd8",
+      "seed": 478076159,
+      "regions": [],
+      "separate_seconds": 0.8759223241358995,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-16",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "660da5013733b4c97d5983e1d03be316508afce3067f95066dc6d10d8741ab24",
+      "vocals_sha256": "d746a44bc44f5dde271b65e75476329a8714a8fcc43f55f4c3ccaeab5e82cd35",
+      "seed": 216210110,
+      "regions": [],
+      "separate_seconds": 0.8832599483430386,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-17",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.351020408163265,
+      "audio_sha256": "a338a69d547cbe9af2e0d3e5c54fee0c5e46055baccfd908aa3c58a2ebdc1f17",
+      "vocals_sha256": "04eb388d63871c419e12d52780de1721c8fa5c81e143e55a9cee316f622614e7",
+      "seed": 2628359184,
+      "regions": [],
+      "separate_seconds": 0.8600905705243349,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-18",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "2cb73bc04f99c46f95f4ffaedf68996113dc89a817973f243fbf8c95ab23d180",
+      "vocals_sha256": "e08c0a0f5f9ff497c11b36f77c28f174634543e9517988ccf9c5ae515687fca6",
+      "seed": 2058866712,
+      "regions": [],
+      "separate_seconds": 0.8457848746329546,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-19",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "77f14b7426178687ad10abab0937b74a1d2756d38b6bf09e3dc4a57c155194aa",
+      "vocals_sha256": "106fe1545fdb7b57a107817a43a1825fe32cce76abb183e968312569e745e862",
+      "seed": 1794269127,
+      "regions": [],
+      "separate_seconds": 0.8993118312209845,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    },
+    {
+      "id": "instr-test-20",
+      "split": "test",
+      "condition": "instrumental",
+      "duration": 30.013333333333332,
+      "audio_sha256": "c2751d08c01c2429d8a123634c364ccb87c6e8cff34684e30c7c3871912c42c8",
+      "vocals_sha256": "623e106495f1f9c09568ee9312827c89a521b8fc8fc61fca8c21b73a3089189a",
+      "seed": 3472887868,
+      "regions": [],
+      "separate_seconds": 0.9006794560700655,
+      "whisper": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      },
+      "parakeet": {
+        "reference_words": 0,
+        "hypothesis_words": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": null,
+        "no_lyrics": true,
+        "dropped_segments": 0,
+        "transcript_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gap_candidates": [],
+        "asr_seconds": 0.0,
+        "load_seconds": null
+      }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 """Rendering: pagination, the SVG pages, PNG / PDF export and MusicXML."""
 
+import itertools
 import re
 from pathlib import Path
 
@@ -62,8 +63,9 @@ def test_svg_pages_show_the_sheet() -> None:
     assert ">Am<" not in svg
     assert "有 1 个和弦可能不准" in svg
     assert svg.count("<circle") > 10  # diagram dots
-    # the folk pattern: 6 strokes per bar, each an arrow through the strings
-    assert svg.count("<path") == 5 * 6
+    # Tied continuations add written symbols but never an extra stroke.
+    assert svg.count('class="stroke-direction"') == 5 * 6
+    assert svg.count('class="rhythm-tie"') == 5
     assert "1 / 1" in svg
 
 
@@ -72,16 +74,17 @@ def test_rendering_follows_the_arrangement() -> None:
     g_shapes = render_svg(arrange(SONG, Arrangement(fingering_key=7)))[0]
     assert ">G<" in g_shapes and ">Em?<" in g_shapes and ">Am" not in g_shapes
     assert "G 调指法 夹 5 品" in g_shapes
-    assert base.count("<path") == g_shapes.count("<path")  # same strokes in another key
+    assert base.count('data-attack="true"') == g_shapes.count('data-attack="true"')
     quarter = render_svg(arrange(SONG, Arrangement(strum_pattern="quarter-down")))[0]
-    assert quarter.count("<path") == 5 * 4
+    assert quarter.count('data-attack="true"') == 5 * 4
     none = render_svg(arrange(SONG, Arrangement(strum_pattern="none")))[0]
-    assert none.count("<path") == 6  # one strum per chord change
+    assert none.count('data-attack="true"') == 6  # one mark per chord change
     assert "节奏型：" not in none
     mute = render_svg(arrange(SONG, Arrangement(strum_pattern="mute")))[0]
-    assert mute.count('r="1.1"') == 5 * 2  # the two muted strokes per bar carry a dot
+    assert mute.count('class="stroke-mute"') == 5 * 2
     arpeggio = render_svg(arrange(SONG, Arrangement(strum_pattern="arp-53231323")))[0]
-    assert "<path" not in arpeggio and arpeggio.count(">×<") >= 5 * 8  # one x per plucked string
+    assert 'class="stroke-direction"' not in arpeggio
+    assert arpeggio.count('class="tab-notehead"') == 5 * 8
     full = render_svg(arrange(SONG, Arrangement(simplify_chords=False)))[0]
     assert ">G/B<" in full and ">Fmaj7<" in full and ">G7<" in full
 
@@ -177,3 +180,68 @@ def test_sheet_json_round_trip_keeps_rendering_identical() -> None:
     sheet = arrange(SONG)
     again = ArrangedSheet.from_json(sheet.to_json())
     assert render_svg(again) == render_svg(sheet)
+
+
+def sung(song: Analysis, lines: list[tuple[float, float, str]]) -> Analysis:
+    """`song` with lyrics: each line's syllables spread evenly over (start, end)."""
+    from openbapo.lyrics import parse_lyrics
+    from openbapo.model import LyricSyllable
+
+    syllables = []
+    for index, ((start, end, _text), line) in enumerate(
+        zip(lines, parse_lyrics("\n".join(t for *_, t in lines)), strict=True)
+    ):
+        parts = [p for token in line.tokens for p in token.syllables]
+        step = (end - start) / len(parts)
+        syllables += [
+            LyricSyllable(
+                start=start + k * step, end=start + (k + 1) * step, text=p, line_index=index
+            )
+            for k, p in enumerate(parts)
+        ]
+    return song.model_copy(update={"lyrics": tuple(syllables)})
+
+
+def lyric_texts(svg: str) -> list[tuple[float, float, str]]:
+    """(x, font size, text) of every text on the lyric baseline."""
+    y = f"{L.HEADER_H + L.MARGIN + L.LYRIC_Y:.1f}"
+    return [
+        (float(x), float(size), text)
+        for x, yy, size, text in re.findall(
+            r'<text x="([\d.]+)" y="([\d.]+)" font-size="([\d.]+)"[^>]*>([^<]*)</text>', svg
+        )
+        if yy == y
+    ]
+
+
+def test_lyrics_sit_under_their_beats_without_overlap() -> None:
+    song = sung(
+        SONG,
+        [
+            (0.0, 2.0, "我爱你"),
+            (2.0, 2.5, "一闪一闪亮晶晶满天都是小星星挂在天上放光明好像许多小眼睛"),
+            (4.0, 6.0, "beautiful day"),
+        ],
+    )
+    svg = render_svg(arrange(song))[0]
+    texts = lyric_texts(svg)
+    assert [t for *_, t in texts][:3] == ["我", "爱", "你"]
+    assert [t for *_, t in texts][-4:] == ["beau-", "ti-", "ful", "day"]
+    crowded = texts[3:-4]
+    assert len(crowded) == 28
+    size = crowded[0][1]
+    assert size < 7.5  # 28 syllables do not fit one bar at the normal size
+    xs = [x for x, *_ in crowded]
+    assert xs == sorted(xs) and min(b - a for a, b in itertools.pairwise(xs)) >= size
+
+
+def test_musicxml_has_one_text_per_lyric_line() -> None:
+    music21 = pytest.importorskip("music21")
+    song = sung(SONG, [(0.0, 2.0, "我爱你"), (5.0, 7.0, "beautiful day")])
+    score = music21.converter.parse(render_musicxml(arrange(song)), format="musicxml")
+    words = [
+        (m.number, e.getOffsetBySite(m), e.content)
+        for m in score.parts[0].getElementsByClass("Measure")
+        for e in m.getElementsByClass("TextExpression")
+    ]
+    assert words == [(1, 0.0, "我爱你"), (3, 2.0, "beautiful day")]

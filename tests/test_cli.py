@@ -113,6 +113,7 @@ def test_missing_analysis_extra(
         ["analyze"],
         ["analyze", "song.mp3"],
         ["analyze", "s.mp3", "--out", "-", "--device", "tpu"],
+        ["analyze", "s.mp3", "--out", "-", "--lyrics", "l.txt", "--no-lyrics"],
     ],
 )
 def test_usage_errors_exit_2(argv: list[str]) -> None:
@@ -125,6 +126,18 @@ def test_cli_imports_nothing_heavy() -> None:
     # A core-only install must reach the install hint before numpy/torch are needed.
     code = "import sys, openbapo.cli; assert 'numpy' not in sys.modules, 'numpy imported'"
     subprocess.run([sys.executable, "-c", code], check=True)
+
+
+def test_lyrics_factory_keeps_energy_recovery_out_of_recognition(monkeypatch) -> None:
+    from openbapo.cli import build_lyrics_stage
+
+    monkeypatch.setattr("openbapo.analysis.lyrics.recognize.load_whisper", lambda device: object())
+    stage = build_lyrics_stage("cpu")
+    assert stage.activity.params.energy_relative_db is None
+    assert stage.activity.params.context_gap_s == 30.0
+    assert stage.alignment_activity.params.energy_relative_db == -15.0
+    assert stage.alignment_activity.params.context_gap_s is None
+    assert stage.activity is not stage.alignment_activity
 
 
 def test_module_entry_point_reports_usage() -> None:
@@ -162,3 +175,45 @@ def test_arrange_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> 
     assert main(["arrange", str(src), "--out", str(out), "--fingering-key", "H"]) == 1
     assert main(["arrange", str(tmp_path / "missing.json"), "--out", str(out)]) == 1
     assert main(["arrange", str(src), "--out", str(out), "--transpose", "9"]) == 1
+
+
+def test_attached_lyrics_reach_the_lyrics_stage(
+    tone: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    pytest.importorskip("soxr")
+    from test_pipeline import FakeLyricsStage
+
+    lyrics = tmp_path / "lyrics.txt"
+    lyrics.write_text("我爱你\n", encoding="utf-8")
+    stage = FakeLyricsStage()
+    code = main(
+        ["analyze", str(tone), "--out", "-", "--lyrics", str(lyrics)],
+        separator=FakeSeparator(),
+        tracker=FakeTracker(),
+        lyrics_stage=stage,  # type: ignore[arg-type]
+    )
+    assert code == 0
+    assert stage.calls[0][1] == "我爱你\n"
+    captured = capsys.readouterr()
+    assert [s.text for s in Analysis.from_json(captured.out).lyrics] == ["la"]
+    assert "openbapo: note: a note" in captured.err
+
+
+def test_no_lyrics_skips_the_stage(tone: Path) -> None:
+    from test_pipeline import FakeLyricsStage
+
+    stage = FakeLyricsStage()
+    code = main(
+        ["analyze", str(tone), "--out", "-", "--no-lyrics"],
+        separator=FakeSeparator(),
+        tracker=FakeTracker(),
+        lyrics_stage=stage,  # type: ignore[arg-type]
+    )
+    assert code == 0 and stage.calls == []
+
+
+def test_missing_lyrics_file(
+    tone: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert run(["analyze", str(tone), "--out", "-", "--lyrics", str(tmp_path / "nope.txt")]) == 1
+    assert "lyrics file not found" in capsys.readouterr().err

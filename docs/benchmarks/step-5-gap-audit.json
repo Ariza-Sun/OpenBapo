@@ -1,0 +1,160 @@
+{
+  "protocol": "Reference-supported vocals and explicit human reviews; ASR output unchanged.",
+  "baseline_file": "step-5-lyrics-retest.json",
+  "baseline_sha256": "19ee7370647918b0c9915436c7df08b1550650c8d3e4e50ec780ec46b24e9a6f",
+  "revised_reference_sha256": "16b6a4922f5d3f3c0951b63297b883f4f525bce1abb964ff957b521bf38d21d6",
+  "source": "https://huggingface.co/datasets/jamendolyrics/jam-alt/blob/main/metadata.jsonl",
+  "legacy_gap_candidates": 10,
+  "classifications": {
+    "reference_supported_vocal": 3,
+    "human_supported_vocal": 0,
+    "confirmed_hallucination": 7,
+    "unresolved": 0
+  },
+  "no_hallucination_in_reviewed_gaps": false,
+  "independent_development": {
+    "entries": 50,
+    "gap_candidates": 0,
+    "instrumentals": 10,
+    "instrumentals_without_words": 10,
+    "outside_vad_words": 0
+  },
+  "songs": [
+    {
+      "id": "en-test-04",
+      "audio_sha256": "2172a564b8a695d566435344da37c18e37bae5da3a7ac6f5c9347288dfaa22f6",
+      "candidates": [
+        {
+          "start": 164.9,
+          "end": 165.18,
+          "classification": "reference_supported_vocal"
+        },
+        {
+          "start": 165.18,
+          "end": 165.68,
+          "classification": "reference_supported_vocal"
+        }
+      ],
+      "revised_vocal_intervals": [
+        [
+          164.99,
+          166.4
+        ]
+      ]
+    },
+    {
+      "id": "en-test-07",
+      "audio_sha256": "9a675e89bb3b4882a38c0571475eff6917db4bc1d96ec19e3e910995741ffe99",
+      "candidates": [
+        {
+          "start": 181.8,
+          "end": 181.82,
+          "classification": "confirmed_hallucination"
+        },
+        {
+          "start": 181.82,
+          "end": 181.82,
+          "classification": "confirmed_hallucination"
+        },
+        {
+          "start": 181.82,
+          "end": 181.96,
+          "classification": "confirmed_hallucination"
+        },
+        {
+          "start": 181.96,
+          "end": 182.16,
+          "classification": "confirmed_hallucination"
+        },
+        {
+          "start": 182.16,
+          "end": 182.44,
+          "classification": "confirmed_hallucination"
+        },
+        {
+          "start": 182.44,
+          "end": 182.6,
+          "classification": "confirmed_hallucination"
+        },
+        {
+          "start": 182.6,
+          "end": 182.76,
+          "classification": "confirmed_hallucination"
+        }
+      ],
+      "revised_vocal_intervals": []
+    },
+    {
+      "id": "en-test-19",
+      "audio_sha256": "b5bbad56cf1f40dc36556b1f6bfa414a6c5fba6bd48058486c7600c25fb01a7d",
+      "candidates": [
+        {
+          "start": 15.5,
+          "end": 15.86,
+          "classification": "reference_supported_vocal"
+        }
+      ],
+      "revised_vocal_intervals": [
+        [
+          15.54,
+          17.87
+        ]
+      ]
+    }
+  ],
+  "input_sha256": {
+    "test-diagnostic.json": "b3fb394ce26663a325ce12e38005d9483509094e447c14a251bb303d49ee2cda",
+    "crosscheck.json": "519f36a7883941fcaf51547b84ef7b2da60da86ca6f4fb7e09dc16daccba9747",
+    "dev-diagnostic.json": "cfe5cc21503776baba91add73e4160bc01a98335225c87b9d295eb9797f3f864",
+    "step-5-gap-review.json": "c26d3467de267314954898657bdbf470c40ae153386eb66c0a2526adb1135665"
+  },
+  "notes": "No numeric reduction is an ASR improvement. Model agreement is supporting evidence, not a listening verdict. No word blacklist or song-specific output filter.",
+  "historical_energy_candidate": {
+    "baseline_file": "step-5-lyrics-energy-candidate.json",
+    "baseline_sha256": "ad3135721a9da60637b685145f7c92b79351a31ad97eea15f71de491d094cd58",
+    "crosscheck_sha256": "13ac666e39a628f14806caa2507b85bd0fba3d37b12ae9e9dbf33659089f70d9",
+    "historical_candidates": 120,
+    "repeat_candidates": 103,
+    "reference_supported": 80,
+    "confirmed_hallucinations": 7,
+    "unresolved": 16,
+    "songs": [
+      {
+        "id": "en-test-04",
+        "repeat_candidates": 77,
+        "reference_supported": 75,
+        "confirmed_hallucinations": 0,
+        "unresolved": 2
+      },
+      {
+        "id": "en-test-07",
+        "repeat_candidates": 7,
+        "reference_supported": 0,
+        "confirmed_hallucinations": 7,
+        "unresolved": 0
+      },
+      {
+        "id": "en-test-13",
+        "repeat_candidates": 5,
+        "reference_supported": 4,
+        "confirmed_hallucinations": 0,
+        "unresolved": 1
+      },
+      {
+        "id": "en-test-17",
+        "repeat_candidates": 13,
+        "reference_supported": 0,
+        "confirmed_hallucinations": 0,
+        "unresolved": 13
+      },
+      {
+        "id": "en-test-19",
+        "repeat_candidates": 1,
+        "reference_supported": 1,
+        "confirmed_hallucinations": 0,
+        "unresolved": 0
+      }
+    ],
+    "notes": "Diagnostic repeat differs from the historical unseeded run; not a reclassification of its exact words. No candidate default change."
+  }
+}

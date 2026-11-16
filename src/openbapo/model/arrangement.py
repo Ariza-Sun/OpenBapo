@@ -25,5 +25,3 @@ class Arrangement(Model):
     fingering_key: PitchClass | None = None
     strum_pattern: Annotated[StrictStr, Field(min_length=1)] = STRUM_AUTO
     simplify_chords: StrictBool = True
-    # Pasted lyrics; None = use the recognized lyrics.
-    lyrics_text: StrictStr | None = None

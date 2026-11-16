@@ -6,7 +6,17 @@ from openbapo.errors import InputError
 
 # Importable names of the analysis extra, checked before any model is loaded
 # so a missing install produces one clear message instead of a traceback.
-ANALYSIS_PACKAGES = ("numpy", "librosa", "torch", "demucs", "beat_this", "lv_chordia")
+ANALYSIS_PACKAGES = (
+    "numpy",
+    "librosa",
+    "torch",
+    "demucs",
+    "beat_this",
+    "lv_chordia",
+    "faster_whisper",
+    "transformers",
+    "silero_vad",
+)
 
 
 def missing_analysis_packages() -> list[str]:

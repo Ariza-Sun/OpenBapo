@@ -1,0 +1,116 @@
+{
+  "environment": {
+    "date": "2026-11-15",
+    "python": "3.12.13",
+    "platform": "Linux-5.15.0-179-generic-x86_64-with-glibc2.35",
+    "device": "cuda",
+    "packages": {
+      "openbapo": "0.0.1",
+      "torch": "2.5.1+cu121",
+      "demucs": "4.1.0",
+      "beat-this": "1.1.0",
+      "lv-chordia": "1.1.0"
+    },
+    "gpu": "NVIDIA GeForce RTX 3090"
+  },
+  "song": {
+    "name": "lyrics-retest-4min",
+    "duration_seconds": 240.091429
+  },
+  "acceptance_total_seconds": 90.0,
+  "acceptance_chords_seconds": 30.0,
+  "analysis_budget_seconds": 300.0,
+  "lyrics": true,
+  "chord_experts": "btc,lvchordia,chroma",
+  "results": [
+    {
+      "separator": "htdemucs",
+      "cold": {
+        "decode": 0.7470410037785769,
+        "separate": 9.317471500486135,
+        "beats": 1.0675707422196865,
+        "chords": 8.13396617397666,
+        "key": 0.02072669006884098,
+        "lyrics": 29.046454722061753,
+        "chords.chroma": 0.014704929664731026,
+        "chords.btc": 1.765642760321498,
+        "chords.lvchordia": 2.7877270318567753,
+        "chords.bass": 0.2551465630531311,
+        "chords.fusion": 0.009796634316444397,
+        "total": 48.389448249712586,
+        "beats_found": 350,
+        "chords_found": 63,
+        "syllables_found": 557,
+        "bpm": 81.0810810810832
+      },
+      "warm_runs": [
+        {
+          "decode": 0.6746371015906334,
+          "separate": 5.76864368468523,
+          "beats": 0.33379989862442017,
+          "chords": 5.293483862653375,
+          "key": 0.017557352781295776,
+          "lyrics": 22.42887443676591,
+          "chords.chroma": 0.015660574659705162,
+          "chords.btc": 1.6310907509177923,
+          "chords.lvchordia": 2.097740449011326,
+          "chords.bass": 0.21446914412081242,
+          "chords.fusion": 0.008408548310399055,
+          "total": 34.57081672362983,
+          "beats_found": 350,
+          "chords_found": 63,
+          "syllables_found": 557,
+          "bpm": 81.0810810810832
+        },
+        {
+          "decode": 0.689111553132534,
+          "separate": 6.224583396688104,
+          "beats": 0.3389113023877144,
+          "chords": 5.172566389665008,
+          "key": 0.017307449132204056,
+          "lyrics": 25.994116002693772,
+          "chords.chroma": 0.012883514165878296,
+          "chords.btc": 1.611832108348608,
+          "chords.lvchordia": 2.0546889305114746,
+          "chords.bass": 0.21130714565515518,
+          "chords.fusion": 0.008339401334524155,
+          "total": 38.49150977469981,
+          "beats_found": 350,
+          "chords_found": 63,
+          "syllables_found": 557,
+          "bpm": 81.0810810810832
+        },
+        {
+          "decode": 0.7919135075062513,
+          "separate": 6.465807197615504,
+          "beats": 0.3525571748614311,
+          "chords": 5.370940767228603,
+          "key": 0.020109552890062332,
+          "lyrics": 28.698963014408946,
+          "chords.chroma": 0.01573917642235756,
+          "chords.btc": 1.8576385267078876,
+          "chords.lvchordia": 2.024034019559622,
+          "chords.bass": 0.26478104665875435,
+          "chords.fusion": 0.010373147204518318,
+          "total": 41.75825439020991,
+          "beats_found": 350,
+          "chords_found": 63,
+          "syllables_found": 557,
+          "bpm": 81.0810810810832
+        }
+      ],
+      "warm_median": {
+        "decode": 0.689111553132534,
+        "separate": 6.224583396688104,
+        "beats": 0.3389113023877144,
+        "chords": 5.293483862653375,
+        "key": 0.017557352781295776,
+        "lyrics": 25.994116002693772,
+        "total": 38.49150977469981
+      },
+      "beats_found": 350,
+      "syllables_found": 557,
+      "bpm": 81.0810810810832
+    }
+  ]
+}

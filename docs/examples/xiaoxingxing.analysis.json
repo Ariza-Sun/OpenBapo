@@ -1,0 +1,486 @@
+{
+  "schema_version": 2,
+  "title": "小星星",
+  "artist": "法国民歌",
+  "duration": 29.79997732426304,
+  "beats": [
+    {
+      "time": 0.0,
+      "is_downbeat": true,
+      "bar_index": 0,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 0.6,
+      "is_downbeat": false,
+      "bar_index": 0,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 1.2,
+      "is_downbeat": false,
+      "bar_index": 0,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 1.82,
+      "is_downbeat": false,
+      "bar_index": 0,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 2.4,
+      "is_downbeat": true,
+      "bar_index": 1,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 3.02,
+      "is_downbeat": false,
+      "bar_index": 1,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 3.62,
+      "is_downbeat": false,
+      "bar_index": 1,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 4.22,
+      "is_downbeat": false,
+      "bar_index": 1,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 4.82,
+      "is_downbeat": true,
+      "bar_index": 2,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 5.4,
+      "is_downbeat": false,
+      "bar_index": 2,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 6.02,
+      "is_downbeat": false,
+      "bar_index": 2,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 6.6,
+      "is_downbeat": false,
+      "bar_index": 2,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 7.2,
+      "is_downbeat": true,
+      "bar_index": 3,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 7.8,
+      "is_downbeat": false,
+      "bar_index": 3,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 8.4,
+      "is_downbeat": false,
+      "bar_index": 3,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 9.0,
+      "is_downbeat": false,
+      "bar_index": 3,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 9.6,
+      "is_downbeat": true,
+      "bar_index": 4,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 10.2,
+      "is_downbeat": false,
+      "bar_index": 4,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 10.82,
+      "is_downbeat": false,
+      "bar_index": 4,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 11.4,
+      "is_downbeat": false,
+      "bar_index": 4,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 12.0,
+      "is_downbeat": true,
+      "bar_index": 5,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 12.6,
+      "is_downbeat": false,
+      "bar_index": 5,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 13.22,
+      "is_downbeat": false,
+      "bar_index": 5,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 13.82,
+      "is_downbeat": false,
+      "bar_index": 5,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 14.4,
+      "is_downbeat": true,
+      "bar_index": 6,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 15.0,
+      "is_downbeat": false,
+      "bar_index": 6,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 15.6,
+      "is_downbeat": false,
+      "bar_index": 6,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 16.2,
+      "is_downbeat": false,
+      "bar_index": 6,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 16.8,
+      "is_downbeat": true,
+      "bar_index": 7,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 17.4,
+      "is_downbeat": false,
+      "bar_index": 7,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 18.0,
+      "is_downbeat": false,
+      "bar_index": 7,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 18.6,
+      "is_downbeat": false,
+      "bar_index": 7,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 19.2,
+      "is_downbeat": true,
+      "bar_index": 8,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 19.8,
+      "is_downbeat": false,
+      "bar_index": 8,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 20.4,
+      "is_downbeat": false,
+      "bar_index": 8,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 21.0,
+      "is_downbeat": false,
+      "bar_index": 8,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 21.6,
+      "is_downbeat": true,
+      "bar_index": 9,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 22.2,
+      "is_downbeat": false,
+      "bar_index": 9,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 22.82,
+      "is_downbeat": false,
+      "bar_index": 9,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 23.42,
+      "is_downbeat": false,
+      "bar_index": 9,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 24.02,
+      "is_downbeat": true,
+      "bar_index": 10,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 24.6,
+      "is_downbeat": false,
+      "bar_index": 10,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 25.22,
+      "is_downbeat": false,
+      "bar_index": 10,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 25.8,
+      "is_downbeat": false,
+      "bar_index": 10,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 26.42,
+      "is_downbeat": true,
+      "bar_index": 11,
+      "beat_in_bar": 1
+    },
+    {
+      "time": 27.02,
+      "is_downbeat": false,
+      "bar_index": 11,
+      "beat_in_bar": 2
+    },
+    {
+      "time": 27.62,
+      "is_downbeat": false,
+      "bar_index": 11,
+      "beat_in_bar": 3
+    },
+    {
+      "time": 28.2,
+      "is_downbeat": false,
+      "bar_index": 11,
+      "beat_in_bar": 4
+    },
+    {
+      "time": 28.82,
+      "is_downbeat": true,
+      "bar_index": 12,
+      "beat_in_bar": 1
+    }
+  ],
+  "tempo": {
+    "bpm": 100.00000000000006
+  },
+  "time_signature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "key": {
+    "tonic": 2,
+    "mode": "major",
+    "confidence": 1.0
+  },
+  "chords": [
+    {
+      "start": 0.0,
+      "end": 2.4,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9880712661972129
+    },
+    {
+      "start": 2.4,
+      "end": 3.62,
+      "root": 7,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9919024953741014
+    },
+    {
+      "start": 3.62,
+      "end": 4.82,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.6904360477593644
+    },
+    {
+      "start": 4.82,
+      "end": 6.02,
+      "root": 7,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9854812406825785
+    },
+    {
+      "start": 6.02,
+      "end": 7.2,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9733718292454325
+    },
+    {
+      "start": 7.2,
+      "end": 8.4,
+      "root": 9,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.979999181116683
+    },
+    {
+      "start": 8.4,
+      "end": 10.82,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9795164216706008
+    },
+    {
+      "start": 10.82,
+      "end": 12.0,
+      "root": 9,
+      "quality": "7",
+      "bass": null,
+      "confidence": 0.8056881737933834
+    },
+    {
+      "start": 12.0,
+      "end": 13.22,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9930509847738217
+    },
+    {
+      "start": 13.22,
+      "end": 14.4,
+      "root": 9,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9319780623793557
+    },
+    {
+      "start": 14.4,
+      "end": 15.6,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9933450221968665
+    },
+    {
+      "start": 15.6,
+      "end": 16.8,
+      "root": 9,
+      "quality": "7",
+      "bass": null,
+      "confidence": 0.3165724113411574
+    },
+    {
+      "start": 16.8,
+      "end": 18.0,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9897934245309187
+    },
+    {
+      "start": 18.0,
+      "end": 19.2,
+      "root": 9,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9526613363093623
+    },
+    {
+      "start": 19.2,
+      "end": 21.6,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9927692539403568
+    },
+    {
+      "start": 21.6,
+      "end": 22.82,
+      "root": 7,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9919149253983818
+    },
+    {
+      "start": 22.82,
+      "end": 24.02,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9779143784912951
+    },
+    {
+      "start": 24.02,
+      "end": 25.22,
+      "root": 7,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9888108721753678
+    },
+    {
+      "start": 25.22,
+      "end": 26.42,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9838203437849586
+    },
+    {
+      "start": 26.42,
+      "end": 27.62,
+      "root": 9,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9764513228658743
+    },
+    {
+      "start": 27.62,
+      "end": 28.82,
+      "root": 2,
+      "quality": "maj",
+      "bass": null,
+      "confidence": 0.9799397278138597
+    }
+  ],
+  "notes": [],
+  "lyrics": []
+}

@@ -31,7 +31,7 @@ def test_analyze_file_fills_beats_tempo_meter_and_duration(tone: Path) -> None:
 def test_timings_cover_every_stage(tone: Path) -> None:
     result = analyze_file(tone, separator=FakeSeparator(), tracker=FakeTracker())
     timings = result.timings.as_dict()
-    assert list(timings) == ["decode", "separate", "beats", "chords", "key", "total"]
+    assert list(timings) == ["decode", "separate", "beats", "chords", "key", "lyrics", "total"]
     assert all(value >= 0.0 for value in timings.values())
     assert timings["total"] >= timings["decode"] + timings["separate"] + timings["beats"]
 
@@ -100,6 +100,7 @@ def test_stage_timer_accumulates() -> None:
         "beats",
         "chords",
         "key",
+        "lyrics",
         "warmup",
         "total",
     ]
@@ -110,3 +111,34 @@ def test_missing_packages_message(monkeypatch: pytest.MonkeyPatch) -> None:
     assert missing_analysis_packages() == ["no_such_pkg"]
     with pytest.raises(InputError, match=r"no_such_pkg.*openbapo\[analysis\]"):
         require_analysis_packages()
+
+
+class FakeLyricsStage:
+    """Records what it was given and returns one syllable."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[int, str | None]] = []
+
+    def run(self, vocals: object, lyrics_text: str | None = None) -> object:
+        from openbapo.analysis.lyrics.stage import LyricsResult
+        from openbapo.model import LyricSyllable
+
+        self.calls.append((len(vocals), lyrics_text))  # type: ignore[arg-type]
+        syllable = LyricSyllable(start=0.5, end=1.0, text="la", line_index=0)
+        return LyricsResult((syllable,), (), (), warnings=("a note",))
+
+
+def test_lyrics_stage_gets_16k_vocals_and_the_attached_text(tone: Path) -> None:
+    pytest.importorskip("soxr")
+    stage = FakeLyricsStage()
+    result = analyze_file(
+        tone,
+        separator=FakeSeparator(),
+        tracker=FakeTracker(),
+        lyrics_stage=stage,  # type: ignore[arg-type]
+        lyrics_text="la la",
+    )
+    assert stage.calls == [(3 * 16000, "la la")]
+    assert [s.text for s in result.analysis.lyrics] == ["la"]
+    assert result.notes == ("a note",)
+    assert result.timings.lyrics >= 0.0

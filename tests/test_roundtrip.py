@@ -155,7 +155,6 @@ arrangements = st.builds(
     fingering_key=st.none() | pitch_class,
     strum_pattern=st.text(min_size=1),
     simplify_chords=st.booleans(),
-    lyrics_text=optional_text,
 )
 
 

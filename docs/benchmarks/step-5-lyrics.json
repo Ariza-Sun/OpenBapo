@@ -1,0 +1,4034 @@
+{
+  "first_run": "step-5-lyrics-first-run.json",
+  "retest": "step-5-lyrics-retest.json",
+  "historical_candidate": "step-5-lyrics-energy-candidate.json",
+  "candidate": {
+    "en-test/en/real": {
+      "songs": 20,
+      "align/wav2vec2": {
+        "lines": 868,
+        "within": 0.945852534562212,
+        "missing": 0,
+        "median": 0.041,
+        "p90": 0.2303000000000001,
+        "seconds_per_song": 1.2465919421985745
+      },
+      "recognition": {
+        "error_rate": 0.34664101330768,
+        "language_correct": 1.0,
+        "hallucinated_words": 120,
+        "songs_with_hallucination": 5
+      }
+    },
+    "instr/instrumental": {
+      "songs": 20,
+      "no_lyrics_rate": 1.0
+    },
+    "zh-ref/zh/real": {
+      "songs": 17,
+      "align/wav2vec2": {
+        "lines": 196,
+        "within": 0.9693877551020408,
+        "missing": 0,
+        "median": 0.02,
+        "p90": 0.08,
+        "seconds_per_song": 0.7399808967157322
+      },
+      "recognition": {
+        "error_rate": 0.40540540540540543,
+        "language_correct": 1.0,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    },
+    "zh-test/zh/dry": {
+      "songs": 10,
+      "align/wav2vec2": {
+        "lines": 207,
+        "within": 0.9806763285024155,
+        "missing": 0,
+        "median": 0.033,
+        "p90": 0.11,
+        "seconds_per_song": 2.7497242342680694
+      },
+      "recognition": {
+        "error_rate": 0.08508403361344538,
+        "language_correct": 1.0,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    },
+    "zh-test/zh/mix": {
+      "songs": 10,
+      "align/wav2vec2": {
+        "lines": 207,
+        "within": 0.9758454106280193,
+        "missing": 0,
+        "median": 0.039,
+        "p90": 0.113,
+        "seconds_per_song": 1.4867489710450172
+      },
+      "recognition": {
+        "error_rate": 0.17542016806722688,
+        "language_correct": 1.0,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    }
+  },
+  "gap_audit": {
+    "protocol": "Reference-supported vocals and explicit human reviews; ASR output unchanged.",
+    "baseline_file": "step-5-lyrics-retest.json",
+    "baseline_sha256": "19ee7370647918b0c9915436c7df08b1550650c8d3e4e50ec780ec46b24e9a6f",
+    "revised_reference_sha256": "16b6a4922f5d3f3c0951b63297b883f4f525bce1abb964ff957b521bf38d21d6",
+    "source": "https://huggingface.co/datasets/jamendolyrics/jam-alt/blob/main/metadata.jsonl",
+    "legacy_gap_candidates": 10,
+    "classifications": {
+      "reference_supported_vocal": 3,
+      "human_supported_vocal": 0,
+      "confirmed_hallucination": 7,
+      "unresolved": 0
+    },
+    "no_hallucination_in_reviewed_gaps": false,
+    "independent_development": {
+      "entries": 50,
+      "gap_candidates": 0,
+      "instrumentals": 10,
+      "instrumentals_without_words": 10,
+      "outside_vad_words": 0
+    },
+    "songs": [
+      {
+        "id": "en-test-04",
+        "audio_sha256": "2172a564b8a695d566435344da37c18e37bae5da3a7ac6f5c9347288dfaa22f6",
+        "candidates": [
+          {
+            "start": 164.9,
+            "end": 165.18,
+            "classification": "reference_supported_vocal"
+          },
+          {
+            "start": 165.18,
+            "end": 165.68,
+            "classification": "reference_supported_vocal"
+          }
+        ],
+        "revised_vocal_intervals": [
+          [
+            164.99,
+            166.4
+          ]
+        ]
+      },
+      {
+        "id": "en-test-07",
+        "audio_sha256": "9a675e89bb3b4882a38c0571475eff6917db4bc1d96ec19e3e910995741ffe99",
+        "candidates": [
+          {
+            "start": 181.8,
+            "end": 181.82,
+            "classification": "confirmed_hallucination"
+          },
+          {
+            "start": 181.82,
+            "end": 181.82,
+            "classification": "confirmed_hallucination"
+          },
+          {
+            "start": 181.82,
+            "end": 181.96,
+            "classification": "confirmed_hallucination"
+          },
+          {
+            "start": 181.96,
+            "end": 182.16,
+            "classification": "confirmed_hallucination"
+          },
+          {
+            "start": 182.16,
+            "end": 182.44,
+            "classification": "confirmed_hallucination"
+          },
+          {
+            "start": 182.44,
+            "end": 182.6,
+            "classification": "confirmed_hallucination"
+          },
+          {
+            "start": 182.6,
+            "end": 182.76,
+            "classification": "confirmed_hallucination"
+          }
+        ],
+        "revised_vocal_intervals": []
+      },
+      {
+        "id": "en-test-19",
+        "audio_sha256": "b5bbad56cf1f40dc36556b1f6bfa414a6c5fba6bd48058486c7600c25fb01a7d",
+        "candidates": [
+          {
+            "start": 15.5,
+            "end": 15.86,
+            "classification": "reference_supported_vocal"
+          }
+        ],
+        "revised_vocal_intervals": [
+          [
+            15.54,
+            17.87
+          ]
+        ]
+      }
+    ],
+    "input_sha256": {
+      "test-diagnostic.json": "b3fb394ce26663a325ce12e38005d9483509094e447c14a251bb303d49ee2cda",
+      "crosscheck.json": "519f36a7883941fcaf51547b84ef7b2da60da86ca6f4fb7e09dc16daccba9747",
+      "dev-diagnostic.json": "cfe5cc21503776baba91add73e4160bc01a98335225c87b9d295eb9797f3f864",
+      "step-5-gap-review.json": "c26d3467de267314954898657bdbf470c40ae153386eb66c0a2526adb1135665"
+    },
+    "notes": "No numeric reduction is an ASR improvement. Model agreement is supporting evidence, not a listening verdict. No word blacklist or song-specific output filter.",
+    "historical_energy_candidate": {
+      "baseline_file": "step-5-lyrics-energy-candidate.json",
+      "baseline_sha256": "ad3135721a9da60637b685145f7c92b79351a31ad97eea15f71de491d094cd58",
+      "crosscheck_sha256": "13ac666e39a628f14806caa2507b85bd0fba3d37b12ae9e9dbf33659089f70d9",
+      "historical_candidates": 120,
+      "repeat_candidates": 103,
+      "reference_supported": 80,
+      "confirmed_hallucinations": 7,
+      "unresolved": 16,
+      "songs": [
+        {
+          "id": "en-test-04",
+          "repeat_candidates": 77,
+          "reference_supported": 75,
+          "confirmed_hallucinations": 0,
+          "unresolved": 2
+        },
+        {
+          "id": "en-test-07",
+          "repeat_candidates": 7,
+          "reference_supported": 0,
+          "confirmed_hallucinations": 7,
+          "unresolved": 0
+        },
+        {
+          "id": "en-test-13",
+          "repeat_candidates": 5,
+          "reference_supported": 4,
+          "confirmed_hallucinations": 0,
+          "unresolved": 1
+        },
+        {
+          "id": "en-test-17",
+          "repeat_candidates": 13,
+          "reference_supported": 0,
+          "confirmed_hallucinations": 0,
+          "unresolved": 13
+        },
+        {
+          "id": "en-test-19",
+          "repeat_candidates": 1,
+          "reference_supported": 1,
+          "confirmed_hallucinations": 0,
+          "unresolved": 0
+        }
+      ],
+      "notes": "Diagnostic repeat differs from the historical unseeded run; not a reclassification of its exact words. No candidate default change."
+    }
+  },
+  "before": {
+    "en-test/en/real": {
+      "songs": 20,
+      "align/wav2vec2": {
+        "lines": 868,
+        "within": 0.8248847926267281,
+        "median": 0.0475,
+        "p90": 4.496600000000014,
+        "seconds_per_song": 0.8843237251974643
+      },
+      "recognition": {
+        "error_rate": 0.414301747635081,
+        "language_correct": 1.0,
+        "hallucinated_words": 10,
+        "songs_with_hallucination": 3
+      }
+    },
+    "instr/instrumental": {
+      "songs": 20,
+      "no_lyrics_rate": 1.0
+    },
+    "zh-ref/zh/real": {
+      "songs": 17,
+      "align/wav2vec2": {
+        "lines": 196,
+        "within": 0.8979591836734694,
+        "median": 0.0245,
+        "p90": 0.52,
+        "seconds_per_song": 0.2626113372252268
+      },
+      "recognition": {
+        "error_rate": 0.31292479231373577,
+        "language_correct": 1.0,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    },
+    "zh-test/zh/dry": {
+      "songs": 10,
+      "align/wav2vec2": {
+        "lines": 207,
+        "within": 0.9806763285024155,
+        "median": 0.034,
+        "p90": 0.10940000000000001,
+        "seconds_per_song": 1.9580085702240466
+      },
+      "recognition": {
+        "error_rate": 0.08713754071279699,
+        "language_correct": 1.0,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    },
+    "zh-test/zh/mix": {
+      "songs": 10,
+      "align/wav2vec2": {
+        "lines": 207,
+        "within": 0.9855072463768116,
+        "median": 0.038,
+        "p90": 0.11440000000000002,
+        "seconds_per_song": 0.5666133675724268
+      },
+      "recognition": {
+        "error_rate": 0.1332220989850842,
+        "language_correct": 1.0,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    }
+  },
+  "after": {
+    "en-test/en/real": {
+      "songs": 20,
+      "align/wav2vec2": {
+        "lines": 868,
+        "within": 0.945852534562212,
+        "missing": 0,
+        "median": 0.041,
+        "p90": 0.2303000000000001,
+        "seconds_per_song": 6.000937210116535
+      },
+      "recognition": {
+        "error_rate": 0.4149430816097483,
+        "language_correct": 1.0,
+        "hallucinated_words": 10,
+        "songs_with_hallucination": 3
+      }
+    },
+    "instr/instrumental": {
+      "songs": 20,
+      "no_lyrics_rate": 1.0
+    },
+    "zh-ref/zh/real": {
+      "songs": 17,
+      "align/wav2vec2": {
+        "lines": 196,
+        "within": 0.9693877551020408,
+        "missing": 0,
+        "median": 0.02,
+        "p90": 0.08,
+        "seconds_per_song": 2.2898268792778254
+      },
+      "recognition": {
+        "error_rate": 0.3941031941031941,
+        "language_correct": 0.9411764705882353,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    },
+    "zh-test/zh/dry": {
+      "songs": 10,
+      "align/wav2vec2": {
+        "lines": 207,
+        "within": 0.9806763285024155,
+        "missing": 0,
+        "median": 0.033,
+        "p90": 0.11,
+        "seconds_per_song": 5.653816111199558
+      },
+      "recognition": {
+        "error_rate": 0.1213235294117647,
+        "language_correct": 1.0,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    },
+    "zh-test/zh/mix": {
+      "songs": 10,
+      "align/wav2vec2": {
+        "lines": 207,
+        "within": 0.9758454106280193,
+        "missing": 0,
+        "median": 0.039,
+        "p90": 0.113,
+        "seconds_per_song": 4.634501838311553
+      },
+      "recognition": {
+        "error_rate": 0.19117647058823528,
+        "language_correct": 1.0,
+        "hallucinated_words": 0,
+        "songs_with_hallucination": 0
+      }
+    }
+  },
+  "acceptance": {
+    "alignment": {
+      "en-test/en/real": true,
+      "zh-test/zh/dry": true,
+      "zh-test/zh/mix": true
+    },
+    "instrumental_no_lyrics": true,
+    "no_hallucinations_in_reviewed_instrumental_gaps": true,
+    "raw_gap_candidates": 3,
+    "analysis_budget": true,
+    "all": true
+  },
+  "frozen_code_sha256": "967e87536ff85bdafb9b73b8d2cc2112f695d6415129421953257c88297a495e",
+  "first_run_sha256": "e3f767a83c107635c1f095fefa1a79e9dc4d2f0678e970b25ac85e3b3e77fb83",
+  "notes": "首轮中文 CER 口径有误；复测使用实际 LyricsStage、缺失行计失败。能量补检候选曾按旧指标搁置，但未标注区间词不能直接视为幻听。分离模式后复用同一验收集做回归验证，非新盲测。",
+  "previous_acceptance": {
+    "alignment": {
+      "en-test/en/real": true,
+      "zh-test/zh/dry": true,
+      "zh-test/zh/mix": true
+    },
+    "instrumental_no_lyrics": true,
+    "no_hallucinations_in_reviewed_instrumental_gaps": false,
+    "raw_gap_candidates": 10,
+    "all": false
+  },
+  "current_regression": {
+    "protocol": {
+      "date": "2026-11-16",
+      "code_sha256": "725bd54adfd48519d65e03422d6e5b2b7505ee064e05f22ebef89ac119186c8f",
+      "manifest_sha256": "116cde94be622a49c90720f667370c605e8b15f0f557711235a54476e7259c4e",
+      "input_sha256": {
+        "step-5-local-activity-dev.json": "6a382f57551e4b67fa91e1c89acdbe11843e2e961a30cb8dd39fecb7f5d73be8",
+        "step-5-lyrics-retest.json": "19ee7370647918b0c9915436c7df08b1550650c8d3e4e50ec780ec46b24e9a6f",
+        "step-5-gap-review.json": "c26d3467de267314954898657bdbf470c40ae153386eb66c0a2526adb1135665"
+      },
+      "params": {
+        "context_gap_s": 30.0,
+        "min_total_s": 5.0,
+        "random_seed": 0
+      },
+      "purpose": "Regression after human-confirmed 7-word hallucination. Independent 109-entry activity check; no threshold search. 3.649 seconds of annotated dev vocals lost; 50 original ASR dev inputs unchanged. English test has been inspected, not a blind test.",
+      "runs": [
+        "step-5-local-en.json",
+        "step-5-local-other.json"
+      ]
+    },
+    "input_sha256": {
+      "step-5-local-en.json": "ede100cf560de883371b8604f10b0cbc9c735a82ffb9597c8597bcdac07d52f5",
+      "step-5-local-other.json": "fc63d145aac4b7469e85d502ab6bae71c1435f3f83394fb7929aadba3ecc906e",
+      "step-5-gap-audit.json": "47132f37f74c92747c3c001d2955a3c18580b981777cc26438687908676152f3",
+      "step-5-gap-review.json": "c26d3467de267314954898657bdbf470c40ae153386eb66c0a2526adb1135665",
+      "step-5-timing-local.json": "0ba4946b8c1e3082f96292de6357ddcac95047607a6b1a821be557f370a8819e"
+    },
+    "timing": {
+      "decode": 0.6288137882947922,
+      "separate": 6.815034685656428,
+      "beats": 0.34504870139062405,
+      "chords": 5.00313612818718,
+      "key": 0.018592463806271553,
+      "lyrics": 17.608861420303583,
+      "total": 30.41688558459282
+    },
+    "before": {
+      "en-test/en/real": {
+        "songs": 20,
+        "align/wav2vec2": {
+          "lines": 868,
+          "within": 0.945852534562212,
+          "missing": 0,
+          "median": 0.041,
+          "p90": 0.2303000000000001,
+          "seconds_per_song": 6.000937210116535
+        },
+        "recognition": {
+          "error_rate": 0.4149430816097483,
+          "language_correct": 1.0,
+          "hallucinated_words": 10,
+          "songs_with_hallucination": 3
+        }
+      },
+      "instr/instrumental": {
+        "songs": 20,
+        "no_lyrics_rate": 1.0
+      },
+      "zh-ref/zh/real": {
+        "songs": 17,
+        "align/wav2vec2": {
+          "lines": 196,
+          "within": 0.9693877551020408,
+          "missing": 0,
+          "median": 0.02,
+          "p90": 0.08,
+          "seconds_per_song": 2.2898268792778254
+        },
+        "recognition": {
+          "error_rate": 0.3941031941031941,
+          "language_correct": 0.9411764705882353,
+          "hallucinated_words": 0,
+          "songs_with_hallucination": 0
+        }
+      },
+      "zh-test/zh/dry": {
+        "songs": 10,
+        "align/wav2vec2": {
+          "lines": 207,
+          "within": 0.9806763285024155,
+          "missing": 0,
+          "median": 0.033,
+          "p90": 0.11,
+          "seconds_per_song": 5.653816111199558
+        },
+        "recognition": {
+          "error_rate": 0.1213235294117647,
+          "language_correct": 1.0,
+          "hallucinated_words": 0,
+          "songs_with_hallucination": 0
+        }
+      },
+      "zh-test/zh/mix": {
+        "songs": 10,
+        "align/wav2vec2": {
+          "lines": 207,
+          "within": 0.9758454106280193,
+          "missing": 0,
+          "median": 0.039,
+          "p90": 0.113,
+          "seconds_per_song": 4.634501838311553
+        },
+        "recognition": {
+          "error_rate": 0.19117647058823528,
+          "language_correct": 1.0,
+          "hallucinated_words": 0,
+          "songs_with_hallucination": 0
+        }
+      }
+    },
+    "summary": {
+      "en-test/en/real": {
+        "songs": 20,
+        "align/wav2vec2": {
+          "lines": 868,
+          "within": 0.945852534562212,
+          "missing": 0,
+          "median": 0.041,
+          "p90": 0.2303000000000001,
+          "seconds_per_song": 6.246804019529373
+        },
+        "recognition": {
+          "error_rate": 0.4149430816097483,
+          "language_correct": 1.0,
+          "hallucinated_words": 3,
+          "gap_candidate_words": 3,
+          "songs_with_hallucination": 2
+        }
+      },
+      "instr/instrumental": {
+        "songs": 20,
+        "no_lyrics_rate": 1.0
+      },
+      "zh-ref/zh/real": {
+        "songs": 17,
+        "align/wav2vec2": {
+          "lines": 196,
+          "within": 0.9693877551020408,
+          "missing": 0,
+          "median": 0.02,
+          "p90": 0.08,
+          "seconds_per_song": 2.323119935853516
+        },
+        "recognition": {
+          "error_rate": 0.3941031941031941,
+          "language_correct": 0.9411764705882353,
+          "hallucinated_words": 0,
+          "gap_candidate_words": 0,
+          "songs_with_hallucination": 0
+        }
+      },
+      "zh-test/zh/dry": {
+        "songs": 10,
+        "align/wav2vec2": {
+          "lines": 207,
+          "within": 0.9806763285024155,
+          "missing": 0,
+          "median": 0.033,
+          "p90": 0.11,
+          "seconds_per_song": 5.7995941350236535
+        },
+        "recognition": {
+          "error_rate": 0.1213235294117647,
+          "language_correct": 1.0,
+          "hallucinated_words": 0,
+          "gap_candidate_words": 0,
+          "songs_with_hallucination": 0
+        }
+      },
+      "zh-test/zh/mix": {
+        "songs": 10,
+        "align/wav2vec2": {
+          "lines": 207,
+          "within": 0.9758454106280193,
+          "missing": 0,
+          "median": 0.039,
+          "p90": 0.113,
+          "seconds_per_song": 4.777049768902361
+        },
+        "recognition": {
+          "error_rate": 0.19117647058823528,
+          "language_correct": 1.0,
+          "hallucinated_words": 0,
+          "gap_candidate_words": 0,
+          "songs_with_hallucination": 0
+        }
+      }
+    },
+    "songs": [
+      {
+        "id": "en-test-01",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 242.55691609977325,
+        "random_seed": 1401557088,
+        "separate_seconds": 8.192825043573976,
+        "voiced_seconds": 32.10000000000001,
+        "align": {
+          "wav2vec2": {
+            "seconds": 10.76232048869133,
+            "errors": [
+              0.072,
+              0.097,
+              0.027,
+              0.024,
+              0.061,
+              0.144,
+              0.045,
+              0.402,
+              0.489,
+              0.182,
+              0.927,
+              1.817,
+              3.115,
+              0.446,
+              0.078,
+              0.109,
+              0.033,
+              3.971,
+              0.188,
+              0.049,
+              0.205,
+              0.048,
+              0.168,
+              0.089,
+              1.706,
+              1.43,
+              0.378,
+              0.077,
+              0.096,
+              0.068,
+              0.325,
+              0.636,
+              0.073,
+              0.031,
+              0.085,
+              1.608,
+              0.332,
+              0.153,
+              0.529,
+              0.039,
+              0.133,
+              1.258
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 162.74999999999991,
+        "recognition": {
+          "seconds": 7.015809535980225,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.882051282051282,
+          "ref_units": 195,
+          "dropped_segments": 4,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-02",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 221.97845804988663,
+        "random_seed": 701764834,
+        "separate_seconds": 5.045923074707389,
+        "voiced_seconds": 128.1,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.139694698154926,
+            "errors": [
+              0.061,
+              0.051,
+              0.191,
+              0.015,
+              0.152,
+              0.041,
+              0.157,
+              0.124,
+              0.145,
+              0.089,
+              0.117,
+              0.082,
+              0.209,
+              0.168,
+              0.18,
+              0.14,
+              0.368,
+              0.146,
+              0.071,
+              0.181,
+              0.122,
+              0.049,
+              0.11,
+              0.129,
+              0.217,
+              0.169,
+              0.165,
+              0.126,
+              0.23,
+              0.319,
+              0.053,
+              0.053,
+              0.049,
+              0.485,
+              0.151,
+              0.088,
+              0.143
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 139.09999999999997,
+        "recognition": {
+          "seconds": 8.027964184060693,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.25274725274725274,
+          "ref_units": 273,
+          "dropped_segments": 1,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-03",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 240.56163265306122,
+        "random_seed": 484849381,
+        "separate_seconds": 5.41417171806097,
+        "voiced_seconds": 181.80000000000013,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.850820222869515,
+            "errors": [
+              0.057,
+              0.001,
+              0.179,
+              0.666,
+              0.223,
+              0.003,
+              0.002,
+              0.031,
+              0.036,
+              0.014,
+              0.018,
+              0.032,
+              0.025,
+              0.025,
+              0.124,
+              0.009,
+              0.083,
+              0.1,
+              0.011,
+              0.019,
+              0.093,
+              0.068,
+              0.027,
+              0.004,
+              0.179,
+              0.046,
+              0.01,
+              0.034,
+              0.03,
+              0.078,
+              0.015,
+              0.125,
+              0.033,
+              0.139,
+              0.045,
+              0.163,
+              0.145,
+              0.165,
+              0.03,
+              0.002,
+              0.055,
+              0.042
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 184.89999999999992,
+        "recognition": {
+          "seconds": 13.202207127586007,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.0898876404494382,
+          "ref_units": 356,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-04",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 192.92165532879818,
+        "random_seed": 1794262142,
+        "separate_seconds": 4.076250718906522,
+        "voiced_seconds": 121.69999999999993,
+        "align": {
+          "wav2vec2": {
+            "seconds": 5.3482812736183405,
+            "errors": [
+              0.004,
+              0.11,
+              0.059,
+              0.11,
+              0.105,
+              0.04,
+              0.049,
+              0.029,
+              0.024,
+              0.026,
+              0.005,
+              0.016,
+              0.015,
+              0.024,
+              0.053,
+              0.034,
+              0.038,
+              0.099,
+              0.046,
+              0.036,
+              0.071,
+              0.067,
+              0.019,
+              0.053,
+              0.104,
+              0.052,
+              0.016,
+              0.0,
+              0.014,
+              0.06,
+              0.031,
+              0.022,
+              0.01,
+              0.08,
+              0.006,
+              0.038,
+              0.042,
+              0.024,
+              0.019,
+              0.017,
+              0.025,
+              0.108,
+              0.025,
+              0.06,
+              0.035,
+              5.577
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 169.39999999999992,
+        "recognition": {
+          "seconds": 14.753228411078453,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.5492957746478874,
+          "ref_units": 426,
+          "dropped_segments": 10,
+          "hallucinated": [
+            "HOO",
+            "HOO"
+          ],
+          "gap_candidates": [
+            {
+              "text": "HOO",
+              "start": 164.9,
+              "end": 165.18
+            },
+            {
+              "text": "HOO",
+              "start": 165.18,
+              "end": 165.68
+            }
+          ]
+        }
+      },
+      {
+        "id": "en-test-05",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 233.62498866213153,
+        "random_seed": 1513122402,
+        "separate_seconds": 5.121880168095231,
+        "voiced_seconds": 171.79999999999993,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.72626082226634,
+            "errors": [
+              0.3,
+              0.036,
+              0.057,
+              0.821,
+              0.038,
+              0.057,
+              0.074,
+              0.108,
+              0.01,
+              0.065,
+              0.005,
+              0.004,
+              0.008,
+              0.1,
+              0.011,
+              0.047,
+              0.032,
+              0.037,
+              0.176,
+              0.049,
+              0.04,
+              0.072,
+              0.036,
+              0.033,
+              0.081,
+              0.063,
+              0.026,
+              0.023,
+              0.032,
+              0.018,
+              0.023,
+              0.134,
+              0.193,
+              0.094,
+              0.056,
+              0.009,
+              0.011,
+              0.166,
+              0.007,
+              0.379,
+              0.031,
+              0.144,
+              0.024,
+              0.757,
+              0.117,
+              0.018,
+              0.326,
+              0.025,
+              0.386,
+              0.017,
+              0.142,
+              0.015,
+              0.088,
+              0.493,
+              0.291,
+              0.255,
+              0.011,
+              0.125
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 191.54999999999993,
+        "recognition": {
+          "seconds": 12.331866260617971,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.2006269592476489,
+          "ref_units": 319,
+          "dropped_segments": 6,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-06",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 192.8,
+        "random_seed": 1673118669,
+        "separate_seconds": 4.087273083627224,
+        "voiced_seconds": 151.09999999999997,
+        "align": {
+          "wav2vec2": {
+            "seconds": 5.492957513779402,
+            "errors": [
+              0.059,
+              0.044,
+              0.039,
+              0.203,
+              0.005,
+              0.073,
+              0.042,
+              0.073,
+              0.019,
+              0.015,
+              0.002,
+              0.003,
+              0.049,
+              0.022,
+              0.023,
+              0.012,
+              0.048,
+              0.0,
+              0.004,
+              0.093,
+              0.012,
+              0.028,
+              0.016,
+              0.16,
+              0.011,
+              0.091,
+              0.033,
+              0.005,
+              0.074,
+              0.026,
+              0.021,
+              0.008,
+              0.047,
+              0.002,
+              0.081,
+              0.067,
+              0.054,
+              0.056,
+              0.057,
+              0.019,
+              0.038,
+              0.001,
+              0.01,
+              0.03,
+              0.077,
+              0.005,
+              0.008,
+              0.034,
+              0.064,
+              0.04,
+              0.006,
+              0.087,
+              0.009,
+              0.039,
+              0.017,
+              0.008,
+              0.03,
+              0.032,
+              0.038,
+              0.015,
+              0.015,
+              0.061,
+              0.021,
+              0.015,
+              0.07,
+              0.053,
+              0.028,
+              0.012,
+              0.059,
+              0.004,
+              0.031,
+              0.001,
+              0.028,
+              0.016,
+              0.03,
+              0.01,
+              0.01,
+              0.025,
+              0.038,
+              0.053,
+              0.035,
+              0.017
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 151.29999999999998,
+        "recognition": {
+          "seconds": 15.45519943535328,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.3675373134328358,
+          "ref_units": 536,
+          "dropped_segments": 9,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-07",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 183.37333333333333,
+        "random_seed": 2877555817,
+        "separate_seconds": 3.9141305442899466,
+        "voiced_seconds": 76.39999999999999,
+        "align": {
+          "wav2vec2": {
+            "seconds": 5.257038380950689,
+            "errors": [
+              0.023,
+              0.05,
+              0.012,
+              0.044,
+              0.036,
+              0.894,
+              0.003,
+              0.086,
+              0.038,
+              0.253,
+              0.003,
+              1.059,
+              0.793,
+              1.03
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 80.77331249999995,
+        "recognition": {
+          "seconds": 5.418953415006399,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.27672955974842767,
+          "ref_units": 159,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-08",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 220.71428571428572,
+        "random_seed": 2204980664,
+        "separate_seconds": 4.894326305016875,
+        "voiced_seconds": 141.00000000000003,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.105322511866689,
+            "errors": [
+              0.004,
+              0.009,
+              0.014,
+              0.08,
+              0.038,
+              0.035,
+              0.016,
+              0.026,
+              0.064,
+              0.024,
+              0.029,
+              0.03,
+              0.041,
+              0.17,
+              0.145,
+              0.053,
+              0.127,
+              0.05,
+              0.0,
+              0.013,
+              0.109,
+              0.119,
+              0.092,
+              0.059,
+              0.002,
+              0.027,
+              0.024,
+              0.041,
+              0.052,
+              0.06,
+              0.012,
+              0.06,
+              0.13,
+              0.044,
+              0.056,
+              0.047,
+              0.02,
+              0.021,
+              0.043,
+              0.047,
+              0.019,
+              0.026,
+              0.021,
+              0.031,
+              0.069,
+              0.094,
+              0.046,
+              0.014,
+              0.103,
+              0.054,
+              0.052,
+              0.336,
+              0.047
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 142.24999999999986,
+        "recognition": {
+          "seconds": 11.102143444120884,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.1836734693877551,
+          "ref_units": 294,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-09",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 180.06149659863945,
+        "random_seed": 1512232494,
+        "separate_seconds": 3.856087753549218,
+        "voiced_seconds": 112.99999999999999,
+        "align": {
+          "wav2vec2": {
+            "seconds": 4.963227905333042,
+            "errors": [
+              0.12,
+              0.002,
+              0.054,
+              0.01,
+              0.534,
+              0.01,
+              0.038,
+              0.048,
+              0.023,
+              0.048,
+              0.02,
+              0.04,
+              0.013,
+              0.016,
+              0.049,
+              0.137,
+              0.308,
+              0.062,
+              0.046,
+              0.052,
+              0.059,
+              0.027,
+              0.073,
+              0.067,
+              0.018,
+              0.065
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 113.49999999999991,
+        "recognition": {
+          "seconds": 8.426877757534385,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.09722222222222222,
+          "ref_units": 216,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-10",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 219.99566893424037,
+        "random_seed": 1766248908,
+        "separate_seconds": 4.810490243136883,
+        "voiced_seconds": 78.00000000000006,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.087003348395228,
+            "errors": [
+              0.005,
+              0.016,
+              0.18,
+              0.041,
+              0.011,
+              0.042,
+              0.02,
+              0.034,
+              0.124,
+              0.03,
+              0.021,
+              0.033,
+              0.016,
+              0.037,
+              0.021,
+              0.06,
+              0.014,
+              0.022,
+              0.094,
+              0.037,
+              0.006,
+              0.005,
+              0.04,
+              0.068,
+              0.044,
+              0.036,
+              0.001,
+              0.024,
+              0.026,
+              0.137,
+              0.015,
+              0.002,
+              0.006,
+              0.047,
+              0.067,
+              0.064,
+              0.045,
+              0.056,
+              0.098,
+              0.078,
+              0.086,
+              0.047,
+              0.004
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 169.8499999999998,
+        "recognition": {
+          "seconds": 12.959495786577463,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.7352941176470589,
+          "ref_units": 272,
+          "dropped_segments": 9,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-11",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 262.4,
+        "random_seed": 3125678087,
+        "separate_seconds": 5.821904880926013,
+        "voiced_seconds": 23.100000000000016,
+        "align": {
+          "wav2vec2": {
+            "seconds": 7.114100135862827,
+            "errors": [
+              0.018,
+              0.027,
+              0.047,
+              0.042,
+              0.004,
+              0.056,
+              0.043,
+              0.07,
+              1.872,
+              0.308,
+              2.628,
+              2.299,
+              0.112,
+              0.01,
+              0.252,
+              0.005,
+              0.231,
+              1.421,
+              7.656,
+              12.808
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 116.49999999999974,
+        "recognition": {
+          "seconds": 4.101373728364706,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.8657718120805369,
+          "ref_units": 149,
+          "dropped_segments": 2,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-12",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 189.84,
+        "random_seed": 1643542008,
+        "separate_seconds": 4.07032429985702,
+        "voiced_seconds": 89.00000000000007,
+        "align": {
+          "wav2vec2": {
+            "seconds": 5.200497856363654,
+            "errors": [
+              0.024,
+              0.018,
+              3.175,
+              0.096,
+              0.091,
+              0.095,
+              0.037,
+              0.029,
+              0.085,
+              0.0,
+              0.01,
+              0.008,
+              0.066,
+              0.041,
+              0.048,
+              0.062,
+              0.003,
+              0.008,
+              0.081,
+              0.007,
+              0.034,
+              0.025,
+              0.053,
+              0.01,
+              0.005,
+              0.038,
+              0.019
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 89.25,
+        "recognition": {
+          "seconds": 9.290282618254423,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.23684210526315788,
+          "ref_units": 190,
+          "dropped_segments": 4,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-13",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 283.93020408163267,
+        "random_seed": 1988369469,
+        "separate_seconds": 6.207008069381118,
+        "voiced_seconds": 130.5,
+        "align": {
+          "wav2vec2": {
+            "seconds": 7.873367797583342,
+            "errors": [
+              0.055,
+              0.181,
+              0.016,
+              0.014,
+              0.015,
+              0.031,
+              0.001,
+              0.006,
+              0.247,
+              0.039,
+              0.01,
+              0.05,
+              0.054,
+              0.051,
+              0.001,
+              0.005,
+              1.28,
+              0.023,
+              0.025,
+              0.012,
+              0.018,
+              0.015,
+              0.022,
+              0.099,
+              0.023,
+              0.031,
+              0.012,
+              0.083,
+              0.045,
+              0.008,
+              0.147,
+              0.01,
+              0.156,
+              0.055,
+              0.015,
+              0.028,
+              0.008,
+              0.076,
+              0.025,
+              0.071,
+              40.241,
+              0.177,
+              0.321,
+              0.009,
+              0.928,
+              0.024,
+              0.367,
+              0.004,
+              4.984,
+              3.686
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 142.95,
+        "recognition": {
+          "seconds": 13.620928404852748,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.20462046204620463,
+          "ref_units": 303,
+          "dropped_segments": 1,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-14",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 216.55523809523808,
+        "random_seed": 2895243653,
+        "separate_seconds": 4.756121559068561,
+        "voiced_seconds": 169.8,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.1466606594622135,
+            "errors": [
+              0.204,
+              0.068,
+              0.038,
+              0.105,
+              0.07,
+              0.032,
+              0.08,
+              0.004,
+              0.02,
+              0.024,
+              0.013,
+              0.017,
+              0.051,
+              0.006,
+              0.013,
+              0.73,
+              0.072,
+              0.015,
+              0.038,
+              0.418,
+              1.1,
+              0.004,
+              0.087,
+              0.079,
+              0.052,
+              0.038,
+              0.007,
+              0.175,
+              0.0,
+              0.041,
+              0.023,
+              0.197,
+              0.061,
+              0.02,
+              0.018,
+              0.088,
+              0.071,
+              0.086,
+              0.039,
+              0.044,
+              0.01,
+              0.041,
+              0.018,
+              0.023,
+              0.144,
+              0.107,
+              0.023,
+              0.005,
+              0.435,
+              0.082,
+              0.006,
+              0.028,
+              0.018,
+              0.008,
+              0.038,
+              0.022,
+              0.747,
+              0.013,
+              0.011,
+              0.096,
+              0.197,
+              0.155,
+              0.02,
+              0.073,
+              1.183,
+              0.066,
+              0.032,
+              0.16,
+              0.029,
+              0.037,
+              2.74,
+              0.017
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 171.85,
+        "recognition": {
+          "seconds": 19.44238199852407,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.35152838427947597,
+          "ref_units": 458,
+          "dropped_segments": 8,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-15",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 229.2247619047619,
+        "random_seed": 256923522,
+        "separate_seconds": 5.126836311072111,
+        "voiced_seconds": 140.80000000000007,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.257996782660484,
+            "errors": [
+              0.014,
+              0.091,
+              0.025,
+              0.005,
+              0.023,
+              0.014,
+              0.094,
+              0.014,
+              0.052,
+              0.023,
+              0.055,
+              0.029,
+              0.015,
+              0.036,
+              0.062,
+              0.009,
+              0.011,
+              0.03,
+              0.035,
+              0.043,
+              0.088,
+              0.012,
+              0.01,
+              0.009,
+              0.064,
+              0.085,
+              0.034,
+              0.141,
+              0.07,
+              0.058,
+              7.806
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 168.74999999999994,
+        "recognition": {
+          "seconds": 9.92428021505475,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.20245398773006135,
+          "ref_units": 163,
+          "dropped_segments": 1,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-16",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 209.03385487528345,
+        "random_seed": 1470408802,
+        "separate_seconds": 4.546525701880455,
+        "voiced_seconds": 134.19999999999996,
+        "align": {
+          "wav2vec2": {
+            "seconds": 5.770021298900247,
+            "errors": [
+              0.002,
+              0.109,
+              0.027,
+              0.014,
+              0.02,
+              0.021,
+              0.005,
+              0.088,
+              0.005,
+              0.025,
+              0.016,
+              0.017,
+              0.006,
+              0.018,
+              0.001,
+              0.0,
+              0.307,
+              0.013,
+              0.021,
+              0.003,
+              0.047,
+              0.005,
+              0.038,
+              0.001,
+              0.041,
+              0.016,
+              0.056,
+              0.026,
+              0.026,
+              0.021,
+              0.054,
+              0.037,
+              0.043,
+              0.01,
+              0.04,
+              0.006,
+              0.038,
+              0.039,
+              0.021,
+              0.024,
+              0.005,
+              0.037,
+              0.023,
+              0.15,
+              0.023,
+              0.059
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 156.54999999999987,
+        "recognition": {
+          "seconds": 13.879951156675816,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.16943521594684385,
+          "ref_units": 301,
+          "dropped_segments": 2,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-17",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 171.0,
+        "random_seed": 2449454196,
+        "separate_seconds": 3.7007058933377266,
+        "voiced_seconds": 104.30000000000003,
+        "align": {
+          "wav2vec2": {
+            "seconds": 4.732637260109186,
+            "errors": [
+              0.068,
+              0.02,
+              0.088,
+              0.141,
+              0.136,
+              0.099,
+              0.126,
+              0.115,
+              0.075,
+              0.063,
+              0.246,
+              0.019,
+              0.24,
+              0.044,
+              0.032,
+              0.023,
+              0.01,
+              0.013,
+              0.013,
+              0.002,
+              0.12,
+              0.029,
+              0.082,
+              0.068,
+              0.041,
+              10.377,
+              0.011,
+              0.153,
+              0.063,
+              0.822
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 158.9999999999998,
+        "recognition": {
+          "seconds": 8.017771523445845,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.33490566037735847,
+          "ref_units": 212,
+          "dropped_segments": 3,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-18",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 231.22430839002268,
+        "random_seed": 2364948413,
+        "separate_seconds": 5.89669100753963,
+        "voiced_seconds": 114.79999999999984,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.421373778954148,
+            "errors": [
+              0.073,
+              0.037,
+              0.139,
+              0.03,
+              0.021,
+              0.083,
+              0.015,
+              0.248,
+              0.064,
+              0.13,
+              0.0,
+              0.037,
+              0.024,
+              0.042,
+              0.08,
+              0.015,
+              0.054,
+              0.018,
+              0.261,
+              0.041,
+              0.12,
+              0.0,
+              0.074,
+              0.086,
+              0.032,
+              0.008,
+              0.033,
+              0.041,
+              0.017,
+              0.12,
+              0.141,
+              0.199,
+              0.153,
+              0.011,
+              0.059,
+              0.054,
+              0.035,
+              0.129,
+              0.043,
+              0.217,
+              0.366,
+              0.056,
+              0.067,
+              0.044,
+              0.124,
+              1.175
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 139.09999999999985,
+        "recognition": {
+          "seconds": 9.095797836780548,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.6534653465346535,
+          "ref_units": 202,
+          "dropped_segments": 14,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "en-test-19",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 240.04625850340136,
+        "random_seed": 1085811920,
+        "separate_seconds": 5.557065058499575,
+        "voiced_seconds": 121.60000000000001,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.793388685211539,
+            "errors": [
+              5.087,
+              2.526,
+              0.218,
+              0.005,
+              0.007,
+              0.599,
+              0.94,
+              0.031,
+              0.091,
+              0.041,
+              0.058,
+              0.017,
+              0.026,
+              0.009,
+              0.053,
+              0.007,
+              0.062,
+              0.045,
+              0.016,
+              0.011,
+              0.023,
+              0.046,
+              0.055,
+              0.015,
+              0.015,
+              0.029,
+              0.036,
+              0.009,
+              0.012,
+              0.009,
+              0.012,
+              0.032,
+              0.051,
+              0.024,
+              0.313,
+              0.006,
+              0.005,
+              0.473,
+              0.32,
+              0.008,
+              0.043,
+              0.032,
+              0.028,
+              0.006,
+              0.001,
+              0.056,
+              0.029,
+              0.113,
+              0.028,
+              0.024,
+              0.076,
+              0.046,
+              0.041,
+              0.015,
+              0.047,
+              0.094,
+              0.04,
+              0.029,
+              0.018,
+              0.034,
+              0.061,
+              0.035,
+              0.254,
+              0.033,
+              0.022,
+              0.448,
+              0.442,
+              0.294,
+              1.197,
+              0.009,
+              2.727,
+              26.961
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 206.79999999999993,
+        "recognition": {
+          "seconds": 9.666540149599314,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.6437699680511182,
+          "ref_units": 626,
+          "dropped_segments": 16,
+          "hallucinated": [
+            "OH!"
+          ],
+          "gap_candidates": [
+            {
+              "text": "OH!",
+              "start": 15.5,
+              "end": 15.86
+            }
+          ]
+        }
+      },
+      {
+        "id": "en-test-20",
+        "set": "en-test",
+        "condition": "real",
+        "lang": "en",
+        "duration": 171.2,
+        "random_seed": 3689769507,
+        "separate_seconds": 4.3723725490272045,
+        "voiced_seconds": 145.5,
+        "align": {
+          "wav2vec2": {
+            "seconds": 4.893108969554305,
+            "errors": [
+              0.09,
+              0.043,
+              0.022,
+              0.02,
+              0.087,
+              0.009,
+              0.001,
+              0.009,
+              0.011,
+              0.01,
+              0.089,
+              0.006,
+              0.02,
+              0.008,
+              0.074,
+              0.001,
+              0.002,
+              0.018,
+              0.032,
+              0.024,
+              0.028,
+              0.059,
+              0.055,
+              0.005,
+              0.034,
+              0.033,
+              0.041,
+              0.002,
+              0.023,
+              0.004,
+              0.034
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 145.5,
+        "recognition": {
+          "seconds": 25.63590486906469,
+          "language": "en",
+          "language_ok": true,
+          "error_rate": 0.7052810902896082,
+          "ref_units": 587,
+          "dropped_segments": 14,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-01-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 113.36768707482993,
+        "random_seed": 3461379855,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 90.6676875,
+        "align": {
+          "wav2vec2": {
+            "seconds": 18.000656865537167,
+            "errors": [
+              0.06,
+              0.092,
+              0.079,
+              0.099,
+              0.011,
+              0.039,
+              0.033,
+              0.023,
+              0.113,
+              0.042,
+              0.052,
+              0.361,
+              0.113,
+              0.024,
+              0.056,
+              0.106,
+              0.063,
+              0.04,
+              0.01,
+              0.03,
+              0.02,
+              0.042,
+              0.042
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 93.41768749999994,
+        "recognition": {
+          "seconds": 8.749297780916095,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.07633587786259542,
+          "ref_units": 131,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-01-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 125.36768707482993,
+        "random_seed": 752452773,
+        "separate_seconds": 3.9994944501668215,
+        "voiced_seconds": 89.90000000000002,
+        "align": {
+          "wav2vec2": {
+            "seconds": 4.066351164132357,
+            "errors": [
+              0.1,
+              0.132,
+              0.079,
+              0.099,
+              0.009,
+              0.039,
+              0.053,
+              0.023,
+              0.113,
+              0.022,
+              0.052,
+              0.361,
+              0.113,
+              0.064,
+              0.116,
+              0.106,
+              0.063,
+              0.04,
+              0.01,
+              0.03,
+              0.02,
+              0.042,
+              0.042
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 92.89999999999995,
+        "recognition": {
+          "seconds": 8.804971352219582,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.15267175572519084,
+          "ref_units": 131,
+          "dropped_segments": 2,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-02-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 74.0456462585034,
+        "random_seed": 1837181766,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 59.800000000000004,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.413070337846875,
+            "errors": [
+              0.04,
+              0.04,
+              0.152,
+              0.008,
+              0.057,
+              0.027,
+              0.077,
+              0.018,
+              0.058,
+              0.028,
+              0.01,
+              0.054,
+              0.024
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 60.045625,
+        "recognition": {
+          "seconds": 5.253296373412013,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.047619047619047616,
+          "ref_units": 105,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-02-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 86.0456462585034,
+        "random_seed": 828891369,
+        "separate_seconds": 2.379576336592436,
+        "voiced_seconds": 60.500000000000014,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.9784327670931816,
+            "errors": [
+              0.04,
+              0.04,
+              0.152,
+              3.528,
+              0.057,
+              0.027,
+              0.057,
+              0.038,
+              0.058,
+              0.048,
+              0.49,
+              0.094,
+              0.024
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 62.75000000000002,
+        "recognition": {
+          "seconds": 5.241981323808432,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.06666666666666667,
+          "ref_units": 105,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-03-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 173.89546485260772,
+        "random_seed": 1730227030,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 147.79543750000002,
+        "align": {
+          "wav2vec2": {
+            "seconds": 5.875476950779557,
+            "errors": [
+              0.0,
+              0.044,
+              0.019,
+              0.053,
+              0.017,
+              0.016,
+              0.035,
+              0.012,
+              0.012,
+              0.034,
+              0.046,
+              0.055,
+              0.052,
+              0.001,
+              0.017,
+              0.0,
+              0.025
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 151.64543749999996,
+        "recognition": {
+          "seconds": 11.28835297934711,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.25901639344262295,
+          "ref_units": 305,
+          "dropped_segments": 3,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-03-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 185.89546485260772,
+        "random_seed": 2573051420,
+        "separate_seconds": 4.702044673264027,
+        "voiced_seconds": 148.70000000000005,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.325180007144809,
+            "errors": [
+              0.0,
+              0.064,
+              0.019,
+              0.053,
+              0.017,
+              0.016,
+              0.035,
+              0.012,
+              0.008,
+              0.074,
+              0.046,
+              0.055,
+              2.148,
+              0.021,
+              0.037,
+              0.02,
+              0.025
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 152.04999999999995,
+        "recognition": {
+          "seconds": 11.626424157992005,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.3344262295081967,
+          "ref_units": 305,
+          "dropped_segments": 3,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-04-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 146.89072562358277,
+        "random_seed": 1968921013,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 125.49074999999996,
+        "align": {
+          "wav2vec2": {
+            "seconds": 4.957431565970182,
+            "errors": [
+              0.02,
+              0.008,
+              0.021,
+              0.011,
+              0.048,
+              0.178,
+              0.031,
+              0.021,
+              0.021,
+              0.002,
+              0.002,
+              0.015,
+              0.017,
+              0.007,
+              0.07,
+              0.023,
+              0.015,
+              0.014,
+              0.024,
+              0.038,
+              0.089,
+              0.074,
+              0.082,
+              0.069
+            ],
+            "untimed": 3
+          }
+        },
+        "alignment_voiced_seconds": 126.1907499999999,
+        "recognition": {
+          "seconds": 11.971141116693616,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.023972602739726026,
+          "ref_units": 292,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-04-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 158.89072562358277,
+        "random_seed": 2403863284,
+        "separate_seconds": 4.350250601768494,
+        "voiced_seconds": 126.89999999999992,
+        "align": {
+          "wav2vec2": {
+            "seconds": 5.303856246173382,
+            "errors": [
+              0.0,
+              0.008,
+              0.021,
+              0.011,
+              0.048,
+              0.158,
+              0.031,
+              0.021,
+              0.021,
+              0.002,
+              0.002,
+              0.005,
+              0.003,
+              0.007,
+              0.07,
+              0.003,
+              0.015,
+              0.014,
+              0.024,
+              0.038,
+              0.089,
+              0.074,
+              0.082,
+              0.069
+            ],
+            "untimed": 3
+          }
+        },
+        "alignment_voiced_seconds": 127.0999999999999,
+        "recognition": {
+          "seconds": 12.528878239914775,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.0547945205479452,
+          "ref_units": 292,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-05-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 177.53548752834467,
+        "random_seed": 239986388,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 147.3,
+        "align": {
+          "wav2vec2": {
+            "seconds": 5.733059408143163,
+            "errors": [
+              0.06,
+              0.001,
+              0.011,
+              0.006,
+              0.003,
+              0.013,
+              0.033,
+              0.007,
+              0.013,
+              0.023,
+              0.006,
+              0.027,
+              0.063,
+              0.017,
+              0.005,
+              0.005,
+              0.012,
+              0.022,
+              0.012,
+              0.001,
+              0.03,
+              0.01,
+              0.042,
+              0.004,
+              0.014,
+              0.004,
+              0.011,
+              0.011,
+              0.029,
+              0.015,
+              0.015,
+              0.025,
+              0.065
+            ],
+            "untimed": 10
+          }
+        },
+        "alignment_voiced_seconds": 148.23549999999994,
+        "recognition": {
+          "seconds": 13.821536904200912,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.06837606837606838,
+          "ref_units": 234,
+          "dropped_segments": 2,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-05-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 189.53548752834467,
+        "random_seed": 2813268198,
+        "separate_seconds": 4.959613179787993,
+        "voiced_seconds": 146.6,
+        "align": {
+          "wav2vec2": {
+            "seconds": 6.168475920334458,
+            "errors": [
+              0.06,
+              0.041,
+              0.031,
+              0.014,
+              0.003,
+              0.013,
+              0.033,
+              0.007,
+              0.027,
+              0.003,
+              0.006,
+              0.027,
+              0.063,
+              0.017,
+              0.005,
+              0.025,
+              0.012,
+              0.022,
+              0.032,
+              0.001,
+              0.05,
+              0.01,
+              0.042,
+              0.016,
+              0.014,
+              0.024,
+              0.011,
+              0.011,
+              0.029,
+              0.015,
+              0.015,
+              0.025,
+              0.065
+            ],
+            "untimed": 10
+          }
+        },
+        "alignment_voiced_seconds": 147.34999999999985,
+        "recognition": {
+          "seconds": 16.31262288801372,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.24786324786324787,
+          "ref_units": 234,
+          "dropped_segments": 8,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-06-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 116.10154195011337,
+        "random_seed": 3000913748,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 90.49999999999999,
+        "align": {
+          "wav2vec2": {
+            "seconds": 3.7402107659727335,
+            "errors": [
+              0.18,
+              0.088,
+              0.004,
+              0.144,
+              0.163,
+              0.053,
+              0.07,
+              0.023,
+              0.118,
+              0.088,
+              0.1,
+              0.069,
+              0.109,
+              0.063,
+              0.15,
+              0.043,
+              0.098,
+              0.068,
+              0.046
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 97.3,
+        "recognition": {
+          "seconds": 8.391039418056607,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.3076923076923077,
+          "ref_units": 130,
+          "dropped_segments": 4,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-06-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 128.10151927437641,
+        "random_seed": 3184857560,
+        "separate_seconds": 3.3234619926661253,
+        "voiced_seconds": 89.69999999999999,
+        "align": {
+          "wav2vec2": {
+            "seconds": 4.211873050779104,
+            "errors": [
+              0.2,
+              0.088,
+              0.004,
+              0.104,
+              0.143,
+              0.133,
+              0.07,
+              0.043,
+              0.098,
+              0.088,
+              0.1,
+              0.069,
+              0.109,
+              0.063,
+              0.15,
+              0.063,
+              0.098,
+              0.068,
+              0.026
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 96.89999999999996,
+        "recognition": {
+          "seconds": 9.89577759988606,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.4461538461538462,
+          "ref_units": 130,
+          "dropped_segments": 5,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-07-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 222.51179138321996,
+        "random_seed": 1262412962,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 176.50000000000006,
+        "align": {
+          "wav2vec2": {
+            "seconds": 7.234001260250807,
+            "errors": [
+              0.24,
+              0.041,
+              0.055,
+              0.008,
+              0.189,
+              0.016,
+              0.031,
+              0.048,
+              0.016,
+              0.026,
+              0.017,
+              0.027,
+              0.02,
+              0.03,
+              2.005,
+              0.015,
+              0.045,
+              0.039,
+              0.011,
+              0.014,
+              0.036,
+              0.055,
+              0.03,
+              0.05,
+              0.028,
+              0.068,
+              3.369,
+              0.011,
+              0.075,
+              0.085
+            ],
+            "untimed": 8
+          }
+        },
+        "alignment_voiced_seconds": 177.94999999999993,
+        "recognition": {
+          "seconds": 15.905047239735723,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.192,
+          "ref_units": 250,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-07-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 234.51179138321996,
+        "random_seed": 2569847769,
+        "separate_seconds": 6.3607621770352125,
+        "voiced_seconds": 175.10000000000005,
+        "align": {
+          "wav2vec2": {
+            "seconds": 7.649978257715702,
+            "errors": [
+              0.26,
+              0.021,
+              0.055,
+              0.008,
+              0.209,
+              0.016,
+              0.031,
+              0.048,
+              0.036,
+              0.026,
+              0.017,
+              0.047,
+              0.02,
+              0.03,
+              2.005,
+              0.015,
+              0.045,
+              0.079,
+              0.011,
+              0.014,
+              0.036,
+              0.055,
+              0.03,
+              0.05,
+              0.008,
+              0.028,
+              3.389,
+              0.011,
+              0.055,
+              0.105
+            ],
+            "untimed": 8
+          }
+        },
+        "alignment_voiced_seconds": 178.74999999999994,
+        "recognition": {
+          "seconds": 15.874613771215081,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.224,
+          "ref_units": 250,
+          "dropped_segments": 4,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-08-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 90.52222222222223,
+        "random_seed": 1109575066,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 81.60000000000002,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.9888069313019514,
+            "errors": [
+              0.04,
+              0.003,
+              0.019,
+              0.253,
+              0.056,
+              0.02,
+              0.052,
+              3.048,
+              0.033
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 81.8,
+        "recognition": {
+          "seconds": 5.629123182967305,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.041666666666666664,
+          "ref_units": 144,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-08-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 102.52222222222223,
+        "random_seed": 109456494,
+        "separate_seconds": 2.5854722391813993,
+        "voiced_seconds": 82.39999999999999,
+        "align": {
+          "wav2vec2": {
+            "seconds": 3.3125637974590063,
+            "errors": [
+              0.04,
+              0.023,
+              0.019,
+              0.253,
+              0.056,
+              0.02,
+              0.052,
+              0.012,
+              0.033
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 82.54999999999997,
+        "recognition": {
+          "seconds": 5.8717992734164,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.04861111111111111,
+          "ref_units": 144,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-09-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 82.40104308390022,
+        "random_seed": 3546976763,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 70.0,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.654468981549144,
+            "errors": [
+              0.02,
+              0.03,
+              0.076,
+              0.016,
+              0.086,
+              0.03,
+              0.11,
+              0.004,
+              0.036,
+              0.004,
+              0.04,
+              0.004,
+              0.02,
+              0.026,
+              0.026,
+              0.026,
+              0.089
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 70.20106249999998,
+        "recognition": {
+          "seconds": 6.549095768481493,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.0728476821192053,
+          "ref_units": 151,
+          "dropped_segments": 1,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-09-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 94.40102040816326,
+        "random_seed": 157801120,
+        "separate_seconds": 2.416924711316824,
+        "voiced_seconds": 70.3,
+        "align": {
+          "wav2vec2": {
+            "seconds": 3.0382421035319567,
+            "errors": [
+              0.04,
+              0.03,
+              0.076,
+              0.056,
+              0.146,
+              0.05,
+              0.11,
+              0.004,
+              0.056,
+              0.004,
+              0.06,
+              0.004,
+              0.02,
+              0.026,
+              0.026,
+              0.026,
+              0.089
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 77.49999999999997,
+        "recognition": {
+          "seconds": 6.3100300170481205,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.2119205298013245,
+          "ref_units": 151,
+          "dropped_segments": 3,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-10-dry",
+        "set": "zh-test",
+        "condition": "dry",
+        "lang": "zh",
+        "duration": 136.6095238095238,
+        "random_seed": 3323567982,
+        "separate_seconds": 0.0,
+        "voiced_seconds": 116.80000000000001,
+        "align": {
+          "wav2vec2": {
+            "seconds": 4.398758282884955,
+            "errors": [
+              0.06,
+              0.11,
+              0.076,
+              0.046,
+              0.031,
+              0.074,
+              0.124,
+              0.051,
+              0.081,
+              0.025,
+              0.005,
+              0.055,
+              0.004,
+              0.095,
+              2.089,
+              0.123,
+              0.034,
+              0.083,
+              0.057,
+              0.077,
+              0.119,
+              0.1
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 117.04999999999998,
+        "recognition": {
+          "seconds": 7.676248846575618,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.05555555555555555,
+          "ref_units": 162,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-test-10-mix",
+        "set": "zh-test",
+        "condition": "mix",
+        "lang": "zh",
+        "duration": 148.6095238095238,
+        "random_seed": 809676902,
+        "separate_seconds": 3.6398694459348917,
+        "voiced_seconds": 118.2,
+        "align": {
+          "wav2vec2": {
+            "seconds": 4.7155443746596575,
+            "errors": [
+              0.06,
+              0.85,
+              0.036,
+              0.046,
+              0.011,
+              0.054,
+              0.104,
+              0.071,
+              0.081,
+              0.005,
+              0.015,
+              0.075,
+              0.004,
+              0.095,
+              0.011,
+              0.103,
+              0.034,
+              0.083,
+              0.057,
+              0.097,
+              0.139,
+              0.08
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 118.34999999999998,
+        "recognition": {
+          "seconds": 7.802227571606636,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.04938271604938271,
+          "ref_units": 162,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-01",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 55.15605442176871,
+        "random_seed": 2037047431,
+        "separate_seconds": 1.4961997102946043,
+        "voiced_seconds": 39.9,
+        "align": {
+          "wav2vec2": {
+            "seconds": 1.8188252598047256,
+            "errors": [
+              0.023,
+              0.04,
+              0.037,
+              0.168,
+              0.019,
+              0.06,
+              0.075,
+              0.08,
+              0.017,
+              0.001,
+              0.006,
+              0.02
+            ],
+            "untimed": 3
+          }
+        },
+        "alignment_voiced_seconds": 40.1,
+        "recognition": {
+          "seconds": 8.73274851590395,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.3068181818181818,
+          "ref_units": 88,
+          "dropped_segments": 4,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-02",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 32.1921768707483,
+        "random_seed": 2911118149,
+        "separate_seconds": 0.9709073919802904,
+        "voiced_seconds": 24.0,
+        "align": {
+          "wav2vec2": {
+            "seconds": 1.06230659596622,
+            "errors": [
+              0.008,
+              0.02,
+              0.007,
+              0.114,
+              0.007,
+              0.004,
+              1.125,
+              0.003,
+              0.031,
+              0.016
+            ],
+            "untimed": 1
+          }
+        },
+        "alignment_voiced_seconds": 24.050000000000004,
+        "recognition": {
+          "seconds": 3.600636888295412,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.3,
+          "ref_units": 60,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-03",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 62.033197278911565,
+        "random_seed": 4017459846,
+        "separate_seconds": 1.6281693261116743,
+        "voiced_seconds": 42.70000000000001,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.072803320363164,
+            "errors": [
+              0.012,
+              0.007,
+              0.002,
+              0.001,
+              0.027,
+              0.005,
+              0.0,
+              0.024,
+              0.049,
+              0.004,
+              0.02,
+              0.04,
+              0.02,
+              0.028,
+              0.024,
+              0.02,
+              0.037
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 43.900000000000006,
+        "recognition": {
+          "seconds": 7.210619321092963,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 1.0285714285714285,
+          "ref_units": 70,
+          "dropped_segments": 3,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-04",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 56.92281179138322,
+        "random_seed": 614506799,
+        "separate_seconds": 1.4824829529970884,
+        "voiced_seconds": 45.60000000000002,
+        "align": {
+          "wav2vec2": {
+            "seconds": 1.8359934780746698,
+            "errors": [
+              0.017,
+              0.044,
+              0.052,
+              0.024,
+              0.012,
+              0.02,
+              0.005,
+              0.029,
+              0.001,
+              0.095,
+              0.02,
+              0.06,
+              0.012,
+              0.009,
+              0.08
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 46.050000000000026,
+        "recognition": {
+          "seconds": 5.39746250025928,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.11764705882352941,
+          "ref_units": 85,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-05",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 61.19886621315193,
+        "random_seed": 3213607346,
+        "separate_seconds": 1.6342706605792046,
+        "voiced_seconds": 54.30000000000001,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.101334076374769,
+            "errors": [
+              0.008,
+              0.069,
+              0.003,
+              0.008,
+              1.49,
+              0.017,
+              0.047,
+              0.043,
+              0.042
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 54.30000000000001,
+        "recognition": {
+          "seconds": 5.062116036191583,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.42718446601941745,
+          "ref_units": 103,
+          "dropped_segments": 1,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-06",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 74.83619047619048,
+        "random_seed": 299101387,
+        "separate_seconds": 1.9065004847943783,
+        "voiced_seconds": 68.6,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.4895086139440536,
+            "errors": [
+              0.115,
+              0.04,
+              0.034,
+              0.024,
+              0.027,
+              0.0,
+              0.04,
+              0.032,
+              0.009
+            ],
+            "untimed": 2
+          }
+        },
+        "alignment_voiced_seconds": 68.84999999999998,
+        "recognition": {
+          "seconds": 5.462559320032597,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.21764705882352942,
+          "ref_units": 170,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-07",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 32.59006802721088,
+        "random_seed": 4006945682,
+        "separate_seconds": 0.9556399453431368,
+        "voiced_seconds": 24.799999999999997,
+        "align": {
+          "wav2vec2": {
+            "seconds": 1.0821984764188528,
+            "errors": [
+              0.0,
+              0.0,
+              0.011,
+              0.004,
+              0.004,
+              0.053
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 25.250000000000004,
+        "recognition": {
+          "seconds": 3.647183418273926,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.4375,
+          "ref_units": 48,
+          "dropped_segments": 1,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-08",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 80.7701814058957,
+        "random_seed": 195506194,
+        "separate_seconds": 2.006247065961361,
+        "voiced_seconds": 68.60000000000002,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.789292858913541,
+            "errors": [
+              0.0,
+              0.01,
+              0.014,
+              0.02,
+              0.02,
+              0.04,
+              0.1,
+              1.275,
+              0.031,
+              0.022,
+              0.057,
+              0.02,
+              0.027,
+              0.04
+            ],
+            "untimed": 5
+          }
+        },
+        "alignment_voiced_seconds": 70.30000000000001,
+        "recognition": {
+          "seconds": 6.9682786129415035,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.5914634146341463,
+          "ref_units": 164,
+          "dropped_segments": 9,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-09",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 108.42274376417234,
+        "random_seed": 2633737518,
+        "separate_seconds": 2.667524630203843,
+        "voiced_seconds": 90.19999999999997,
+        "align": {
+          "wav2vec2": {
+            "seconds": 3.5127657279372215,
+            "errors": [
+              0.003,
+              0.04,
+              0.0,
+              0.029,
+              0.04,
+              0.061,
+              0.013,
+              0.03,
+              0.098,
+              0.04,
+              0.04,
+              0.01,
+              0.011,
+              0.02,
+              0.009,
+              0.087
+            ],
+            "untimed": 1
+          }
+        },
+        "alignment_voiced_seconds": 90.54999999999998,
+        "recognition": {
+          "seconds": 7.408032251521945,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.1509433962264151,
+          "ref_units": 159,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-10",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 80.24861678004535,
+        "random_seed": 662990860,
+        "separate_seconds": 2.0270315688103437,
+        "voiced_seconds": 73.39999999999999,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.666429530829191,
+            "errors": [
+              0.033,
+              0.012,
+              1.349,
+              0.004,
+              0.061,
+              0.0,
+              0.036,
+              0.045,
+              0.02
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 80.248625,
+        "recognition": {
+          "seconds": 4.870419234037399,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.11428571428571428,
+          "ref_units": 105,
+          "dropped_segments": 1,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-11",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 61.629183673469385,
+        "random_seed": 2837139471,
+        "separate_seconds": 1.6323507502675056,
+        "voiced_seconds": 54.6,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.2139962520450354,
+            "errors": [
+              0.022,
+              0.006,
+              0.015,
+              0.001,
+              0.014,
+              0.003,
+              0.02,
+              0.004,
+              0.006,
+              0.0,
+              0.003,
+              0.02
+            ],
+            "untimed": 1
+          }
+        },
+        "alignment_voiced_seconds": 55.05,
+        "recognition": {
+          "seconds": 4.34049141779542,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.640625,
+          "ref_units": 128,
+          "dropped_segments": 11,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-12",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 86.6771201814059,
+        "random_seed": 2013931489,
+        "separate_seconds": 2.188464490696788,
+        "voiced_seconds": 72.5,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.8474895637482405,
+            "errors": [
+              0.006,
+              0.011,
+              0.092,
+              0.051,
+              0.003,
+              0.046,
+              0.0,
+              0.046,
+              0.099
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 72.55,
+        "recognition": {
+          "seconds": 5.353231135755777,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.11038961038961038,
+          "ref_units": 154,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-13",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 60.70088435374149,
+        "random_seed": 1499672689,
+        "separate_seconds": 1.6186278071254492,
+        "voiced_seconds": 56.5,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.0759151726961136,
+            "errors": [
+              0.029,
+              0.026,
+              0.026,
+              0.033,
+              0.03,
+              0.015,
+              0.05,
+              0.022,
+              0.005
+            ],
+            "untimed": 3
+          }
+        },
+        "alignment_voiced_seconds": 56.64999999999999,
+        "recognition": {
+          "seconds": 4.312699433416128,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.5321100917431193,
+          "ref_units": 109,
+          "dropped_segments": 6,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-14",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 92.10530612244898,
+        "random_seed": 648052432,
+        "separate_seconds": 2.2736830320209265,
+        "voiced_seconds": 77.99999999999999,
+        "align": {
+          "wav2vec2": {
+            "seconds": 3.0909235551953316,
+            "errors": [
+              0.06,
+              0.04,
+              0.074,
+              0.0,
+              0.034,
+              0.06,
+              0.064,
+              0.02,
+              0.003,
+              0.021,
+              0.008,
+              0.037,
+              0.384,
+              0.031,
+              0.018,
+              0.02
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 78.54999999999997,
+        "recognition": {
+          "seconds": 5.370503315702081,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.13125,
+          "ref_units": 160,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-15",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 67.36006802721089,
+        "random_seed": 2583589065,
+        "separate_seconds": 1.771709207445383,
+        "voiced_seconds": 58.46006249999999,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.3076030015945435,
+            "errors": [
+              0.58,
+              0.02,
+              0.014,
+              0.0,
+              1.197,
+              0.015,
+              0.12,
+              0.08,
+              0.02,
+              0.0
+            ],
+            "untimed": 3
+          }
+        },
+        "alignment_voiced_seconds": 59.7100625,
+        "recognition": {
+          "seconds": 6.875393571332097,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.48366013071895425,
+          "ref_units": 153,
+          "dropped_segments": 7,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-16",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 63.301179138322,
+        "random_seed": 1740839039,
+        "separate_seconds": 1.6227258387953043,
+        "voiced_seconds": 0,
+        "align": {
+          "wav2vec2": {
+            "seconds": 2.13756406866014,
+            "errors": [
+              0.078,
+              0.059,
+              0.013,
+              0.04,
+              0.0,
+              0.004,
+              0.003,
+              0.035
+            ],
+            "untimed": 0
+          }
+        },
+        "alignment_voiced_seconds": 52.50000000000003,
+        "recognition": {
+          "seconds": 8.205883204936981e-05,
+          "language": "",
+          "language_ok": false,
+          "error_rate": 1.0,
+          "ref_units": 108,
+          "dropped_segments": 0,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "zh-ref-17",
+        "set": "zh-ref",
+        "condition": "real",
+        "lang": "zh",
+        "duration": 97.51555555555555,
+        "random_seed": 402194370,
+        "separate_seconds": 2.4352389499545097,
+        "voiced_seconds": 70.10000000000001,
+        "align": {
+          "wav2vec2": {
+            "seconds": 3.388089356943965,
+            "errors": [
+              0.02,
+              0.046,
+              0.011,
+              0.013,
+              0.0,
+              0.118,
+              0.046,
+              0.015,
+              0.006,
+              0.023,
+              0.036,
+              0.023,
+              0.0,
+              0.007,
+              0.014
+            ],
+            "untimed": 1
+          }
+        },
+        "alignment_voiced_seconds": 78.14999999999992,
+        "recognition": {
+          "seconds": 7.807045331224799,
+          "language": "zh",
+          "language_ok": true,
+          "error_rate": 0.4678362573099415,
+          "ref_units": 171,
+          "dropped_segments": 2,
+          "hallucinated": [],
+          "gap_candidates": []
+        }
+      },
+      {
+        "id": "instr-test-01",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 178.0598185941043,
+        "random_seed": 782695126,
+        "separate_seconds": 4.503391856327653,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-02",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 172.933537414966,
+        "random_seed": 3918596831,
+        "separate_seconds": 4.355353655293584,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-03",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 167.88231292517005,
+        "random_seed": 121301930,
+        "separate_seconds": 3.7262859530746937,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-04",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 177.26637188208616,
+        "random_seed": 3949841454,
+        "separate_seconds": 3.974058197811246,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-05",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 128.6226530612245,
+        "random_seed": 3267585312,
+        "separate_seconds": 2.72487561032176,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-06",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 149.99378684807257,
+        "random_seed": 3129093938,
+        "separate_seconds": 3.271405555307865,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-07",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 136.05421768707484,
+        "random_seed": 1356024868,
+        "separate_seconds": 5.453583259135485,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-08",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 133.2798185941043,
+        "random_seed": 1080733621,
+        "separate_seconds": 3.254993563517928,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-09",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 167.16537414965987,
+        "random_seed": 3721123577,
+        "separate_seconds": 3.9772973712533712,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-10",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 154.5854648526077,
+        "random_seed": 2262815888,
+        "separate_seconds": 3.800416085869074,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-11",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 338253016,
+        "separate_seconds": 1.1443608198314905,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-12",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 228320002,
+        "separate_seconds": 0.9560017473995686,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-13",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 1378119389,
+        "separate_seconds": 0.9524028766900301,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-14",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 2188714707,
+        "separate_seconds": 0.9443963579833508,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-15",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 478076159,
+        "separate_seconds": 2.965158563107252,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-16",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 216210110,
+        "separate_seconds": 0.9434544499963522,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-17",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.351020408163265,
+        "random_seed": 2628359184,
+        "separate_seconds": 0.9221478048712015,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-18",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 2058866712,
+        "separate_seconds": 0.9206546917557716,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-19",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 1794269127,
+        "separate_seconds": 0.8871125485748053,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      },
+      {
+        "id": "instr-test-20",
+        "set": "instr",
+        "condition": "instrumental",
+        "lang": "",
+        "duration": 30.013333333333332,
+        "random_seed": 3472887868,
+        "separate_seconds": 0.9360848274081945,
+        "voiced_seconds": 0,
+        "no_lyrics": true,
+        "recognized": []
+      }
+    ],
+    "gap_classifications": {
+      "reference_supported_vocal": 3,
+      "human_supported_vocal": 0,
+      "confirmed_hallucination": 0,
+      "unresolved": 0
+    },
+    "reviewed_candidates": [
+      {
+        "id": "en-test-04",
+        "start": 164.9,
+        "end": 165.18,
+        "category": "reference_supported_vocal"
+      },
+      {
+        "id": "en-test-04",
+        "start": 165.18,
+        "end": 165.68,
+        "category": "reference_supported_vocal"
+      },
+      {
+        "id": "en-test-19",
+        "start": 15.5,
+        "end": 15.86,
+        "category": "reference_supported_vocal"
+      }
+    ],
+    "acceptance": {
+      "alignment": {
+        "en-test/en/real": true,
+        "zh-test/zh/dry": true,
+        "zh-test/zh/mix": true
+      },
+      "instrumental_no_lyrics": true,
+      "no_hallucinations_in_reviewed_instrumental_gaps": true,
+      "raw_gap_candidates": 3,
+      "analysis_budget": true,
+      "all": true
+    },
+    "baseline_sha256": "19ee7370647918b0c9915436c7df08b1550650c8d3e4e50ec780ec46b24e9a6f",
+    "notes": "Regression on previously inspected test data, not a new blind test. Local activity filtering has documented losses of real isolated vocals on dev data. The baseline was unseeded; small ASR differences cannot all be attributed to the filter."
+  }
+}
