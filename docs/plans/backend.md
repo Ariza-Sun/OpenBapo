@@ -45,7 +45,7 @@ API 层
 
 每接入一份权重在此登记（CLAUDE.md 要求）。CC-BY-NC 类及许可证不明的显式标出。
 
-英文识别补充实验（2026-11-16，尚未替换默认模型）：NVIDIA
+英文识别补充实验（2026-11-16，已评测，保留 Whisper 默认）：NVIDIA
 [`parakeet-tdt-0.6b-v2`](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v2/tree/ae9ad07059c7c739ffaf932226a8fe64ae2620b0)
 权重为 **CC-BY-4.0**，作者 NVIDIA；实验使用 Ilya Stupakov 的
 [ONNX 转换](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v2-onnx/tree/0bbb45a3365852604aef28b538a8f066f4ccaa85)
@@ -53,6 +53,8 @@ API 层
 [`onnx-asr`](https://github.com/istupakov/onnx-asr/blob/main/LICENSE) 为 MIT。
 英文专用 FastConformer-TDT 与 Whisper 分别评测；ONNX 转换的成绩不宣称为官方 NeMo 运行时成绩。
 权重和实验依赖放在仓库外，发布代码不包含权重；保留模型作者、转换者、许可与修订归属。
+70 条比较完成：真实英文 WER 36.3% 对 Whisper 41.5%，但有 16 个未决空隙词且开发集退化，
+未满足更换条件。详情见 `step-5.md` 第 14 节，生产依赖不引入该运行时。
 
 | 环节 | 模型 / 权重 | 代码许可证 | 权重许可证 | 训练数据 | 备注 |
 |---|---|---|---|---|---|

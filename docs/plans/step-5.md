@@ -309,3 +309,90 @@ python scripts/lyrics_retest_report.py \
 最终结果：[77 条回归报告](../benchmarks/step-5-local-regression.md)。英文对齐 94.6%，中文干声 98.1%、混音 97.6%，纯音乐 20/20 无歌词；确认幻听 0，未决候选 0，另外 3 个官方人声标注支持的词完整保留。原版本与新版本的中英文总字 / 词错率按一位小数显示一致。637 项测试通过、7 项模型测试默认排除；实际模型行为由本次完整数据回归另验。ruff 与 mypy 通过。
 
 [计时](../benchmarks/step-5-timing-local.md)：4 分钟原曲，三次热运行中位数为歌词 17.6 秒、分析合计 30.4 秒；首轮分析 42.4 秒。Whisper 对象初始化在该计时之外，因此首轮不是完整进程冷启动时间；不包含排队、渲染及未来旋律环节。新的计时在同主机另一张卡仍有评测任务时完成，不据此宣称相对上一轮加速或减速。
+
+## 14. 收尾前补充：英文专用 Parakeet 对比
+
+负责人要求再尝试一个英文语音识别模型。候选为 NVIDIA Parakeet TDT 0.6B v2，
+使用 Ilya Stupakov 的未量化 ONNX 转换；原模型、转换权重的许可与固定修订见
+[后端许可登记](backend.md#21-已接入的模型权重与许可证)。这次是英文识别实验，
+不重做 Demucs 选型，也不改变中文识别或附歌词对齐。
+
+脚本为 `scripts/compare_english_asr.py`，协议为
+[`step-5-english-asr-protocol.json`](../benchmarks/step-5-english-asr-protocol.json)。
+开发集为 10 首英文歌的干声 / 合成伴奏两个版本及 10 条纯音乐；
+回归集为原 20 首真实英文歌及 20 条纯音乐。真实歌曲此前已查看过，不是新盲测。
+两模型均使用固定逐曲种子、同一 Demucs / Silero 配置与局部人声过滤，指定英文，
+不传入参考文本。开发样本从行标注取参考歌词，真实英文歌从 Jam-ALT 修订全文取参考。
+
+Parakeet 按保留的 VAD 区间独立解码，超过 30 秒则不重叠切分；Whisper 沿用
+`clip_timestamps`。候选原生 token 时间只用于空隙词检查，词尾估计为最后 token
+发射时间加 80 ms，并截断到切片末尾；不将此当作强制对齐成绩。
+空隙词沿用第 12–13 节的修订标注 / 人工听辨分类，未覆盖的词保留为待核验。
+
+使用仓库外实验环境（`onnx-asr==0.12.0`、`onnxruntime-gpu==1.23.2`），未修改生产依赖。
+两张 RTX 3090 分别运行基线与候选，CUDA 12 / cuDNN 9 动态库需完整可见。
+脚本检查实际 ONNX session 使用 CUDA，拒绝静默 CPU 回退。模型文件按固定修订的
+LFS SHA-256 校验。Whisper 每首新进程，避免旧批处理中的 GPU 分配累积；
+模型下载期间可用 `--baseline-only` 预跑基线，之后重新分轨并逐字节校验人声哈希、
+检测区间和协议签名后复用识别输出。分轨仍不落盘，只保存文本诊断在仓库外。
+
+计时口径仅为识别调用，不含分轨、VAD、模型加载、CTC 对齐、渲染与排队；
+Whisper 为 float16，Parakeet 为未量化 ONNX，且模型复用方式不同，不能当作同精度
+架构吞吐率基准，也不能直接与第 13 节“识别 + 对齐”的歌词总耗时比较。
+
+在安装原评测依赖与上述隔离运行时、下载固定模型文件后，从仓库根目录运行：
+
+```bash
+# MODEL_DIR 指向固定修订的 ONNX snapshot；DATA_ROOT 为原歌词数据目录。
+python scripts/compare_english_asr.py \
+  --manifest "$DATA_ROOT/testset/manifest.json" --model-dir "$MODEL_DIR" \
+  --jam-alt "$DATA_ROOT/jam-alt/metadata.jsonl" \
+  --reviews docs/benchmarks/step-5-gap-review.json \
+  --protocol "$DATA_ROOT/english-asr-repeat-protocol.json" \
+  --cache "$DATA_ROOT/english-asr-repeat" --split dev \
+  --out "$DATA_ROOT/english-asr-repeat-dev"
+# 保持协议、配置和缓存目录不变，再以 --split test 跑真实歌曲 / 纯音乐回归。
+```
+
+开发与回归报告分别写入 `docs/benchmarks/step-5-english-asr-dev.*` 和
+`docs/benchmarks/step-5-english-asr-test.*`。更换默认模型的预先条件为真实英文 WER
+降低、没有新增确认幻听 / 未决空隙词、纯音乐全部通过；不按验收输出调参或过滤词语。
+
+### 本次结果与决定
+
+完整比较共 70 条，两个模型均完成：
+
+| 条件 | 数量 | Whisper large-v3 WER | Parakeet TDT 0.6B v2 WER |
+|---|---:|---:|---:|
+| 开发干声 | 10 | 15.6% | 19.3% |
+| 开发合成伴奏 | 10 | 17.0% | 23.7% |
+| 真实英文歌曲回归 | 20 | 41.5% | 36.3% |
+| 纯音乐（开发 + 回归） | 30 | 30/30 无歌词 | 30/30 无歌词 |
+
+详见 [开发报告](../benchmarks/step-5-english-asr-dev.md) 和
+[真实歌曲 / 纯音乐报告](../benchmarks/step-5-english-asr-test.md)。
+真实歌曲的 6,237 个参考词中，Whisper 为 566 替换 / 1,965 删除 / 57 插入，
+Parakeet 为 858 替换 / 1,318 删除 / 87 插入：候选减少漏词，但替换与插入更多。
+总 WER 低 5.2 个百分点；逐曲 8 首更好、11 首更差、1 首相同。
+按歌曲配对 bootstrap 的 WER 差 95% 区间为 −13.2 至 +2.4 个百分点，包含零，
+不能把这 20 首的平均优势推广成普遍结论。
+
+Whisper 的 3 个空隙词均有修订人声标注支持；Parakeet 的 47 个空隙词中，
+31 个有标注支持，**16 个待核验（4 首歌）**。另外开发混音有 1 个待核验词。
+它们不是已经确认的幻听，原生时间戳误差与漏标人声均可能影响分类。
+没有把它们直接删除、认定为真实人声或擅自补填人工结论。
+纯音乐无输出由共用 VAD 门控保证，本次不能据此独立证明候选模型不会幻听。
+
+真实歌曲识别调用中位耗时：Whisper 9.67 秒、Parakeet 7.26 秒。
+该口径及精度 / 模型复用差异见上文；不是完整出谱耗时。
+20 首 Whisper 的逐曲 WER 全部复现了此前 77 条回归里的英文结果。
+
+**决定：保留 Whisper large-v3 为默认识别模型。** Parakeet 有减少真实歌曲漏词的潜力，
+但开发集退化且仍有未决空隙词，未满足预先设定的更换条件。
+本次保留实验脚本、固定权重修订、结果和核验时间点，生产依赖不增加 ONNX / Parakeet。
+继续评估该候选时，应先听辨未决区间并在独立留出歌曲上验证；不能将待核验词数宣称为幻听率。
+
+交付检查：642 项本地测试通过，ruff 和 mypy 通过。远程 CI 额外发现精简依赖环境与
+Python 3.11 的可选库 / NumPy 类型声明差异，随后仅补充 `Any` / `cast` 注解与
+`huggingface_hub` 的可选导入配置，未改变推理数值计算、模型或阈值。
+实测签名保留实际实验版本；模型模块的数值实现对应提交 `b496367`，不覆写历史协议来伪装重测。

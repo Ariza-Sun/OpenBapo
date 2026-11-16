@@ -11,7 +11,7 @@ proof of increased hallucinations (step-5-gap-audit.md).
 
 from dataclasses import dataclass
 from math import isfinite
-from typing import Protocol
+from typing import Protocol, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -60,8 +60,11 @@ def frame_rms(vocals: NDArray[np.float32]) -> NDArray[np.float32]:
     if not len(vocals):
         return np.empty(0, dtype=np.float32)
     padded = np.pad(vocals, (0, (-len(vocals)) % hop))
-    return np.sqrt(np.mean(padded.reshape(-1, hop).astype(np.float64) ** 2, axis=1)).astype(
-        np.float32
+    return cast(
+        NDArray[np.float32],
+        np.sqrt(np.mean(padded.reshape(-1, hop).astype(np.float64) ** 2, axis=1)).astype(
+            np.float32
+        ),
     )
 
 
