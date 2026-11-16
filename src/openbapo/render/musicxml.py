@@ -11,9 +11,17 @@ from __future__ import annotations
 
 from xml.etree import ElementTree as ET
 
-from openbapo.arrange import ArrangedSheet, Bar, Shape, StrumEvent, StrumPattern
+from openbapo.arrange import ArrangedSheet, Shape
 from openbapo.arrange.keys import parse_key_name
 from openbapo.model import Mode
+from openbapo.render.rhythm import (
+    DIVISIONS,
+    TabSymbol,
+    beam_marks,
+    quarter_length,
+    tab_symbols,
+    xml_duration,
+)
 
 TUNING = (40, 45, 50, 55, 59, 64)  # MIDI of the open strings, low to high
 STEPS = ("C", "C", "D", "D", "E", "F", "F", "G", "G", "A", "A", "B")
@@ -24,7 +32,6 @@ QUALITY_KIND = {
     "5": "power", "dim": "diminished", "aug": "augmented", "dim7": "diminished-seventh",
     "m7-5": "half-diminished",
 }  # fmt: skip
-DIVISIONS = 4  # per beat: down to sixteenths
 
 
 def _sub(parent: ET.Element, tag: str, text: str | None = None, **attrs: str) -> ET.Element:
@@ -42,25 +49,12 @@ def _pitch(el: ET.Element, midi: int) -> None:
     _sub(pitch, "octave", str(midi // 12 - 1))
 
 
-def _duration_type(beats: float) -> tuple[int, str]:
-    for value, name in (
-        (4.0, "whole"),
-        (2.0, "half"),
-        (1.0, "quarter"),
-        (0.5, "eighth"),
-        (0.25, "16th"),
-    ):
-        if abs(beats - value) < 1e-6:
-            return int(value * DIVISIONS), name
-    return max(1, round(beats * DIVISIONS)), "quarter"
-
-
 def _harmony(
     measure: ET.Element,
     name: str,
     sounding_root: int,
     sounding_bass: int | None,
-    beat_offset: float,
+    offset: int,
 ) -> None:
     harmony = _sub(measure, "harmony")
     root = _sub(harmony, "root")
@@ -76,70 +70,59 @@ def _harmony(
         _sub(bass, "bass-step", STEPS[sounding_bass])
         if ALTERS[sounding_bass]:
             _sub(bass, "bass-alter", "1")
-    if beat_offset:
-        _sub(harmony, "offset", str(int(beat_offset * DIVISIONS)))
-
-
-def _tab_events(
-    bar: Bar, pattern: StrumPattern | None
-) -> list[tuple[float, float, StrumEvent | None, str]]:
-    """(beat, length in beats, event, chord shape name) for the bar, filling the bar with rests."""
-    chords = bar.chords
-    if not chords:
-        return [(0.0, float(bar.beats), None, "")]
-    starts = [float(c.beat) for c in chords]
-    points: list[tuple[float, StrumEvent | None]]
-    if pattern is None:
-        points = [(s, None) for s in starts]
-    else:
-        points = [(e.beat, e) for e in pattern.events if e.beat < bar.beats]
-        if not points:
-            points = [(0.0, None)]
-    out: list[tuple[float, float, StrumEvent | None, str]] = []
-    for n, (beat, event) in enumerate(points):
-        nxt = points[n + 1][0] if n + 1 < len(points) else float(bar.beats)
-        current = chords[max(i for i, s in enumerate(starts) if s <= beat or i == 0)]
-        out.append((beat, nxt - beat, event, current.shape))
-    if out[0][0] > 0:
-        out.insert(0, (0.0, out[0][0], None, ""))
-    return out
+    if offset:
+        _sub(harmony, "offset", str(offset))
 
 
 def _tab_note(
-    measure: ET.Element, string_index: int, fret: int, duration: int, kind: str, chord: bool
+    measure: ET.Element,
+    symbol: TabSymbol,
+    shape: Shape,
+    string_index: int,
+    chord: bool,
+    beams: tuple[str, ...],
+    denominator: int,
 ) -> None:
+    fret = shape.frets[string_index]
+    assert fret is not None
     note = _sub(measure, "note")
     if chord:
         _sub(note, "chord")
     _pitch(note, TUNING[string_index] + fret)
-    _sub(note, "duration", str(duration))
+    _sub(note, "duration", str(xml_duration(symbol.length, denominator)))
+    for tied, kind in ((symbol.tie_stop, "stop"), (symbol.tie_start, "start")):
+        if tied:
+            _sub(note, "tie", type=kind)
     _sub(note, "voice", "1")
-    _sub(note, "type", kind)
-    technical = _sub(_sub(note, "notations"), "technical")
+    _sub(note, "type", symbol.value.kind)
+    for _ in range(symbol.value.dots):
+        _sub(note, "dot")
+    _sub(note, "stem", "down")
+    if symbol.event is not None and symbol.event.stroke == "mute":
+        _sub(note, "notehead", "x")
+    if not chord:
+        for number, mark in enumerate(beams, 1):
+            _sub(note, "beam", mark, number=str(number))
+    notations = _sub(note, "notations")
+    for tied, kind in ((symbol.tie_stop, "stop"), (symbol.tie_start, "start")):
+        if tied:
+            _sub(notations, "tied", type=kind)
+    technical = _sub(notations, "technical")
     _sub(technical, "string", str(6 - string_index))
     _sub(technical, "fret", str(fret))
+    if not symbol.tie_stop and symbol.event is not None and symbol.event.stroke in ("down", "up"):
+        _sub(notations, "arpeggiate", direction="up" if symbol.event.stroke == "down" else "down")
 
 
-def _rest(measure: ET.Element, duration: int, kind: str) -> None:
+def _rest(measure: ET.Element, duration: int, symbol: TabSymbol | None = None) -> None:
     note = _sub(measure, "note")
-    _sub(note, "rest")
+    _sub(note, "rest", **({"measure": "yes"} if symbol is None else {}))
     _sub(note, "duration", str(duration))
     _sub(note, "voice", "1")
-    _sub(note, "type", kind)
-
-
-def _strings_for(event: StrumEvent | None, shape: Shape) -> list[int]:
-    sounded = [i for i, f in enumerate(shape.frets) if f is not None]
-    if event is None or event.stroke is not None:
-        return sounded
-    out = []
-    for ref in event.strings:
-        if ref == "bass":
-            if sounded:
-                out.append(sounded[0])
-        elif isinstance(ref, int) and shape.frets[6 - ref] is not None:
-            out.append(6 - ref)
-    return out
+    if symbol is not None:
+        _sub(note, "type", symbol.value.kind)
+        for _ in range(symbol.value.dots):
+            _sub(note, "dot")
 
 
 def render_musicxml(sheet: ArrangedSheet) -> str:
@@ -157,7 +140,6 @@ def render_musicxml(sheet: ArrangedSheet) -> str:
     sung_tonic, sung_mode = parse_key_name(h.sung_key)
     fifths = _fifths(sung_tonic, sung_mode)
     num, den = h.time_signature
-    bar_beats_default = num
 
     p1 = _sub(root, "part", id="P1")
     p2 = _sub(root, "part", id="P2")
@@ -166,6 +148,9 @@ def render_musicxml(sheet: ArrangedSheet) -> str:
     for n, bar in enumerate(bars):
         m1 = _sub(p1, "measure", number=str(n + 1))
         m2 = _sub(p2, "measure", number=str(n + 1))
+        if bar.beats < num:
+            m1.set("implicit", "yes")
+            m2.set("implicit", "yes")
         if n == 0:
             for measure, tab in ((m1, False), (m2, True)):
                 attrs = _sub(measure, "attributes")
@@ -194,10 +179,14 @@ def render_musicxml(sheet: ArrangedSheet) -> str:
                         _sub(transpose, "chromatic", str(h.capo))
             if h.bpm:
                 direction = _sub(m1, "direction", placement="above")
-                _sub(_sub(_sub(direction, "direction-type"), "metronome"), "beat-unit", "quarter")
+                _sub(
+                    _sub(_sub(direction, "direction-type"), "metronome"),
+                    "beat-unit",
+                    {2: "half", 4: "quarter", 8: "eighth", 16: "16th"}[den],
+                )
                 _sub(direction.find("direction-type/metronome"), "per-minute", str(round(h.bpm)))  # type: ignore[arg-type]
-                _sub(direction, "sound", tempo=str(round(h.bpm)))
-        beats = bar.beats or bar_beats_default
+                _sub(direction, "sound", tempo=str(float(quarter_length(h.bpm, den))))
+        beats = bar.beats
         # Chord symbols as they sound: the shape's root plus the capo.
         for c in bar.chords:
             shape = sheet.shapes[c.shape]
@@ -205,27 +194,27 @@ def render_musicxml(sheet: ArrangedSheet) -> str:
             sounding_bass = None
             if bass_name:
                 sounding_bass = (parse_key_name(bass_name)[0] + h.capo) % 12
-            _harmony(m1, c.name, (shape.root + h.capo) % 12, sounding_bass, float(c.beat))
+            _harmony(
+                m1, c.name, (shape.root + h.capo) % 12, sounding_bass, xml_duration(c.beat, den)
+            )
         # Lyrics, one line per text direction at its first syllable, until the
         # melody (step 7) gives the syllables notes to sit under.
         for beat, text in line_starts.get(n, []):
             direction = _sub(m1, "direction", placement="below")
             _sub(_sub(direction, "direction-type"), "words", text)
             if beat:
-                _sub(direction, "offset", str(int(beat * DIVISIONS)))
-        whole, kind = _duration_type(float(beats))
-        _rest(m1, whole, kind if beats in (1, 2, 4) else "whole")
-        for _beat, length, event, shape_name in _tab_events(bar, sheet.strum):
-            duration, kind = _duration_type(length)
-            strings = _strings_for(event, sheet.shapes[shape_name]) if shape_name else []
-            if not strings or (event is not None and event.stroke == "mute"):
-                _rest(m2, duration, kind)
+                _sub(direction, "offset", str(round(quarter_length(beat, den) * DIVISIONS)))
+        _rest(m1, xml_duration(beats, den))
+        symbols = tab_symbols(bar, sheet.strum, sheet.shapes, h.time_signature)
+        marks = beam_marks(symbols, h.time_signature)
+        for index, symbol in enumerate(symbols):
+            if symbol.rest:
+                _rest(m2, xml_duration(symbol.length, den), symbol)
                 continue
-            shape = sheet.shapes[shape_name]
-            for k, index in enumerate(strings):
-                fret = shape.frets[index]
-                assert fret is not None
-                _tab_note(m2, index, fret, duration, kind, chord=k > 0)
+            assert symbol.shape is not None
+            shape = sheet.shapes[symbol.shape]
+            for k, string in enumerate(symbol.strings):
+                _tab_note(m2, symbol, shape, string, k > 0, marks.get(index, ()), den)
     ET.indent(root)
     body = ET.tostring(root, encoding="unicode")
     return (

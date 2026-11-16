@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-15",
+  "python": "3.12.13",
+  "machine": "x86_64",
+  "analysis": "/tmp/claude-1006/-datasdc1-peiyan-openCapo/fd2c42a7-15d9-4e09-8a7d-27a42c39f893/scratchpad/song4-analysis.json",
+  "duration_seconds": 240.0,
+  "bars": 113,
+  "pages": 8,
+  "repeat": 5,
+  "cold": {
+    "arrange": 0.0056310612708330154,
+    "svg": 0.05860205739736557,
+    "png": 0.5086118467152119,
+    "pdf": 0.9211837593466043,
+    "musicxml": 0.21535693854093552,
+    "total": 1.7093856632709503
+  },
+  "warm_median": {
+    "arrange": 0.0016142278909683228,
+    "svg": 0.05721533112227917,
+    "png": 0.24413463287055492,
+    "pdf": 0.8385949153453112,
+    "musicxml": 0.21672195382416248,
+    "total": 1.3356840666383505
+  },
+  "acceptance_seconds": 5.0
+}

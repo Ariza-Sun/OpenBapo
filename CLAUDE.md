@@ -8,6 +8,7 @@
 2. `docs/ROADMAP.md` —— 当前在哪一步、这一步的验收标准。只做负责人指派的那一步。
 3. 相关的实现计划：`docs/plans/backend.md`（分析 / 编配 / 渲染 / 存储）、`docs/plans/frontend-discord.md`（Discord 交互）。
 4. 排版参考：`docs/reference/desperado-sheet.webp`。
+   扫弦与分解的符号还须对照负责人本地曲库原图及 `docs/plans/step-4.md` 第 12 节：扫弦用谱内竖箭头，不能把参考图中的 × 拨弦符号套到扫弦上。
 
 ## 硬性边界
 - 需求第 10 节"后续开发"里的功能一律不做，哪怕顺手。

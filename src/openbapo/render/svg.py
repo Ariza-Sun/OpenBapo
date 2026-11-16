@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import itertools
 from xml.sax.saxutils import escape
 
-from openbapo.arrange import ArrangedSheet, Shape, StrumEvent, StrumPattern
+from openbapo.arrange import ArrangedSheet, Shape, StrumPattern
 from openbapo.model import TICKS_PER_BEAT, Mode
 from openbapo.render import layout as L
 from openbapo.render.layout import BarBox, Page, System
+from openbapo.render.rhythm import TabSymbol, beam_marks, tab_symbols
 
 FONT = "Noto Sans CJK SC, Noto Sans SC, PingFang SC, Microsoft YaHei, Helvetica, Arial, sans-serif"
 INK = "#111"
@@ -74,21 +74,6 @@ def chord_diagram(x: float, y: float, shape: Shape) -> list[str]:
     return out
 
 
-def _sounded(shape: Shape) -> list[int]:
-    return [i for i, f in enumerate(shape.frets) if f is not None]
-
-
-def _string_index(ref: object, shape: Shape) -> int | None:
-    """A strum event's string reference -> index into the shape (0 = low E)."""
-    if ref == "bass":
-        sounded = _sounded(shape)
-        return sounded[0] if sounded else None
-    if isinstance(ref, int):
-        index = 6 - ref
-        return index if shape.frets[index] is not None else None
-    return None
-
-
 def _string_y(box: BarBox, index: int) -> float:
     """y of a string line; index 0 (low E) is the bottom line, as tab is written."""
     return box.top + L.STAFF_Y + (5 - index) * L.STRING_GAP
@@ -98,76 +83,148 @@ def _stem(out: list[str], box: BarBox, x: float, lowest_index: int) -> None:
     out.append(_line(x, _string_y(box, lowest_index) + 2, x, box.top + L.STEM_Y, 0.8))
 
 
-def _arrow(out: list[str], box: BarBox, x: float, low: int, high: int, upward: bool) -> None:
-    """A strum: a line through the sounded strings with an arrowhead.
+def _cross(out: list[str], x: float, y: float) -> None:
+    # Clear the staff beneath the mark, like engraved cross noteheads.
+    out.append('<g class="tab-notehead">')
+    out.append(f'<rect x="{x - 2.3:.1f}" y="{y - 2.3:.1f}" width="4.6" height="4.6" fill="white"/>')
+    out.append(_line(x - 1.7, y - 1.7, x + 1.7, y + 1.7, 0.75))
+    out.append(_line(x - 1.7, y + 1.7, x + 1.7, y - 1.7, 0.75))
+    out.append("</g>")
 
-    Chinese play-along sheets point the arrow toward the high strings (up the
-    staff) for a down-strum and toward the low strings for an up-strum.
+
+def _stroke_mark(out: list[str], box: BarBox, x: float, symbol: TabSymbol) -> None:
+    """An open arrow within the TAB, as in the local play-along corpus.
+
+    The arrow replaces string crosses; its separate rhythm stem sits below
+    the staff. Toward the treble strings (up the page) means a down-strum.
     """
-    y_low, y_high = _string_y(box, low) + 1.5, _string_y(box, high) - 1.5
-    out.append(_line(x, y_low, x, y_high, 0.9))
-    tip, base = (y_high, y_high + 4.0) if upward else (y_low, y_low - 4.0)
+    stroke = symbol.event.stroke if symbol.event is not None else "down"
+    high = _string_y(box, max(symbol.strings))
+    low = _string_y(box, min(symbol.strings))
+    tip, tail = (low, high) if stroke == "up" else (high, low)
+    base = tip - 3.4 if stroke == "up" else tip + 3.4
     out.append(
-        f'<path d="M{x:.1f},{tip:.1f} L{x - 2.4:.1f},{base:.1f} L{x + 2.4:.1f},{base:.1f} Z" '
-        f'fill="{INK}"/>'
+        f'<path class="stroke-direction" data-stroke="{stroke}" '
+        f'd="M{x:.1f},{tail:.1f} L{x:.1f},{tip:.1f} '
+        f'M{x - 1.9:.1f},{base:.1f} L{x:.1f},{tip:.1f} L{x + 1.9:.1f},{base:.1f}" '
+        f'fill="none" stroke="{INK}" stroke-width="0.8" stroke-linecap="round" '
+        f'stroke-linejoin="round"/>'
+    )
+    if stroke == "mute":
+        # Corpus sheets place this dot above the arrow, not among the
+        # duration dots below the TAB.
+        out.append(
+            f'<circle class="stroke-mute" cx="{x:.1f}" '
+            f'cy="{box.top + L.STAFF_Y - 5:.1f}" r="1.1" fill="{INK}"/>'
+        )
+
+
+def _sustain_mark(out: list[str], box: BarBox, x: float) -> None:
+    """A dash extends the previous sound; it is neither a rest nor a stroke."""
+    y = box.top + L.STAFF_Y + 2.5 * L.STRING_GAP
+    out.append('<g class="rhythm-sustain">')
+    out.append(_line(x - 2.5, y, x + 2.5, y, 1.0))
+    out.append("</g>")
+
+
+def _rest_mark(out: list[str], box: BarBox, x: float, symbol: TabSymbol) -> None:
+    y = box.top + L.STAFF_Y + 2.5 * L.STRING_GAP
+    if symbol.value.kind in ("whole", "half"):
+        line_y = box.top + L.STAFF_Y + 2 * L.STRING_GAP
+        top = line_y if symbol.value.kind == "whole" else line_y - 2.5
+        out.append(f'<rect x="{x - 3:.1f}" y="{top:.1f}" width="6" height="2.5" fill="{INK}"/>')
+    elif symbol.value.kind == "quarter":
+        out.append(
+            f'<path d="M{x - 1:.1f},{y - 6:.1f} l3,4 l-3,4 l2,3 '
+            f'q-5,-1 -2,-4 l1,-1 l-2,-3 l3,-3 Z" fill="{INK}"/>'
+        )
+    else:
+        out.append(_line(x + 2, y - 4, x - 1, y + 6, 0.9))
+        for level in range(symbol.value.beams):
+            yy = y - 3 + level * 3
+            out.append(f'<circle cx="{x - 1:.1f}" cy="{yy:.1f}" r="1.5" fill="{INK}"/>')
+            out.append(_line(x - 1, yy + 1, x + 2, yy - 1, 0.8))
+
+
+def _flag(out: list[str], x: float, y: float, level: int) -> None:
+    yy = y - level * 3.2
+    out.append(
+        f'<path class="rhythm-flag" d="M{x:.1f},{yy:.1f} '
+        f'C{x + 6:.1f},{yy - 3:.1f} {x + 6:.1f},{yy - 7:.1f} {x + 3:.1f},{yy - 10:.1f}" '
+        f'fill="none" stroke="{INK}" stroke-width="1.1"/>'
     )
 
 
-def _event_marks(out: list[str], box: BarBox, x: float, event: StrumEvent, shape: Shape) -> None:
-    if event.stroke is not None:
-        strings = _sounded(shape)
-        if not strings:
-            return
-        # A down-strum hits every sounded string; an up-strum the top few.
-        low = strings[0] if event.stroke != "up" else strings[max(0, len(strings) - 4)]
-        _arrow(out, box, x, low, strings[-1], upward=event.stroke != "up")
-        if event.stroke == "mute":  # a dot beside the arrow: muted strum
-            mid = (_string_y(box, low) + _string_y(box, strings[-1])) / 2
-            out.append(f'<circle cx="{x + 3.6:.1f}" cy="{mid:.1f}" r="1.1" fill="{INK}"/>')
-        _stem(out, box, x, low)  # the stem continues the arrow's line, without a gap
-        return
-    picked = [i for i in (_string_index(r, shape) for r in event.strings) if i is not None]
-    if not picked:
-        return
-    for i in picked:  # a plucked string is marked with x on its line
-        out.append(_text(x, _string_y(box, i) + 2.3, "×", 7))
-    _stem(out, box, x, min(picked))
-
-
-def _beams(out: list[str], box: BarBox, beats: list[float]) -> None:
-    """Join consecutive events half a beat apart with a beam at the stem ends."""
-    y = box.top + L.STEM_Y
-    for a, b in itertools.pairwise(beats):
-        if abs((b - a) - 0.5) < 1e-6 and int(a) == int(b - 1e-9):
-            out.append(_line(box.beat_x(a), y, box.beat_x(b), y, 2.2))
-
-
 def tab_bar(
-    out: list[str], box: BarBox, pattern: StrumPattern | None, shapes: dict[str, Shape]
+    out: list[str],
+    box: BarBox,
+    pattern: StrumPattern | None,
+    shapes: dict[str, Shape],
+    meter: tuple[int, int],
 ) -> None:
-    """One bar of the tab line: the strum pattern under each chord, or chord changes only."""
-    chords = box.bar.chords
-    if not chords:
-        return
-    if pattern is None:  # chord changes only: one down-strum where each chord starts
-        for c in chords:
-            shape = shapes[c.shape]
-            strings = _sounded(shape)
-            if strings:
-                x = box.beat_x(float(c.beat))
-                _arrow(out, box, x, strings[0], strings[-1], upward=True)
-                _stem(out, box, x, strings[0])
-        return
-    # Each event sounds the chord in force at its beat.
-    starts = [float(c.beat) for c in chords]
-    beats_drawn: list[float] = []
-    for event in pattern.events:
-        if event.beat >= box.bar.beats:
-            continue
-        current = chords[max(i for i, s in enumerate(starts) if s <= event.beat or i == 0)]
-        _event_marks(out, box, box.beat_x(event.beat), event, shapes[current.shape])
-        beats_drawn.append(event.beat)
-    _beams(out, box, beats_drawn)
+    symbols = tab_symbols(box.bar, pattern, shapes, meter)
+    marks = beam_marks(symbols, meter)
+    for i, symbol in enumerate(symbols):
+        x = box.beat_x(float(symbol.beat))
+        y = box.top + L.STEM_Y
+        strummed = symbol.event is None or symbol.event.stroke is not None
+        out.append(
+            f'<g class="tab-symbol" data-beat="{float(symbol.beat):g}" '
+            f'data-duration="{float(symbol.length):g}" data-kind="{symbol.value.kind}" '
+            f'data-dots="{symbol.value.dots}" data-rest="{str(symbol.rest).lower()}" '
+            f'data-attack="{str(not symbol.rest and not symbol.tie_stop).lower()}">'
+        )
+        if symbol.rest:
+            _rest_mark(out, box, x, symbol)
+        else:
+            if strummed:
+                if symbol.tie_stop:
+                    _sustain_mark(out, box, x)
+                else:
+                    _stroke_mark(out, box, x, symbol)
+                out.append(_line(x, box.top + L.STAFF_Y + L.STAFF_H + 3, x, y, 0.8))
+            else:
+                for string in symbol.strings:
+                    _cross(out, x, _string_y(box, string))
+                _stem(out, box, x, min(symbol.strings))
+            long_value = symbol.value.kind in ("half", "whole")
+            if long_value:
+                # Chinese TAB uses a quarter-length attack followed by
+                # quarter-length dashes, e.g. arrow — — — for a whole note.
+                for quarter in range(1, int(symbol.value.quarters)):
+                    beat = float(symbol.beat) + quarter * meter[1] / 4
+                    _sustain_mark(out, box, box.beat_x(beat))
+            for level, mark in enumerate(marks.get(i, ())):
+                yy = y - level * 3.2
+                if mark in ("begin", "continue"):
+                    end_x = box.beat_x(float(symbols[i + 1].beat))
+                elif mark.endswith("hook"):
+                    end_x = x + (3.5 if mark == "forward hook" else -3.5)
+                else:
+                    continue
+                out.append(_line(x, yy, end_x, yy, 1.8))
+            if i not in marks:
+                for level in range(symbol.value.beams):
+                    _flag(out, x, y, level)
+            if symbol.tie_start:
+                end_x = box.beat_x(float(symbols[i + 1].beat))
+                tie_y = box.top + L.STAFF_Y - 3
+                out.append(
+                    f'<path class="rhythm-tie" d="M{x + 1:.1f},{tie_y:.1f} '
+                    f'Q{(x + end_x) / 2:.1f},{tie_y - 6:.1f} {end_x - 1:.1f},{tie_y:.1f}" '
+                    f'fill="none" stroke="{INK}" stroke-width="0.75"/>'
+                )
+        # Long sounding values were expanded into quarter-length dashes.
+        dots = (
+            0 if not symbol.rest and symbol.value.kind in ("half", "whole") else symbol.value.dots
+        )
+        for dot in range(dots):
+            dot_y = box.top + L.STAFF_Y + (2.5 * L.STRING_GAP if symbol.rest else L.STAFF_H + 5)
+            out.append(
+                f'<circle class="rhythm-dot" cx="{x + 4 + dot * 2.5:.1f}" '
+                f'cy="{dot_y:.1f}" r="1" fill="{INK}"/>'
+            )
+        out.append("</g>")
 
 
 def chord_strip(out: list[str], box: BarBox, shapes: dict[str, Shape]) -> None:
@@ -175,8 +232,8 @@ def chord_strip(out: list[str], box: BarBox, shapes: dict[str, Shape]) -> None:
         x = box.beat_x(float(c.beat))
         name = c.name + ("?" if c.low_confidence else "")
         color = LOW if c.low_confidence else INK
-        out.append(_text(x + L.DIAGRAM_W / 2, box.top + L.NAME_Y, name, 8, fill=color))
-        out.extend(chord_diagram(x, box.top + L.DIAGRAM_Y, shapes[c.shape]))
+        out.append(_text(x, box.top + L.NAME_Y, name, 8, fill=color))
+        out.extend(chord_diagram(x - L.DIAGRAM_W / 2, box.top + L.DIAGRAM_Y, shapes[c.shape]))
 
 
 def jianpu_bar(
@@ -259,8 +316,21 @@ def system_lines(out: list[str], system: System, sheet: ArrangedSheet) -> None:
     out.append(_line(left, staff_top, left, staff_bottom, 0.8))
     for box in system.bars:
         out.append(_line(box.right, staff_top, box.right, staff_bottom, 0.8))
-        out.append(_line(box.right, jianpu_top, box.right, jianpu_bottom, 0.6))
-    out.append(_line(first.left, jianpu_top, first.left, jianpu_bottom, 0.6))
+        if sheet.notes:
+            out.append(_line(box.right, jianpu_top, box.right, jianpu_bottom, 0.6))
+        if box.bar.beats < num:
+            out.append(
+                _text(
+                    box.right - 3,
+                    staff_bottom + 22,
+                    f"不完全小节 · {box.bar.beats} 拍",
+                    6,
+                    anchor="end",
+                    fill=GREY,
+                )
+            )
+    if sheet.notes:
+        out.append(_line(first.left, jianpu_top, first.left, jianpu_bottom, 0.6))
     out.append(
         _text(
             first.left + 1,
@@ -278,7 +348,15 @@ def header(out: list[str], sheet: ArrangedSheet) -> None:
     top = L.MARGIN
     out.append(_text(L.PAGE_W / 2, top + 26, h.title or "", 18, weight="bold"))
     if h.bpm:
-        out.append(_text(L.MARGIN, top + 20, f"♩= {round(h.bpm)}", 11, anchor="start"))
+        out.append(
+            _text(
+                L.MARGIN,
+                top + 20,
+                f"{ {2: '𝅗𝅥', 4: '♩', 8: '♪', 16: '𝅘𝅥𝅯'}[h.time_signature[1]] }= {round(h.bpm)}",
+                11,
+                anchor="start",
+            )
+        )
     num, den = h.time_signature
     out.append(_text(L.MARGIN, top + 44, f"{h.jianpu_key}  {num}/{den}", 11, anchor="start"))
     if h.artist:
@@ -317,7 +395,7 @@ def render_page(page: Page, sheet: ArrangedSheet, total: int) -> str:
         system_lines(out, system, sheet)
         for box in system.bars:
             chord_strip(out, box, sheet.shapes)
-            tab_bar(out, box, sheet.strum, sheet.shapes)
+            tab_bar(out, box, sheet.strum, sheet.shapes, sheet.header.time_signature)
             jianpu_bar(out, box, sheet, tick, tonic)
             lyric_bar(out, box, sheet)
             tick += box.bar.beats * TICKS_PER_BEAT
