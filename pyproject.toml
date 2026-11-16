@@ -104,6 +104,7 @@ module = [
     "beat_this.*",
     "demucs.*",
     "faster_whisper.*",
+    "huggingface_hub",
     "opencc",
     "pypinyin",
     "silero_vad",

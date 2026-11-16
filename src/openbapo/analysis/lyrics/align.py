@@ -16,7 +16,7 @@ here; the lyrics stage interpolates them.
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from itertools import pairwise
-from typing import Protocol
+from typing import Any, Protocol, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -218,7 +218,9 @@ def _torch_forward(net: object, device: str, normalize: bool) -> Callable[..., N
         with torch.inference_mode():
             out = net(x)  # type: ignore[operator]
             logits = out[0] if isinstance(out, tuple) else out.logits
-            return torch.log_softmax(logits[0].float(), dim=-1).cpu().numpy()
+            return cast(
+                NDArray[np.float32], torch.log_softmax(logits[0].float(), dim=-1).cpu().numpy()
+            )
 
     return forward
 
@@ -258,9 +260,10 @@ def wav2vec2_chinese(device: str = AUTO) -> CtcModel:
     with open(path, "rb") as f:
         if hashlib.file_digest(f, "sha256").hexdigest() != ZH_CTC_SHA256:
             raise RuntimeError(f"{path} does not match the expected checksum; delete it and retry")
-    net = Wav2Vec2ForCTC(config)
+    # HF decorates .to; its static signature differs with optional torch installs.
+    net: Any = Wav2Vec2ForCTC(config)
     net.load_state_dict(torch.load(path, map_location="cpu", weights_only=True))
-    net = net.to(device).eval()  # type: ignore[arg-type]
+    net = net.to(device).eval()
     vocab = tokenizer.get_vocab()
     blank = int(tokenizer.pad_token_id)
 
