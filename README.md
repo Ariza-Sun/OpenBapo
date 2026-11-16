@@ -5,7 +5,7 @@
 
 **Turn a song into a guitar play-along sheet.** Upload a recording and get chord diagrams, a strumming tab, the vocal melody in numbered notation (jianpu) and the lyrics on one sheet. Change the singing key, the fingering key or the strum pattern, and export to PNG, PDF or MusicXML. Works for Chinese and English songs, delivered as a Discord bot.
 
-> ⚠️ **Work in progress.** What works today is the command line: `analyze` finds the beats, tempo, chords and key of a recording; `arrange` turns that into the sheet's content (capo, chord names and shapes in a fingering key of your choice, a strum pattern, the header); `render` draws it as PNG / PDF and exports MusicXML. The melody line, lyrics and the Discord bot are still to come; see [Progress](#progress).
+> ⚠️ **Work in progress.** The analysis, arranging and rendering pipeline works, including lyrics. Automatic recognition may omit short isolated vocals; supplied lyrics bypass that filter. The Discord bot and vocal melody line remain later delivery steps. See [Progress](#progress).
 
 ## Why
 
@@ -19,12 +19,13 @@ Tools that transcribe chords from audio (Capo, Chordify, Moises and others) are 
 | 1 | Source separation, beats, tempo, time signature | ✅ Done |
 | 2 | Chords and key | ✅ Done |
 | 3 | Arranging: capo, fingering key, chord simplification, strum patterns | ✅ Done |
-| 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | ✅ Done (jianpu notes and lyrics arrive with steps 5 and 7) |
-| 5 | Lyrics: alignment of pasted lyrics, and recognition | ⏳ Next |
-| 6 | Discord bot | — |
+| 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | ✅ Done (jianpu notes arrive with step 7) |
+| 5 | Lyrics: alignment of supplied lyrics, and recognition | Quality regression passes; isolated short vocals may be omitted ([results](docs/benchmarks/step-5-lyrics.md)) |
+| 6 | Discord bot | Pending delivery |
 | 7 | Vocal melody to jianpu | — |
 
 The full plan is in the [roadmap](docs/ROADMAP.md) and the [requirements](docs/REQUIREMENTS.md) (both in Chinese).
+
 
 ## Quick start
 
@@ -68,6 +69,13 @@ The output holds the beats and downbeats, tempo, time signature, key, and a chor
 Every loop of this progression ends on Am, so the key comes out as A minor, the relative minor of C major. The very low confidence says the two were nearly tied.
 
 Useful options: `--device cpu|cuda`, `--timing -` to print the time spent in each stage, and `--chord-experts lvchordia` to use a single chord model.
+
+Lyrics are recognized by default. To supply the words, pass a UTF-8 file with one lyric line per line; recognition is skipped and the text is aligned to the vocals. Use `--no-lyrics` to skip this stage:
+
+```bash
+openbapo analyze your-song.mp3 --lyrics lyrics.txt --out analysis.json
+openbapo analyze your-song.mp3 --no-lyrics --out analysis.json
+```
 
 Then arrange it for the guitar:
 

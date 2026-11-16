@@ -1,7 +1,7 @@
 # 第 5 步实现计划：歌词（附歌词对齐 + 识别）
 
 > 对应：`docs/ROADMAP.md` 第 5 步；需求 `docs/REQUIREMENTS.md` 5.4（歌词）、第 9 节验收；`docs/plans/backend.md` 第 2 节（歌词识别 / 对齐）、第 7 节开放问题 1。
-> 状态：计划中（2026-11-12）。负责人决定见第 8 节。
+> 状态：局部人声证据修复完成 77 条回归，已确认的 7 个幻听词不再输出，3 个有官方人声标注支持的词保留；本次质量门槛通过。过滤可能漏掉孤立短演唱，开发检查与局限见第 13 节（2026-11-16）。负责人决定见第 8 节。
 
 ## 1. 目标与范围
 
@@ -9,7 +9,7 @@
 
 **本步做**：
 
-1. 歌词文本处理：把上传时附的歌词切成行与音节。中文一字一音；英文按单词切音节（CMUdict 定音节数，pyphen 定切分位置）；中英混排的行逐词处理；去掉标点、空行与段落标记（`[Chorus]`、`副歌：` 之类）。
+1. 歌词文本处理：把上传时附的歌词切成行与音节。中文一字一音；英文用 pyphen 断字位置切分显示音节；中英混排的行逐词处理；去掉标点、空行与段落标记（`[Chorus]`、`副歌：` 之类）。
 2. 人声活动检测：在人声轨上找出有人声的区间；整首没有人声时返回"无歌词"（`lyrics` 为空，附一条说明），不报错。
 3. 识别：faster-whisper 只在有人声的区间上识别，出带行结构的文本；中文统一转简体。
 4. 对齐：歌词文本 + 人声轨 → 每个音节的起止时间。中、英各选一个对齐器（选法见第 8 节决定 2）。
@@ -45,8 +45,9 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 
 ### 2.3 人声活动与"无歌词"
 
-- 在人声轨上跑 Silero VAD（MIT）；有人声的总时长低于阈值（初定 5 秒）→ 无歌词。
-- 阈值与 VAD 参数在开发集上定（见 4.2），写进评测脚本。
+- 两种模式分开：自动识别仅用 Silero VAD（MIT，阈值 0.5），累计检测时长低于 5 秒 → 无歌词；用户附歌词时才允许能量补检。`LyricsStage` 的 `alignment_activity` 参数只影响附歌词分支。
+- 附歌词时，累计语音证据达到 1 秒后，用人声轨持续能量补回漏检的演唱：50 ms 音量帧，阈值为该曲第 95 百分位 RMS 的 −15 dB，且不低于 −50 dBFS；连过 ≤ 0.3 秒短空隙，保留 ≥ 0.25 秒片段并向两端各扩 0.1 秒。合并区间低于 5 秒仍返回无歌词；没有语音证据时不补检。
+- 参数在独立开发集上确定，报告见 `docs/benchmarks/step-5-activity-real-dev.md`；冻结记录见 `docs/benchmarks/step-5-retest-protocol.json`。
 - 识别只喂有人声的区间，并设 `condition_on_previous_text=False`、按 `no_speech_prob` 过滤，抑制 Whisper 在纯伴奏上的幻听。
 
 ### 2.4 识别
@@ -62,7 +63,7 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 | B. Whisper 对齐（stable-ts） | 把已知文本喂给 Whisper，用交叉注意力定词时间；中英同一模型 | MIT |
 | C. MMS 强制对齐 | 多语言 CTC，中文先转拼音 | **CC BY-NC 4.0** |
 
-长歌处理：CTC 候选对整首一次性做强制对齐（行序天然单调），声学模型按 ≤ 30 秒分块推理；人声活动区间以外的帧强制为空白标签，歌词不会落到纯伴奏段。模型词表拼不出的字（如生僻字）不计时，由前后字插值并记警告。
+长歌处理：CTC 对整首一次性做强制对齐（行序天然单调），声学模型在完整人声轨上按 ≤ 30 秒分块推理。人声活动区间两侧扩 0.3 秒后，区间外的非空白标签施加 2.0 的有限对数惩罚并重新归一化；允许强声学证据覆盖 VAD 漏检，不能把未推理的帧硬设为空白。模型词表拼不出的字（如生僻字）不计时，由前后字插值并记警告。
 
 ### 2.6 渲染
 
@@ -88,7 +89,7 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 
 - **行级对齐**：每行起始时间与标注的绝对误差 ≤ 0.5 秒的比例（中、英分开报，门槛 ≥ 90%）；另报中位误差。
 - **识别**：中文字错率（CER，先转简体、去标点）、英文词错率（WER，小写、去标点，参考文本用 Jam-ALT 的规范化歌词）；不设门槛。
-- **幻听**：标注中 ≥ 3 秒的无人声区间（前奏、间奏、尾奏、乐句间伴奏）里识别出的字 / 词数，目标为 0；另报纯音乐曲目返回"无歌词"的比例（目标 100%）。
+- **幻听**：纯伴奏中凭空识别出的字 / 词数，目标为 0。歌词时间戳间 ≥ 3 秒的空隙（两端各缩 0.5 秒）只用于检出待核验候选，不能证明该处没有人声；需结合官方修订人声标注或与音频校验值绑定的人工听辨。原始候选计数始终保留；另报纯音乐曲目返回"无歌词"的比例（目标 100%）。
 - **耗时**：报告一首 4 分钟歌曲歌词环节（识别 + 对齐）的耗时，计入整体 5 分钟预算。
 
 ### 4.2 选模型不碰验收集
@@ -98,7 +99,7 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 ### 4.3 脚本与结果
 
 - `scripts/lyrics_testset.py`：从本地数据生成测试清单（拼接、混音、行起始时间），输出到数据目录，不进仓库。
-- `scripts/eval_lyrics.py`：跑识别与对齐、算全部指标，写 `docs/benchmarks/step-5-lyrics.{md,json}`。
+- `scripts/eval_lyrics.py`：跑识别与对齐、算全部指标。历史回归原始结果保存在 `docs/benchmarks/step-5-lyrics-retest.{md,json}`；`lyrics_retest_report.py` 汇总首轮、历史候选及回归结果到 `step-5-lyrics.{md,json}`。
 - GPU 评测在负责人的 GPU 机器上跑。
 
 ## 5. 依赖
@@ -153,7 +154,158 @@ src/openbapo/analysis/lyrics/   # 模型推理，进 analysis 可选依赖
 
 | 验收项（ROADMAP 第 5 步） | 如何证明 | 状态 |
 |---|---|---|
-| 小测试集：中、英各 ≥ 5 首，人工标注行起始时间 | 第 3 节；`scripts/lyrics_testset.py` | 未开始 |
-| 附歌词对齐：行级误差 ≤ 0.5 秒的比例 ≥ 90% | `docs/benchmarks/step-5-lyrics.md` | 未开始 |
-| 识别：中、英各自的字错率 / 词错率；纯乐器段落不出现幻听文本 | 同上 | 未开始 |
-| 无人声的歌曲正确返回"无歌词" | 同上；单测 | 未开始 |
+| 小测试集：中、英各 ≥ 5 首，人工标注行起始时间 | 第 3 节；`scripts/lyrics_testset.py` | 已准备：英文 20 首，中文 10 首各两版本，另有 MIR-1K 17 段参考 |
+| 附歌词对齐：行级误差 ≤ 0.5 秒的比例 ≥ 90% | `docs/benchmarks/step-5-lyrics.md` | 回归通过：英文 94.6%（首轮 82.5%）；中文干声 98.1%、合成伴奏 97.6%；MIR-1K 参考 96.9% |
+| 识别：中、英各自的字错率 / 词错率；纯乐器段落不出现幻听文本 | 同上；`step-5-local-regression.md` | 本次回归通过：英文 WER 41.5%，确认的 7 词已移除，剩余 3 词有官方人声标注支持；中文 CER 干声 12.1%、混音 19.1%。孤立短人声有漏检代价，见第 13 节 |
+| 无人声的歌曲正确返回"无歌词" | 同上；单测 | 回归通过：纯音乐 20/20；全部 77 个评测条目完成 |
+| 歌词耗时计入 4 分钟歌曲预算 | `docs/benchmarks/step-5-timing-local.md` | RTX 3090，3 次热运行中位：歌词 17.6 秒，分析合计 30.4 秒；不含排队、渲染及尚未实现的旋律，也不含 Whisper 对象加载 |
+
+## 11. 2026-11-15 接手后的修复与复测协议
+
+负责人要求接手原 agent 的工作，优先修复谱面；谱面确认后继续第 5 步。采用独立开发数据修复的方案，保留首轮结果，避免用英文验收曲目调参。
+
+- `step-5-lyrics-first-run.{json,md}` 原样保留首轮文件；后续指标与其并列报告。
+- `lyrics_activity_dev.py` 用固定版本的 JamendoLyrics 德语、西语、法语 59 首作为人声活动开发集，与英文验收集按歌曲名称检查无交集。只用于语言无关的人声检测，不宣称产品新增这些语言的歌词支持。
+- 实验对比低 VAD 阈值与“先有语音证据，再用持续能量补检”的方案，同时检验原 GTSinger 开发集和 10 首开发纯音乐。分轨只驻留内存；可复用的开发缓存仅含音量曲线、区间与原文件校验值。
+- 对齐器对整段人声推理；VAD 之外只给非空白标签有限惩罚，不再把模型尚未听过的区间强制设为空白。`lyrics_alignment_dev.py` 在原开发集对比惩罚 0、2、5：0 与 2 四组达标率相同，5 降低中文表现，采用 2。原开发集的新结果：英文干声 96.8%、合成伴奏 95.5%；中文干声 96.5%、合成伴奏 96.9%。中文干声较首轮开发值 98.2% 有回落，保留这一差异。
+- 修正评测：走实际 `LyricsStage` 的无人声判断；缺失行计失败，不能从分母删去；中文 CER 直接按规范化后的汉字串计算，不能给每个字符插空格稀释错误。首轮中文 CER 因口径有误，不直接用于比较改进幅度。
+- 参数在开发数据上确定后，冻结候选并跑原验收集；结果完整保留。脚本的中断续跑仅复用代码、输入、参数签名完全相同的逐首结果，避免因中断重复挑选结果。模型性能由独立计时脚本测量。
+- 已选能量补检参数：相对 −15 dB、绝对下限 −50 dBFS、触发证据 1 秒。59 首真实开发歌曲的逐首平均召回率从 93.53% 到 98.82%，精确率从 87.83% 到 85.60%；原干声 / 合成伴奏开发版本召回率为 99.80% / 99.67%，开发纯音乐 10/10 无歌词。更低能量阈值损失更多精确率；Silero 阈值降到 0.1 则在开发纯音乐出现 1 首误报。1 / 5 秒触发证据及 −50 / −60 dB 下限在开发集上打平；采用较短触发证据帮助恢复漏检，保留更高噪声下限及最终 5 秒总量门槛。
+- 当时按旧指标把能量候选的英文未标注区间词由 10 增至 120 解释为幻听回退，故搁置了该候选。第 12 节核查发现这一推断不成立：漏标人声也会计入，不能仅据此淘汰方案。`step-5-lyrics-energy-candidate.{json,md}` 和 `step-5-energy-candidate-protocol.json` 原样保留，避免改写历史结果。
+- 最终分离两种模式：附歌词保留独立开发集选出的补检与软惩罚；自动识别恢复原来的语音检测区间，不改识别阈值。随后使用同一验收集做回归验证，明确它不是新盲测，也不把三次测量描述为一次。最终结果由 `lyrics_retest_report.py` 从原始文件生成。
+- 回归完成：77/77 条目，英文对齐 94.6%，中文干声 98.1%、合成伴奏 97.6%，MIR-1K 参考 96.9%；纯音乐 20/20。自动识别的未标注区间词恢复至 10 词，但不能等同已确认幻听，后续核查见第 12 节。此时核心回归 623 项通过（7 项需模型的测试默认排除，模型行为由真实数据评测另验），ruff 与 mypy 通过。
+
+### 复现
+
+在装好 `.[analysis,dev,render]` 和 `scripts/requirements-eval.txt` 的环境中运行。`DATA_ROOT` 指向本地歌词数据目录；音频、模型缓存与开发特征缓存均留在仓库外。
+
+```bash
+export DATA_ROOT=/path/to/lyrics
+export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
+
+python scripts/lyrics_activity_dev.py \
+  --jamendo "$DATA_ROOT/jamendolyrics" \
+  --manifest "$DATA_ROOT/testset/manifest.json" \
+  --cache "$DATA_ROOT/activity-dev-features" \
+  --out docs/benchmarks/step-5-activity-real-dev
+
+python scripts/lyrics_alignment_dev.py \
+  --manifest "$DATA_ROOT/testset/manifest.json" \
+  --cache "$DATA_ROOT/activity-dev-features" \
+  --out docs/benchmarks/step-5-alignment-soft-dev
+
+python scripts/eval_lyrics.py \
+  --manifest "$DATA_ROOT/testset/manifest.json" --split test \
+  --aligners wav2vec2 --seed 0 --out "$DATA_ROOT/lyrics-new-run"
+
+python scripts/lyrics_retest_report.py --gap-audit docs/benchmarks/step-5-gap-audit.json
+```
+
+首次准备真实人声开发集时，给 `lyrics_activity_dev.py` 加 `--download` 获取脚本固定版本的公开音频。首轮、候选与已冻结的回归结果都是历史记录，不用当前代码覆盖；汇总脚本会校验原始结果与冻结协议。中断后只可在实现、数据、参数完全相同的情况下加 `--resume` 接续逐首检查点。当前评测协议已更新为第 4 版，新输出写到独立路径。
+
+后续自动识别的重点是歌曲内部间奏的幻听，而非仅检查整首纯音乐；需要独立的中英文真实演唱开发样本同时验证漏词和幻听，再评估新参数。不能继续根据这 20 首英文验收歌逐首调整过滤条件。
+
+## 12. 2026-11-16：未标注人声审计与复现修正
+
+此前把英文 10 个未标注区间词全部称为幻听，依据不足。官方 [Jam-ALT 修订标注](https://audioshake.github.io/jam-alt/)包含背景人声及非词语发声；旧 JamendoLyrics 行间空隙只能用来发现候选，不能证明纯伴奏。本轮不按验收曲目删除词、不添加黑名单、不改变生产识别参数。
+
+- 当前默认配置的 10 个候选已完整复现。`en-test-04` 的 2 词和 `en-test-19` 的 1 词落在官方修订人声区间，不能计作纯伴奏幻听；这也不等于识别拼写完全正确。
+- `en-test-07` 的 7 词集中在 181.80–182.76 秒。独立 wav2vec2 无提示贪心解码在人声轨上给出相近的说话内容，但原混音的结果不清楚。当时未获得人工结论，保留为待核验。负责人随后明确回复“没有说话声”，该项现已记录为人工确认幻听，见第 13 节。记录保存在 `step-5-gap-review.json`，绑定音频 SHA-256 和审核人；模型一致不能自动转为人工确认。
+- 历史能量候选的 120 词不能直接作为失败依据。涉及的 5 首歌曲本次重新解码得到 103 词，其中 80 词的时间点有官方人声标注覆盖，23 词仍待核验。重复结果有差异，未用 103 覆盖历史 120，也未把当前分类套到历史输出上。详见 [审计报告](../benchmarks/step-5-gap-audit.md)。
+- 独立开发集 50 条（中英文各 10 首、各两版本，另加纯音乐 10 首）比较显示：英文干声 / 混音 WER 从 15.6% / 17.0% 到 13.2% / 15.3%；中文干声 / 混音 CER 从 11.2% / 18.4% 到 9.5% / 16.1%。两种配置均无未标注区间词，纯音乐均 10/10 无词。这是单次开发比较，不能替代真实歌曲的间奏听辨，也不保证跨次波动下每项都改善。详见 [开发报告](../benchmarks/step-5-asr-audit-dev.md)。
+- 旧评测未固定温度回退抽样的随机种子。当前评测按基准种子与条目 ID 生成逐曲种子，并在设置种子后新建 Whisper 工作线程；只给已存在的线程重新设置全局种子不足以重置 CTranslate2 的线程内随机状态。基准种子纳入续跑签名，候选保留时间戳。此改动仅用于评测复现，不改变生产识别配置。
+- 真实模型抽查：进程 A 顺序运行 `en-dev-01-mix`、`en-dev-02-mix`；进程 B 只运行第二首，模拟续跑跳过第一首。两次均用基准种子 0、能量补检 −15 dB；第二首的完整解码元数据一致，包括文本、时间戳、概率。仅能说明这首曲目在当前环境可复现，不保证所有曲目或跨硬件一致。详见 [抽查记录](../benchmarks/step-5-asr-seed-check.md)。
+- 验证：629 项核心测试通过，7 项模型测试按默认配置排除；ruff 与 mypy（58 个源文件）通过。另用真实模型运行新版评测脚本：`en-dev-01` 干声及混音共 2 条、各 18 行，均完成识别与对齐，候选时间戳、逐曲种子和协议元数据正常输出。还验证了空筛选必须报错，避免误把空报告当成通过。
+
+随机种子的实现依据：[CTranslate2 API](https://opennmt.net/CTranslate2/python/ctranslate2.set_random_seed.html)与[线程内随机状态源码](https://github.com/OpenNMT/CTranslate2/blob/master/src/random.cc)。本轮修改的是评测复现与证据分类，生产模型行为未改，因此沿用此前完整 77 条回归和流水线计时，不将两条冒烟检查另算一次全量验收。
+
+### 复现审计
+
+`DATA_ROOT` 沿用上节。原始解码与交叉检查的文本元数据在仓库外；分轨只驻留内存。以下命令中的开发比较保留旧配置未设随机种子的行为，新实验可加 `--seed 0` 并使用新的缓存目录。已有缓存不允许用不同参数复用。
+
+```bash
+python scripts/audit_lyrics_gaps.py \
+  --manifest "$DATA_ROOT/testset/manifest.json" --split dev \
+  --cache "$DATA_ROOT/asr-gap-audit" --out "$DATA_ROOT/asr-gap-audit/dev-diagnostic.json"
+
+python scripts/audit_lyrics_gaps.py \
+  --manifest "$DATA_ROOT/testset/manifest.json" --split dev --energy-relative-db -15 \
+  --cache "$DATA_ROOT/asr-gap-audit-energy" \
+  --compare "$DATA_ROOT/asr-gap-audit/dev-diagnostic.json" \
+  --out docs/benchmarks/step-5-asr-audit-dev.json
+
+python scripts/audit_lyrics_gaps.py \
+  --manifest "$DATA_ROOT/testset/manifest.json" --split test \
+  --ids en-test-04,en-test-07,en-test-19 --cache "$DATA_ROOT/asr-gap-audit" \
+  --out "$DATA_ROOT/asr-gap-audit/test-diagnostic.json"
+
+python scripts/lyrics_gap_evidence.py \
+  --manifest "$DATA_ROOT/testset/manifest.json" \
+  --audit "$DATA_ROOT/asr-gap-audit/test-diagnostic.json" \
+  --jam-alt "$DATA_ROOT/jam-alt/metadata.jsonl" \
+  --out "$DATA_ROOT/asr-gap-audit/crosscheck.json"
+
+python scripts/lyrics_gap_review.py \
+  --baseline docs/benchmarks/step-5-lyrics-retest.json \
+  --diagnostic "$DATA_ROOT/asr-gap-audit/test-diagnostic.json" \
+  --crosscheck "$DATA_ROOT/asr-gap-audit/crosscheck.json" \
+  --development "$DATA_ROOT/asr-gap-audit/dev-diagnostic.json" \
+  --reviews docs/benchmarks/step-5-gap-review.json \
+  --candidate-baseline docs/benchmarks/step-5-lyrics-energy-candidate.json \
+  --candidate-crosscheck "$DATA_ROOT/asr-gap-audit-energy/crosscheck.json" \
+  --out docs/benchmarks/step-5-gap-audit
+
+python scripts/lyrics_retest_report.py --gap-audit docs/benchmarks/step-5-gap-audit.json
+```
+
+能量候选的交叉检查用同一 `lyrics_gap_evidence.py`，输入 `asr-gap-audit-energy/test-diagnostic.json`；该输入由 `audit_lyrics_gaps.py --energy-relative-db -15` 对 `en-test-04,en-test-07,en-test-13,en-test-17,en-test-19` 生成。
+
+## 13. 2026-11-16：人工确认后的局部证据修复
+
+负责人听辨后明确回复“没有说话声”，因此原版本 `en-test-07` 的 7 词记录为确认幻听，而不是删去评测记录。原有全曲人声总量门槛允许孤立短检测借用其他演唱部分的证据：该检测仅约 1.6 秒，与前一段相隔约 50 秒，仍会进入 Whisper。
+
+自动识别现在将 Silero 区间按至少 30 秒的间隔分组，每组沿用已有的至少 5 秒累计人声门槛；间隔本身及重叠 padding 不重复计数。采用的是通用时间规则，不按歌名、词语或参考歌词过滤。30 秒取现用 Whisper 声学窗口，5 秒取项目既有人声门槛；这是本项目的保守工程选择，并非上游推荐的通用防幻听参数。附歌词对齐不应用该过滤。
+
+独立检查包含 59 首非英语真实歌曲、40 个中英文干声 / 合成伴奏版本和 10 首纯音乐：原 50 条识别开发集的缓存输入区间全部不变；59 首真实歌曲的人声帧召回率从 93.9746% 到 93.9196%，损失 3 首合计 3.649 秒已标注人声。该规则确实可能漏掉独立的短句、呼喊或演唱，不能宣称零漏词。见 [开发检查](../benchmarks/step-5-local-activity-dev.md)。
+
+参数在开发检查后写入 [冻结协议](../benchmarks/step-5-local-protocol.json)，再对原 77 条验收 / 参考条目进行回归。这个已查看过的验收集不作为新盲测，也不将过滤造成的遗漏称为识别能力提升。
+
+复现开发检查与新版回归（`DATA_ROOT` 同上；重跑时使用新的输出目录，避免覆盖已冻结结果）：
+
+```bash
+python scripts/lyrics_local_activity_dev.py \
+  --jamendo "$DATA_ROOT/jamendolyrics" --manifest "$DATA_ROOT/testset/manifest.json" \
+  --features "$DATA_ROOT/activity-dev-features" --asr-cache "$DATA_ROOT/asr-gap-audit" \
+  --out "$DATA_ROOT/local-activity-dev-repeat"
+
+python scripts/eval_lyrics.py --manifest "$DATA_ROOT/testset/manifest.json" \
+  --split test --sets en-test --aligners wav2vec2 --seed 0 \
+  --out "$DATA_ROOT/local-en-repeat"
+
+python scripts/eval_lyrics.py --manifest "$DATA_ROOT/testset/manifest.json" \
+  --split test --sets zh-test,zh-ref,instr --aligners wav2vec2 --seed 0 \
+  --out "$DATA_ROOT/local-other-repeat"
+
+python scripts/lyrics_local_report.py \
+  --runs docs/benchmarks/step-5-local-en.json docs/benchmarks/step-5-local-other.json \
+  --manifest "$DATA_ROOT/testset/manifest.json" \
+  --protocol docs/benchmarks/step-5-local-protocol.json \
+  --baseline docs/benchmarks/step-5-lyrics-retest.json \
+  --references docs/benchmarks/step-5-gap-audit.json \
+  --reviews docs/benchmarks/step-5-gap-review.json \
+  --development docs/benchmarks/step-5-local-activity-dev.json \
+  --timing docs/benchmarks/step-5-timing-local.json \
+  --out docs/benchmarks/step-5-local-regression
+
+python scripts/lyrics_retest_report.py \
+  --gap-audit docs/benchmarks/step-5-gap-audit.json \
+  --local-regression docs/benchmarks/step-5-local-regression.json
+```
+
+汇总脚本验证两个分片覆盖完整清单、没有重复条目，且代码、数据、参数和人工记录与冻结协议相符；新输出的所有未标注区间词逐个按证据重新分类。原 77 条回归及首轮、能量候选结果继续保留。
+
+运行记录：中文 / 参考 / 纯音乐分片累计完成 43 条、51 条时，分别在初始化下一首 Whisper 时显存不足退出。按同一冻结签名和逐曲种子使用 `--resume` 两次接续，不丢弃或重选已完成条目。当前逐曲新建 Whisper 的长批次评测仍可能需要断点续跑；生产流水线只初始化一次该模型。两张卡均为 RTX 3090；独立计时使用另一张卡，期间同主机仍有评测任务，数值按实测负载解释。
+
+最终结果：[77 条回归报告](../benchmarks/step-5-local-regression.md)。英文对齐 94.6%，中文干声 98.1%、混音 97.6%，纯音乐 20/20 无歌词；确认幻听 0，未决候选 0，另外 3 个官方人声标注支持的词完整保留。原版本与新版本的中英文总字 / 词错率按一位小数显示一致。637 项测试通过、7 项模型测试默认排除；实际模型行为由本次完整数据回归另验。ruff 与 mypy 通过。
+
+[计时](../benchmarks/step-5-timing-local.md)：4 分钟原曲，三次热运行中位数为歌词 17.6 秒、分析合计 30.4 秒；首轮分析 42.4 秒。Whisper 对象初始化在该计时之外，因此首轮不是完整进程冷启动时间；不包含排队、渲染及未来旋律环节。新的计时在同主机另一张卡仍有评测任务时完成，不据此宣称相对上一轮加速或减速。

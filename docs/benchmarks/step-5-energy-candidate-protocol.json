@@ -1,0 +1,23 @@
+{
+  "frozen_at_utc": "2026-11-15T14:34:03.691542+00:00",
+  "activity": {
+    "threshold": 0.5,
+    "min_speech_s": 0.25,
+    "min_silence_s": 0.3,
+    "pad_s": 0.1,
+    "min_total_s": 5.0,
+    "energy_relative_db": -15.0,
+    "energy_floor_db": -50.0,
+    "energy_min_seed_s": 1.0
+  },
+  "ctc_activity_penalty": 2.0,
+  "code_sha256": "a1f22d92ae63cb81d57e20e85aaad67bfc739aace482a715a84bc2d74508e260",
+  "manifest_sha256": "116cde94be622a49c90720f667370c605e8b15f0f557711235a54476e7259c4e",
+  "first_run_sha256": "e3f767a83c107635c1f095fefa1a79e9dc4d2f0678e970b25ac85e3b3e77fb83",
+  "dev_reports": [
+    "step-5-activity-real-dev.json",
+    "step-5-alignment-soft-dev.json"
+  ],
+  "selection": "Energy -15 dB: 98.82% recall with 85.60% precision, no instrumental positives on dev. Lower energy thresholds lose precision; VAD threshold 0.1 produces an instrumental positive. Seed 1 vs 5 seconds and floor -50 vs -60 dB tie on dev; use 1 second to trigger recovery, with the separate final 5-second gate retained and the higher absolute floor. CTC penalties 0 and 2 tie on all four dev groups; 5 degrades Chinese. Use finite penalty 2.",
+  "protocol": "One retest on the original acceptance split; actual LyricsStage; missing lines fail; corrected CER. First-run files preserved unchanged."
+}

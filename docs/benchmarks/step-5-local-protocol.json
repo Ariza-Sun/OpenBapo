@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-16",
+  "code_sha256": "725bd54adfd48519d65e03422d6e5b2b7505ee064e05f22ebef89ac119186c8f",
+  "manifest_sha256": "116cde94be622a49c90720f667370c605e8b15f0f557711235a54476e7259c4e",
+  "input_sha256": {
+    "step-5-local-activity-dev.json": "6a382f57551e4b67fa91e1c89acdbe11843e2e961a30cb8dd39fecb7f5d73be8",
+    "step-5-lyrics-retest.json": "19ee7370647918b0c9915436c7df08b1550650c8d3e4e50ec780ec46b24e9a6f",
+    "step-5-gap-review.json": "c26d3467de267314954898657bdbf470c40ae153386eb66c0a2526adb1135665"
+  },
+  "params": {
+    "context_gap_s": 30.0,
+    "min_total_s": 5.0,
+    "random_seed": 0
+  },
+  "purpose": "Regression after human-confirmed 7-word hallucination. Independent 109-entry activity check; no threshold search. 3.649 seconds of annotated dev vocals lost; 50 original ASR dev inputs unchanged. English test has been inspected, not a blind test.",
+  "runs": [
+    "step-5-local-en.json",
+    "step-5-local-other.json"
+  ]
+}

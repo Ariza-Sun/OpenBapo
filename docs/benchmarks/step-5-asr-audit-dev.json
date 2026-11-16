@@ -1,0 +1,595 @@
+{
+  "split": "dev",
+  "base_seed": null,
+  "activity_params": {
+    "threshold": 0.5,
+    "min_speech_s": 0.25,
+    "min_silence_s": 0.3,
+    "pad_s": 0.1,
+    "min_total_s": 5.0,
+    "energy_relative_db": -15.0,
+    "energy_floor_db": -50.0,
+    "energy_min_seed_s": 1.0
+  },
+  "summary": {
+    "en/dry": {
+      "songs": 10,
+      "error_rate": 0.13214990138067062,
+      "gap_candidates": 0,
+      "no_words": 0
+    },
+    "en/mix": {
+      "songs": 10,
+      "error_rate": 0.1525312294543064,
+      "gap_candidates": 0,
+      "no_words": 0
+    },
+    "instrumental/instrumental": {
+      "songs": 10,
+      "error_rate": null,
+      "gap_candidates": 0,
+      "no_words": 10
+    },
+    "zh/dry": {
+      "songs": 10,
+      "error_rate": 0.09499770536943553,
+      "gap_candidates": 0,
+      "no_words": 0
+    },
+    "zh/mix": {
+      "songs": 10,
+      "error_rate": 0.16062413951353832,
+      "gap_candidates": 0,
+      "no_words": 0
+    }
+  },
+  "songs": [
+    {
+      "id": "zh-dev-01-dry",
+      "words": 139,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 139,
+      "error_rate": 0.03067484662576687,
+      "ref_units": 163
+    },
+    {
+      "id": "zh-dev-01-mix",
+      "words": 140,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 140,
+      "error_rate": 0.05521472392638037,
+      "ref_units": 163
+    },
+    {
+      "id": "zh-dev-02-dry",
+      "words": 158,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 158,
+      "error_rate": 0.0782122905027933,
+      "ref_units": 179
+    },
+    {
+      "id": "zh-dev-02-mix",
+      "words": 156,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 156,
+      "error_rate": 0.18435754189944134,
+      "ref_units": 179
+    },
+    {
+      "id": "zh-dev-03-dry",
+      "words": 176,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 176,
+      "error_rate": 0.17801047120418848,
+      "ref_units": 191
+    },
+    {
+      "id": "zh-dev-03-mix",
+      "words": 176,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 176,
+      "error_rate": 0.2513089005235602,
+      "ref_units": 191
+    },
+    {
+      "id": "zh-dev-04-dry",
+      "words": 344,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 344,
+      "error_rate": 0.1388888888888889,
+      "ref_units": 396
+    },
+    {
+      "id": "zh-dev-04-mix",
+      "words": 306,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 306,
+      "error_rate": 0.2803030303030303,
+      "ref_units": 396
+    },
+    {
+      "id": "zh-dev-05-dry",
+      "words": 252,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 252,
+      "error_rate": 0.11278195488721804,
+      "ref_units": 266
+    },
+    {
+      "id": "zh-dev-05-mix",
+      "words": 251,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 251,
+      "error_rate": 0.13157894736842105,
+      "ref_units": 266
+    },
+    {
+      "id": "zh-dev-06-dry",
+      "words": 143,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 143,
+      "error_rate": 0.11409395973154363,
+      "ref_units": 149
+    },
+    {
+      "id": "zh-dev-06-mix",
+      "words": 140,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 140,
+      "error_rate": 0.12751677852348994,
+      "ref_units": 149
+    },
+    {
+      "id": "zh-dev-07-dry",
+      "words": 231,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 231,
+      "error_rate": 0.04152249134948097,
+      "ref_units": 289
+    },
+    {
+      "id": "zh-dev-07-mix",
+      "words": 238,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 238,
+      "error_rate": 0.11072664359861592,
+      "ref_units": 289
+    },
+    {
+      "id": "zh-dev-08-dry",
+      "words": 173,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 173,
+      "error_rate": 0.09844559585492228,
+      "ref_units": 193
+    },
+    {
+      "id": "zh-dev-08-mix",
+      "words": 173,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 173,
+      "error_rate": 0.09844559585492228,
+      "ref_units": 193
+    },
+    {
+      "id": "zh-dev-09-dry",
+      "words": 179,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 179,
+      "error_rate": 0.02403846153846154,
+      "ref_units": 208
+    },
+    {
+      "id": "zh-dev-09-mix",
+      "words": 176,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 176,
+      "error_rate": 0.04807692307692308,
+      "ref_units": 208
+    },
+    {
+      "id": "zh-dev-10-dry",
+      "words": 125,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "dry",
+      "stage_words": 125,
+      "error_rate": 0.1103448275862069,
+      "ref_units": 145
+    },
+    {
+      "id": "zh-dev-10-mix",
+      "words": 120,
+      "suspect": [],
+      "lang": "zh",
+      "condition": "mix",
+      "stage_words": 120,
+      "error_rate": 0.23448275862068965,
+      "ref_units": 145
+    },
+    {
+      "id": "en-dev-01-dry",
+      "words": 205,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 205,
+      "error_rate": 0.06372549019607843,
+      "ref_units": 204
+    },
+    {
+      "id": "en-dev-01-mix",
+      "words": 206,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 206,
+      "error_rate": 0.07352941176470588,
+      "ref_units": 204
+    },
+    {
+      "id": "en-dev-02-dry",
+      "words": 49,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 49,
+      "error_rate": 0.43283582089552236,
+      "ref_units": 67
+    },
+    {
+      "id": "en-dev-02-mix",
+      "words": 61,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 61,
+      "error_rate": 0.14925373134328357,
+      "ref_units": 67
+    },
+    {
+      "id": "en-dev-03-dry",
+      "words": 160,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 160,
+      "error_rate": 0.07975460122699386,
+      "ref_units": 163
+    },
+    {
+      "id": "en-dev-03-mix",
+      "words": 159,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 159,
+      "error_rate": 0.147239263803681,
+      "ref_units": 163
+    },
+    {
+      "id": "en-dev-04-dry",
+      "words": 170,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 170,
+      "error_rate": 0.1111111111111111,
+      "ref_units": 171
+    },
+    {
+      "id": "en-dev-04-mix",
+      "words": 171,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 171,
+      "error_rate": 0.1111111111111111,
+      "ref_units": 171
+    },
+    {
+      "id": "en-dev-05-dry",
+      "words": 242,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 242,
+      "error_rate": 0.20233463035019456,
+      "ref_units": 257
+    },
+    {
+      "id": "en-dev-05-mix",
+      "words": 257,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 257,
+      "error_rate": 0.2490272373540856,
+      "ref_units": 257
+    },
+    {
+      "id": "en-dev-06-dry",
+      "words": 138,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 138,
+      "error_rate": 0.072992700729927,
+      "ref_units": 137
+    },
+    {
+      "id": "en-dev-06-mix",
+      "words": 137,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 137,
+      "error_rate": 0.1386861313868613,
+      "ref_units": 137
+    },
+    {
+      "id": "en-dev-07-dry",
+      "words": 105,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 105,
+      "error_rate": 0.19,
+      "ref_units": 100
+    },
+    {
+      "id": "en-dev-07-mix",
+      "words": 108,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 108,
+      "error_rate": 0.26,
+      "ref_units": 100
+    },
+    {
+      "id": "en-dev-08-dry",
+      "words": 111,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 111,
+      "error_rate": 0.13513513513513514,
+      "ref_units": 111
+    },
+    {
+      "id": "en-dev-08-mix",
+      "words": 110,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 110,
+      "error_rate": 0.14414414414414414,
+      "ref_units": 111
+    },
+    {
+      "id": "en-dev-09-dry",
+      "words": 209,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 209,
+      "error_rate": 0.0967741935483871,
+      "ref_units": 217
+    },
+    {
+      "id": "en-dev-09-mix",
+      "words": 208,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 208,
+      "error_rate": 0.11981566820276497,
+      "ref_units": 217
+    },
+    {
+      "id": "en-dev-10-dry",
+      "words": 95,
+      "suspect": [],
+      "lang": "en",
+      "condition": "dry",
+      "stage_words": 95,
+      "error_rate": 0.10638297872340426,
+      "ref_units": 94
+    },
+    {
+      "id": "en-dev-10-mix",
+      "words": 95,
+      "suspect": [],
+      "lang": "en",
+      "condition": "mix",
+      "stage_words": 95,
+      "error_rate": 0.13829787234042554,
+      "ref_units": 94
+    },
+    {
+      "id": "instr-dev-01",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-02",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-03",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-04",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-05",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-06",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-07",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-08",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-09",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    },
+    {
+      "id": "instr-dev-10",
+      "words": 0,
+      "suspect": [],
+      "lang": "",
+      "condition": "instrumental",
+      "stage_words": 0
+    }
+  ],
+  "comparison": {
+    "source_sha256": "cfe5cc21503776baba91add73e4160bc01a98335225c87b9d295eb9797f3f864",
+    "before": {
+      "en/dry": {
+        "songs": 10,
+        "error_rate": 0.1564760026298488,
+        "gap_candidates": 0,
+        "no_words": 0
+      },
+      "en/mix": {
+        "songs": 10,
+        "error_rate": 0.16962524654832348,
+        "gap_candidates": 0,
+        "no_words": 0
+      },
+      "instrumental/instrumental": {
+        "songs": 10,
+        "error_rate": null,
+        "gap_candidates": 0,
+        "no_words": 10
+      },
+      "zh/dry": {
+        "songs": 10,
+        "error_rate": 0.111977971546581,
+        "gap_candidates": 0,
+        "no_words": 0
+      },
+      "zh/mix": {
+        "songs": 10,
+        "error_rate": 0.18448829738412115,
+        "gap_candidates": 0,
+        "no_words": 0
+      }
+    },
+    "after": {
+      "en/dry": {
+        "songs": 10,
+        "error_rate": 0.13214990138067062,
+        "gap_candidates": 0,
+        "no_words": 0
+      },
+      "en/mix": {
+        "songs": 10,
+        "error_rate": 0.1525312294543064,
+        "gap_candidates": 0,
+        "no_words": 0
+      },
+      "instrumental/instrumental": {
+        "songs": 10,
+        "error_rate": null,
+        "gap_candidates": 0,
+        "no_words": 10
+      },
+      "zh/dry": {
+        "songs": 10,
+        "error_rate": 0.09499770536943553,
+        "gap_candidates": 0,
+        "no_words": 0
+      },
+      "zh/mix": {
+        "songs": 10,
+        "error_rate": 0.16062413951353832,
+        "gap_candidates": 0,
+        "no_words": 0
+      }
+    }
+  }
+}

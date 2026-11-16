@@ -53,7 +53,7 @@ def main() -> int:
 
     results = []
     for threshold, silence in GRID:
-        params = ActivityParams(threshold=threshold, min_silence_s=silence)
+        params = ActivityParams(threshold=threshold, min_silence_s=silence, energy_relative_db=None)
         activity = SileroActivity(params)
         row: dict[str, Any] = {
             "threshold": threshold,

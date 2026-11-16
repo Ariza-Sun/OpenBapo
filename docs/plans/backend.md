@@ -36,14 +36,23 @@ API 层
 | 和弦 | 混音去鼓（bass + other）+ 拍网格 | `Chord`（含转位、置信度） | BTC、ChordFormer、autochord |
 | 调性 | `Chord` 序列 + 音频 | `Key` | **已定：规则法**（第 2 步）：色度模板（Krumhansl 轮廓）与分窗和弦统计互校，关系大小调按主和弦时长与首尾和弦投票；不依赖 essentia |
 | 人声旋律 | vocals | 音高曲线 → 切分 → 量化到拍网格 → `Note` | RMVPE / CREPE 提取音高；音符切分与量化自写 |
-| 歌词识别 | vocals | 文本（用户提供歌词时跳过） | **已定：faster-whisper `large-v3`**（第 5 步），只识别 Silero VAD 判为有人声的区间 |
-| 歌词对齐 | vocals + 文本 | `LyricSyllable` | **已定：wav2vec2 CTC 强制对齐**（第 5 步；英文 LibriSpeech 模型，中文 XLSR-53 中文微调模型）；英文音节切分 pyphen；音节挂到 `Note` 用时间最近匹配 + 单调约束（第 7 步） |
+| 歌词识别 | vocals | 文本（用户提供歌词时跳过） | **已定：faster-whisper `large-v3`**（第 5 步），只识别 Silero 语音区间；相隔 ≥30 秒的每组检测各需累计 ≥5 秒人声，抑制孤立短误检。可能漏掉孤立短句，开发检查记录损失 3.649 秒真实人声。附歌词对齐不使用该过滤；见第 5 步第 13 节 |
+| 歌词对齐 | vocals + 文本 | `LyricSyllable` | **已定：wav2vec2 CTC 强制对齐**（第 5 步；英文 LibriSpeech 模型，中文 XLSR-53 中文微调模型）；完整人声轨推理，活动区间外施加有限惩罚；附歌词时可用持续能量补回 VAD 漏检，自动识别后的对齐仍用语音检测区间作先验；英文音节切分 pyphen；音节挂到 `Note` 用时间最近匹配 + 单调约束（第 7 步） |
 
 分轨结果只在流水线内部使用，任务完成后与原音频一起删除。
 
 ### 2.1 已接入的模型权重与许可证
 
 每接入一份权重在此登记（CLAUDE.md 要求）。CC-BY-NC 类及许可证不明的显式标出。
+
+英文识别补充实验（2026-11-16，尚未替换默认模型）：NVIDIA
+[`parakeet-tdt-0.6b-v2`](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v2/tree/ae9ad07059c7c739ffaf932226a8fe64ae2620b0)
+权重为 **CC-BY-4.0**，作者 NVIDIA；实验使用 Ilya Stupakov 的
+[ONNX 转换](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v2-onnx/tree/0bbb45a3365852604aef28b538a8f066f4ccaa85)
+（同为 CC-BY-4.0，固定上述修订），无量化版本；推理代码
+[`onnx-asr`](https://github.com/istupakov/onnx-asr/blob/main/LICENSE) 为 MIT。
+英文专用 FastConformer-TDT 与 Whisper 分别评测；ONNX 转换的成绩不宣称为官方 NeMo 运行时成绩。
+权重和实验依赖放在仓库外，发布代码不包含权重；保留模型作者、转换者、许可与修订归属。
 
 | 环节 | 模型 / 权重 | 代码许可证 | 权重许可证 | 训练数据 | 备注 |
 |---|---|---|---|---|---|
@@ -78,13 +87,14 @@ API 层
 | 层 | 做法 |
 |---|---|
 | 和弦图 | 自绘 SVG（`openbapo.render.svg.chord_diagram`，第 4 步） |
-| 六线谱（节奏型 / 和弦变化点） | 自绘 SVG：扫弦画 × + 符干 / 符杠 + 上下箭头，分解画品位数字，"无"节奏型只画和弦变化点（第 4 步决定 1，不用 alphaTab / Verovio） |
+| 六线谱（节奏型 / 和弦变化点） | 自绘 SVG：扫弦用谱内细线竖箭头，下方独立标节奏；分解在被拨的弦上画 ×；闷音在箭头上方加点。符干 / 符尾 / 符杠 / 延音由共用时值层计算；"无"只标和弦变化及延续（第 4 步第 11–12 节） |
 | 简谱 | **自绘 SVG**（主流库不支持简谱）；第 4 步画出行与小节线，音符的时值记号第 7 步 |
 | 歌词 | 自绘，音节按起始时间对齐到拍的 x 坐标（第 5 步接真歌词） |
 | 页面 | A4，每行 4 小节；SVG → PNG（cairosvg，第一页预览）/ PDF（逐页 cairosvg + pypdf 合并，矢量多页）。可选依赖组 `openbapo[render]` |
 | MusicXML | 标准库直接写（第 4 步决定 2，不用 music21 生成）：和弦符号按发声音高、TAB 谱表写节奏型的弦 / 品、变调夹作为移调；music21 只在测试里读回校验 |
 
 排版标准：`docs/reference/desperado-sheet.webp`。
+扫弦与分解的具体符号同时以负责人本地曲库为依据，见 `docs/plans/step-4.md` 第 12 节。
 
 ## 5. 存储
 

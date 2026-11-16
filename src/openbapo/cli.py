@@ -159,13 +159,18 @@ def build_chord_stage(spec: str, device: str) -> "ChordStage | None":
 
 
 def build_lyrics_stage(device: str) -> "LyricsStage":
-    from openbapo.analysis.lyrics.activity import SileroActivity
+    from openbapo.analysis.lyrics.activity import ActivityParams, SileroActivity
     from openbapo.analysis.lyrics.align import wav2vec2_aligner
     from openbapo.analysis.lyrics.recognize import WhisperRecognizer, load_whisper
     from openbapo.analysis.lyrics.stage import LyricsStage
 
     whisper = load_whisper(device=device)
-    return LyricsStage(SileroActivity(), WhisperRecognizer(whisper), wav2vec2_aligner(device))
+    return LyricsStage(
+        SileroActivity(ActivityParams(context_gap_s=30.0)),
+        WhisperRecognizer(whisper),
+        wav2vec2_aligner(device),
+        alignment_activity=SileroActivity(ActivityParams(energy_relative_db=-15.0)),
+    )
 
 
 def read_lyrics(path: Path | None) -> str | None:

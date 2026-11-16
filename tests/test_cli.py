@@ -128,6 +128,18 @@ def test_cli_imports_nothing_heavy() -> None:
     subprocess.run([sys.executable, "-c", code], check=True)
 
 
+def test_lyrics_factory_keeps_energy_recovery_out_of_recognition(monkeypatch) -> None:
+    from openbapo.cli import build_lyrics_stage
+
+    monkeypatch.setattr("openbapo.analysis.lyrics.recognize.load_whisper", lambda device: object())
+    stage = build_lyrics_stage("cpu")
+    assert stage.activity.params.energy_relative_db is None
+    assert stage.activity.params.context_gap_s == 30.0
+    assert stage.alignment_activity.params.energy_relative_db == -15.0
+    assert stage.alignment_activity.params.context_gap_s is None
+    assert stage.activity is not stage.alignment_activity
+
+
 def test_module_entry_point_reports_usage() -> None:
     proc = subprocess.run(
         [sys.executable, "-m", "openbapo", "--version"], capture_output=True, text=True, check=True

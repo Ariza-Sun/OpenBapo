@@ -7,8 +7,8 @@ word timing on the step-5 development set (docs/benchmarks/step-5-lyrics-dev.md)
 those two candidates live on in scripts/lyrics_candidates.py.
 
 CTC alignment runs over the whole song at once, so a line cannot be placed
-before the line above it. Frames outside the voiced regions are forced to
-the blank label, which keeps lyrics off instrumental passages. Tokens the
+before the line above it. Voice activity supplies a soft blank preference;
+it must never erase acoustic evidence of singing missed by a speech VAD. Tokens the
 model cannot spell (a character missing from its vocabulary) get no time
 here; the lyrics stage interpolates them.
 """
@@ -89,25 +89,48 @@ def ctc_targets(model: CtcModel, tokens: Sequence[Token]) -> list[list[int]]:
 
 
 def emissions(
-    model: CtcModel, vocals: NDArray[np.float32], regions: Sequence[Region] | None
+    model: CtcModel,
+    vocals: NDArray[np.float32],
+    regions: Sequence[Region] | None,
+    activity_penalty: float = 2.0,
 ) -> NDArray[np.float32]:
-    """Log-probabilities for the whole song; blank outside the (padded) regions."""
+    """Infer every audio frame, then softly prefer blanks outside VAD regions."""
     total = int(len(vocals) / SAMPLE_RATE / model.frame_s) + 1
     out = np.full((total, len(model.labels)), -1e4, dtype=np.float32)
     out[:, model.blank] = 0.0
     duration = len(vocals) / SAMPLE_RATE
-    spans = regions if regions else [(0.0, duration)]
-    for start, end in _merge_padded(spans, duration):
-        t = start
-        while t < end:
-            stop = min(end, t + CHUNK_S)
-            chunk = vocals[int(t * SAMPLE_RATE) : int(stop * SAMPLE_RATE)]
-            if len(chunk) >= SAMPLE_RATE // 10:
-                frames = model.forward(chunk)
-                first = round(t / model.frame_s)
-                n = min(len(frames), total - first)
-                out[first : first + n] = frames[:n]
-            t = stop
+    t = 0.0
+    while t < duration:
+        stop = min(duration, t + CHUNK_S)
+        chunk = vocals[int(t * SAMPLE_RATE) : int(stop * SAMPLE_RATE)]
+        if len(chunk) >= SAMPLE_RATE // 10:
+            frames = model.forward(chunk)
+            first = round(t / model.frame_s)
+            n = min(len(frames), total - first)
+            out[first : first + n] = frames[:n]
+        t = stop
+    return activity_prior(out, model.blank, model.frame_s, regions, activity_penalty)
+
+
+def activity_prior(
+    log_probs: NDArray[np.float32],
+    blank: int,
+    frame_s: float,
+    regions: Sequence[Region] | None,
+    penalty: float,
+) -> NDArray[np.float32]:
+    """A finite nonblank cost: strong acoustic evidence can override a VAD miss."""
+    if penalty < 0 or not np.isfinite(penalty):
+        raise ValueError("activity penalty must be finite and nonnegative")
+    if regions is None or penalty == 0:
+        return log_probs
+    outside = np.ones(len(log_probs), dtype=bool)
+    for start, end in _merge_padded(regions, len(log_probs) * frame_s):
+        outside[round(start / frame_s) : round(end / frame_s)] = False
+    out = log_probs.copy()
+    out[outside] -= penalty
+    out[outside, blank] += penalty
+    out -= np.logaddexp.reduce(out, axis=1, keepdims=True)
     return out
 
 
@@ -154,11 +177,14 @@ def forced_align(
 
 
 class CtcAligner:
-    def __init__(self, name: str, models: dict[str, Callable[[], CtcModel]]) -> None:
+    def __init__(
+        self, name: str, models: dict[str, Callable[[], CtcModel]], activity_penalty: float = 2.0
+    ) -> None:
         """`models` maps a song language (zh / en) to a loader of its CTC model."""
         self.name = name
         self._loaders = models
         self._models: dict[str, CtcModel] = {}
+        self.activity_penalty = activity_penalty
 
     def model(self, language: str) -> CtcModel:
         if language not in self._models:
@@ -174,7 +200,7 @@ class CtcAligner:
         model = self.model(song_language(lines))
         pairs = [(line.index, token) for line in lines for token in line.tokens]
         targets = ctc_targets(model, [token for _, token in pairs])
-        log_probs = emissions(model, vocals, regions)
+        log_probs = emissions(model, vocals, regions, self.activity_penalty)
         timed = forced_align(log_probs, targets, model.blank, model.frame_s)
         return [
             TimedToken(i, token, *(t if t else (None, None, 0.0)))

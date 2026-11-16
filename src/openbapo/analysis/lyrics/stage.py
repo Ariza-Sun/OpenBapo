@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 import numpy as np
 from numpy.typing import NDArray
 
-from openbapo.analysis.lyrics.activity import SAMPLE_RATE, SileroActivity
+from openbapo.analysis.lyrics.activity import SAMPLE_RATE, ActivityDetector
 from openbapo.analysis.lyrics.align import Aligner, TimedToken
 from openbapo.analysis.lyrics.recognize import Recognition, WhisperRecognizer
 from openbapo.lyrics import Line, parse_lyrics
@@ -31,17 +31,21 @@ class LyricsResult:
 class LyricsStage:
     def __init__(
         self,
-        activity: SileroActivity,
+        activity: ActivityDetector,
         recognizer: WhisperRecognizer | None,
         aligner: Aligner,
+        *,
+        alignment_activity: ActivityDetector | None = None,
     ) -> None:
         self.activity = activity
+        self.alignment_activity = alignment_activity if alignment_activity is not None else activity
         self.recognizer = recognizer
         self.aligner = aligner
 
     def run(self, vocals: NDArray[np.float32], lyrics_text: str | None = None) -> LyricsResult:
-        regions = self.activity.regions(vocals)
-        if not self.activity.has_vocals(regions):
+        detector = self.alignment_activity if lyrics_text is not None else self.activity
+        regions = detector.regions(vocals)
+        if not detector.has_vocals(regions):
             return LyricsResult((), (), (), warnings=(NO_VOCALS,))
         recognition = None
         if lyrics_text is None:

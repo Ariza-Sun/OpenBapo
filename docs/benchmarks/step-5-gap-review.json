@@ -1,0 +1,14 @@
+{
+  "purpose": "Human listening review of unresolved annotation-gap candidates; never used as a production output filter.",
+  "reviews": [
+    {
+      "id": "en-test-07",
+      "audio_sha256": "9a675e89bb3b4882a38c0571475eff6917db4bc1d96ec19e3e910995741ffe99",
+      "start": 181.0,
+      "end": 183.0,
+      "verdict": "instrumental",
+      "reviewer": "项目负责人（本会话，2026-11-16）",
+      "evidence": "负责人在被请听原音频 181–183 秒后回复：没有说话声。按此次人工听辨将对应 7 个识别词记为幻听；两套模型的一致结果不覆盖人工结论。"
+    }
+  ]
+}
