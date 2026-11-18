@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-11-16T12:01:29.891475+00:00",
+  "source_sha256": "ced2a26e12397fd679e804a279039660379b8321f1fb99bd66621267559fae39",
+  "audio_sha256": "3012f5d290214def446d203852975b1a7f97be444e3babbdcf8bb9cfe3a674c3",
+  "duration_s": 240.039184,
+  "device": "cuda",
+  "local_submit_to_preview_s": 49.21732929162681,
+  "adjust_to_preview_s": 1.3162421267479658,
+  "analysis_timings_s": {
+    "decode": 0.6840057540684938,
+    "separate": 10.757786851376295,
+    "beats": 1.0757964756339788,
+    "chords": 7.493036353960633,
+    "key": 0.019570255652070045,
+    "lyrics": 21.855492608621716,
+    "chords.chroma": 0.017304901033639908,
+    "chords.btc": 1.7223167959600687,
+    "chords.lvchordia": 2.2179313600063324,
+    "chords.bass": 0.2245032638311386,
+    "chords.fusion": 0.010534020140767097,
+    "total": 41.94290308840573
+  },
+  "export_bytes": {
+    "png": 678833,
+    "pdf": 1179984,
+    "musicxml": 1528762
+  },
+  "audio_cleaned": true,
+  "within_300s": true,
+  "adjust_within_5s": true,
+  "includes": "local copy, validation, queue, fresh model process, analysis, preview",
+  "excludes": "Discord upload/download, Gateway, Discord message delivery, image build",
+  "weights": "already cached; includes model initialization, excludes weight downloads"
+}
