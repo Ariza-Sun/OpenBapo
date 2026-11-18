@@ -55,6 +55,12 @@
 
 因此第 6 步维持“进行中”，M1 不提前标为完成。
 
+## 后端预览工具（开发用）
+
+`scripts/preview_server.py`：本机网页，上传音频（可附歌词）→ 看任务进度 → 看谱、切换演唱调 / 指法调 / 节奏型 / 简化 → 导出 PNG / PDF / MusicXML。
+与 Discord 机器人共用任务库、分析子进程和渲染，只是去掉了每日配额、用独立数据目录。
+只监听 127.0.0.1、没有登录，通过 `ssh -L 8765:127.0.0.1:8765` 转发使用，不能公开暴露。不属于产品功能。
+
 ## 接口依据
 
 - [Discord 交互响应](https://docs.discord.com/developers/interactions/receiving-and-responding)：及时回应、交互 token 有效期、附件限额。
