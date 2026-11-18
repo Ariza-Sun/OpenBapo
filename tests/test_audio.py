@@ -9,6 +9,7 @@ from conftest import convert, write_tone
 from openbapo.analysis.audio import (
     MAX_DURATION_SECONDS,
     Audio,
+    Probe,
     decode,
     probe,
     probe_duration,
@@ -100,7 +101,7 @@ def test_rejects_too_long(tone: Path) -> None:
 
 
 def test_rejects_when_container_under_reports(tone: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("openbapo.analysis.audio.probe_duration", lambda _: 1.0)
+    monkeypatch.setattr("openbapo.analysis.audio.probe", lambda _: Probe(duration=1.0, channels=1))
     with pytest.raises(InputError, match="limit"):
         decode(tone, max_duration=2.0)
 

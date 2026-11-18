@@ -5,7 +5,7 @@
 
 **Turn a song into a guitar play-along sheet.** Upload a recording and get chord diagrams, a strumming tab, the vocal melody in numbered notation (jianpu) and the lyrics on one sheet. Change the singing key, the fingering key or the strum pattern, and export to PNG, PDF or MusicXML. Works for Chinese and English songs, delivered as a Discord bot.
 
-> ⚠️ **Work in progress.** The analysis, arranging and rendering pipeline works, including lyrics. Automatic recognition may omit short isolated vocals; supplied lyrics bypass that filter. The Discord bot and vocal melody line remain later delivery steps. See [Progress](#progress).
+> ⚠️ **Work in progress.** The analysis, arranging and rendering pipeline works, including lyrics. The Discord adapter, persistent queue and controls are implemented and locally tested; live Discord acceptance and a clean Docker deployment are still pending. Automatic recognition may omit short isolated vocals; supplied lyrics bypass that filter. The vocal melody line arrives in step 7. See [Progress](#progress).
 
 ## Why
 
@@ -21,11 +21,12 @@ Tools that transcribe chords from audio (Capo, Chordify, Moises and others) are 
 | 3 | Arranging: capo, fingering key, chord simplification, strum patterns | ✅ Done |
 | 4 | Rendering and export: chord diagrams, tab, jianpu; PNG / PDF / MusicXML | ✅ Done (jianpu notes arrive with step 7) |
 | 5 | Lyrics: alignment of supplied lyrics, and recognition | Quality regression passes; isolated short vocals may be omitted ([results](docs/benchmarks/step-5-lyrics.md)) |
-| 6 | Discord bot | Pending delivery |
+| 6 | Discord bot | Implemented; offline interaction and GPU worker checks pass. Live Discord / clean deployment acceptance pending ([setup](docs/self-hosting.md)) |
 | 7 | Vocal melody to jianpu | — |
 
 The full plan is in the [roadmap](docs/ROADMAP.md) and the [requirements](docs/REQUIREMENTS.md) (both in Chinese).
 
+The bot supports `/transcribe`, `/status`, `/delete`, `/help` and the message context command; six sheet controls, owner-only access, daily quotas and 30-day retention. See [self-hosting](docs/self-hosting.md) for configuration and the remaining acceptance checks. Nothing connects to Discord until you configure a token and start `openbapo-bot`.
 
 ## Quick start
 
@@ -144,6 +145,8 @@ src/openbapo/
   arrange/    arranging: keys and capo, chord names, shape and strum libraries (data/), the sheet
   render/     rendering: page layout, SVG drawing, PNG / PDF export, MusicXML
   sheet/      text sheet format, renderer and sheet reader: the evaluation sample generator
+  service/    SQLite jobs, quotas, isolated GPU processes, retention and re-rendering
+  bot/        Discord commands, persistent controls and Chinese / English messages
 scripts/      evaluation, timing, sheet reading and rendering scripts
 tests/        unit tests; tests marked `models` load the real models
 docs/         requirements, roadmap, per-step plans and benchmark results (in Chinese)

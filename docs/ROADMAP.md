@@ -4,10 +4,11 @@
 > 顺序原则：**最不确定的先做**。阶段 1 的风险全在分析质量（和弦准确率、歌词对齐、人声切音符），Discord 只是最后一层薄壳，放最后。
 > 对应需求：`docs/REQUIREMENTS.md`；实现方案：`docs/plans/`。
 
-**当前状态（2026-11-16）：第 0–5 步核心功能已实现，第 5 步质量回归与英文替代模型比较完成。**
-远程交付与 CI 状态见 [PR #8](https://github.com/Ariza-Sun/OpenBapo/pull/8)。
-歌词识别可能遗漏孤立短人声；质量与计时边界见 [第 5 步计划](plans/step-5.md)。
-Discord 实机验收仍待后续第 6 步完成，M1 尚未交付。
+**当前状态（2026-11-16）：第 0–5 步核心功能已实现，第 5 步质量回归通过；第 6 步进行中。**
+第 5 步补充英文模型比较已完成，保留 Whisper 默认；远程交付见 [PR #8](https://github.com/Ariza-Sun/OpenBapo/pull/8)。
+Discord 适配层、队列、控件与部署材料已实现，本地交互和真实 GPU 流程已验证。
+真实 Discord 服务器 / 用户安装私信验收及干净机器部署尚未完成，故 M1 尚不标为交付完成。
+详见 [第 6 步计划](plans/step-6.md) 和 [本地计时](benchmarks/step-6-service.md)。
 
 ## 总览
 
@@ -127,7 +128,7 @@ Discord 实机验收仍待后续第 6 步完成，M1 尚未交付。
 
 **做什么**
 - 按 `docs/plans/frontend-discord.md`：`/transcribe`、`/status`、`/delete`、`/help`，消息右键入口。
-- 谱子消息：PNG 预览 + 嵌入 + 7 个控件；只有发起者能操作。
+- 谱子消息：PNG 预览 + 嵌入 + 6 个控件（以前端计划 5.2 为准）；只有发起者能操作。
 - 任务队列、GPU worker、配额（每用户每天 5 首）、数据保留（原音频即删、结果 30 天）。
 - 中 / 英文案。
 - Docker Compose 一键部署 + 自部署文档。

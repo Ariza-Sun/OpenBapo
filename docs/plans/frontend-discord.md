@@ -1,7 +1,7 @@
 # 前端计划：Discord Bot（阶段 1）
 
 > 对应需求：`docs/REQUIREMENTS.md` 第 5.4 / 5.5 / 5.6 节。本文档回答"在 Discord 上怎么做"。
-> 状态：草稿，随需求讨论更新。
+> 状态：第 6 步已实现本地可验证版本，真实 Discord 验收待做。实现决定与验证边界见 `step-6.md`。
 
 ## 1. 前提与边界
 
@@ -108,12 +108,12 @@
 
 渲染接口必须秒级返回（不触发模型推理）。
 
-## 9. 技术选型 **[待定]**
+## 9. 技术选型
 
 | 项 | 候选 | 倾向 |
 |---|---|---|
-| Bot 框架 | discord.py（Python，与核心库同语言）/ discord.js（Node） | **[建议]** discord.py，减少语言栈 |
-| 网关模式 | Gateway（长连接）/ HTTP Interactions Endpoint（无状态 webhook） | **[建议]** Gateway 起步简单；后续可切 HTTP 以便水平扩展 |
+| Bot 框架 | discord.py（Python，与核心库同语言） | **已实现** discord.py 2.x |
+| 网关模式 | Gateway（长连接） | **已实现**；不需要 HTTP Interactions Endpoint |
 | 消息状态 | 项目 ID 编码进控件 `custom_id`，当前调整参数存服务端；Bot 重启不丢状态 | 已定 |
 
 ## 10. 开放问题
