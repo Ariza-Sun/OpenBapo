@@ -1,0 +1,54 @@
+[
+ {
+  "setting": "旧规则（每个强拍开新小节）",
+  "p_beat_slip": null,
+  "p_phase_jump": null,
+  "guitarset": {
+   "downbeat_f1": 0.6707567287168845,
+   "irregular_bars": 0.20382775119617225
+  },
+  "gtzan": {
+   "downbeat_f1": 0.7859887556251186,
+   "irregular_bars": 0.1415553613781051
+  }
+ },
+ {
+  "setting": "A 少拍多拍 0.03 / 错位 1e-3",
+  "p_beat_slip": 0.03,
+  "p_phase_jump": 0.001,
+  "guitarset": {
+   "downbeat_f1": 0.6631015385144973,
+   "irregular_bars": 0.033760186263096625
+  },
+  "gtzan": {
+   "downbeat_f1": 0.7865383652849166,
+   "irregular_bars": 0.019339091250469394
+  }
+ },
+ {
+  "setting": "B 少拍多拍 0.003 / 错位 1e-4",
+  "p_beat_slip": 0.003,
+  "p_phase_jump": 0.0001,
+  "guitarset": {
+   "downbeat_f1": 0.6574536314055028,
+   "irregular_bars": 0.02191621411947246
+  },
+  "gtzan": {
+   "downbeat_f1": 0.7843137888704669,
+   "irregular_bars": 0.011711655289033632
+  }
+ },
+ {
+  "setting": "C 只允许错位 1e-4（采用）",
+  "p_beat_slip": 0.0,
+  "p_phase_jump": 0.0001,
+  "guitarset": {
+   "downbeat_f1": 0.6526645522424549,
+   "irregular_bars": 0.01415002907540221
+  },
+  "gtzan": {
+   "downbeat_f1": 0.7816907647646686,
+   "irregular_bars": 0.007076653306613227
+  }
+ }
+]

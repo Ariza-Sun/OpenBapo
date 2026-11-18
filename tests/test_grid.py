@@ -49,7 +49,7 @@ def test_pickup_longer_than_a_bar() -> None:
     assert got[5] == (2, 1)
 
 
-def test_missed_downbeat_keeps_counting() -> None:
+def test_two_downbeats_eight_apart_measure_eight() -> None:
     times = [0.5 * i for i in range(12)]
     got = positions(times, [0.0, 4.0])  # downbeat at beat 8 skipped by the tracker
     assert got[4:8] == [(0, 5), (0, 6), (0, 7), (0, 8)]
@@ -118,3 +118,37 @@ def test_unsorted_and_duplicate_input_is_cleaned() -> None:
 def test_tempo_uses_median_interval() -> None:
     grid = build_grid([0.0, 0.5, 1.0, 1.5, 3.5], [0.0])  # one dropped beat
     assert grid.tempo is not None and grid.tempo.bpm == pytest.approx(120.0)
+
+
+def bar_lengths(times: list[float], downbeats: list[float]) -> list[int]:
+    grid = build_grid(times, downbeats)
+    counts: dict[int, int] = {}
+    for b in grid.beats:
+        counts[b.bar_index] = counts.get(b.bar_index, 0) + 1
+    return [counts[i] for i in sorted(counts)]
+
+
+def test_isolated_spurious_downbeat_does_not_cut_a_short_bar() -> None:
+    times = [0.5 * i for i in range(32)]
+    flagged = [0.0, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0]  # 3.0 is stray
+    assert bar_lengths(times, flagged) == [4] * 8
+
+
+def test_isolated_missed_downbeat_is_repaired() -> None:
+    times = [0.5 * i for i in range(32)]
+    flagged = [0.0, 2.0, 6.0, 8.0, 10.0, 12.0, 14.0]  # 4.0 missed
+    assert bar_lengths(times, flagged) == [4] * 8
+
+
+def test_noisy_start_settles_into_regular_bars() -> None:
+    # The pattern seen on real songs: a burst of stray downbeats in the intro.
+    times = [0.5 * i for i in range(40)]
+    flagged = [0.0, 1.0, 1.5, 2.0, 2.5, 3.5, 4.0, *[2.0 * k for k in range(3, 10)]]
+    assert bar_lengths(times, flagged) == [4] * 10
+
+
+def test_a_genuine_two_beat_bar_is_kept_once() -> None:
+    # Bars of 4, then one 2-beat bar, then the phase stays shifted.
+    times = [0.5 * i for i in range(34)]
+    flagged = [0.0, 2.0, 4.0, 6.0, 7.0, 9.0, 11.0, 13.0, 15.0]
+    assert bar_lengths(times, flagged) == [4, 4, 4, 2, 4, 4, 4, 4, 4]
