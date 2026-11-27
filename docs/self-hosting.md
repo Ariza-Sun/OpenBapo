@@ -13,7 +13,7 @@ This guide sets up your own OpenBapo bot: a Discord application, a machine with 
 | | |
 |---|---|
 | **Machine** | Linux, Python 3.11 or newer |
-| **GPU** | NVIDIA, 12 GB of memory or more recommended (tested on an RTX 3090, 24 GB). A 4-minute song takes about 70 seconds. A CPU works but is many times slower. |
+| **GPU** | NVIDIA with a CUDA 12.6 driver, 12 GB of memory or more recommended (tested on an RTX 3090, 24 GB). A 4-minute song takes about 70 seconds. A CPU works but is many times slower. |
 | **Disk** | About 15 GB: ~9 GB of model weights plus PyTorch |
 | **System packages** | `ffmpeg`, `libcairo2` and a CJK font (`fonts-noto-cjk`) |
 | **Network** | Access to Discord, Hugging Face and download.pytorch.org (for the first download only) |
@@ -56,7 +56,7 @@ cd OpenBapo
 python -m venv .venv && source .venv/bin/activate
 
 # PyTorch first, built for your CUDA version (https://pytorch.org/get-started/locally/).
-pip install torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+pip install torch==2.14.1 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu126
 # OpenBapo with the bot, rendering and the model packages, at tested versions.
 python deploy/install.py
 
@@ -67,7 +67,7 @@ export OPENBAPO_DATA_DIR=/srv/openbapo/data    # where the queue and the sheets 
 openbapo-bot
 ```
 
-`deploy/install.py` installs the model packages pinned in `deploy/constraints.txt`. One of them, lv-chordia, asks for a newer PyTorch than the one tested here, so it is installed without its dependencies; `pip check` will mention this and it is expected.
+`deploy/install.py` installs the model packages at the versions in `deploy/constraints.txt`, the ones the public bot runs on (Python 3.12, PyTorch 2.14 for CUDA 12.6). For another CUDA version, install the matching PyTorch build from pytorch.org instead.
 
 Keep the bot running with your usual tool: a systemd service, `tmux`, or Docker below.
 

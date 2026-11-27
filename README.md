@@ -64,7 +64,7 @@ cd OpenBapo
 python -m venv .venv && source .venv/bin/activate
 
 # 1. PyTorch for your CUDA version (see pytorch.org), then OpenBapo itself
-pip install torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+pip install torch==2.14.1 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu126
 python deploy/install.py
 
 # 2. Download the model weights once (about 9 GB)

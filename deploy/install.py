@@ -1,8 +1,8 @@
-"""Install the tested inference stack without lv-chordia replacing CUDA torch.
+"""Install the tested inference stack at the versions in deploy/constraints.txt.
 
-lv-chordia declares torch>=2.13, but the existing model regression runs all five
-networks on 2.5.1. Only that package uses --no-deps; install its other dependencies
-explicitly. This compatibility exception is documented in self-hosting.md.
+Install the CUDA build of torch first. lv-chordia, published only on GitHub, is
+installed pinned to a commit without its dependencies, so it cannot swap that
+torch build for another; its other dependencies are installed explicitly.
 """
 
 import subprocess

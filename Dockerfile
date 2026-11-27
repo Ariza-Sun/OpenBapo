@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY . /app
-RUN pip install --no-cache-dir torch==2.5.1 torchaudio==2.5.1 \
-    --index-url https://download.pytorch.org/whl/cu121 \
+RUN pip install --no-cache-dir torch==2.14.1 torchaudio==2.11.0 \
+    --index-url https://download.pytorch.org/whl/cu126 \
     && python deploy/install.py \
     && useradd --uid 10001 --create-home openbapo \
     && mkdir -p /data /cache && chown openbapo:openbapo /data /cache \
