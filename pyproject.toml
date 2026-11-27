@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openbapo"
-version = "0.0.1"
+version = "1.0.0"
 description = "Turn a song recording into a guitar play-along sheet."
 readme = "README.md"
 license = "MIT"
