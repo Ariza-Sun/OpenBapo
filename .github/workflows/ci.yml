@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Install
+        run: pip install -e ".[dev,render]"
+      - name: Format
+        run: ruff format --check .
+      - name: Lint
+        run: ruff check .
+      - name: Type check
+        run: mypy
+      - name: Test
+        run: pytest
+      - name: CLI reports a missing analysis install
+        run: |
+          python scripts/make_tone.py "$RUNNER_TEMP/tone.wav"
+          if openbapo analyze "$RUNNER_TEMP/tone.wav" --out "$RUNNER_TEMP/analysis.json" 2> "$RUNNER_TEMP/err.txt"; then
+            echo "expected a failure without the analysis extra"; exit 1
+          fi
+          cat "$RUNNER_TEMP/err.txt"
+          grep -q 'openbapo\[analysis\]' "$RUNNER_TEMP/err.txt"
+
+  # Runs the real models on CPU with a synthetic click track. Also the probe
+  # for "the analysis extra still installs on this Python".
+  analysis-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Cache model weights
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/torch
+            ~/.cache/huggingface
+          key: model-weights-${{ hashFiles('src/openbapo/analysis/separate.py', 'src/openbapo/analysis/beats.py') }}
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Install (CPU torch)
+        run: |
+          pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev,analysis,render]"
+      - name: Model tests
+        run: pytest -m models -v
+      - name: CLI smoke test
+        # Whisper: the default Qwen3-ASR does not fit a hosted runner's memory on CPU.
+        run: |
+          python scripts/make_tone.py "$RUNNER_TEMP/click.wav" --click 120 --seconds 12
+          openbapo analyze "$RUNNER_TEMP/click.wav" --out "$RUNNER_TEMP/analysis.json" --device cpu --recognizer whisper --timing -
+          python -c "import sys; from openbapo.model import Analysis; a = Analysis.from_json(open(sys.argv[1], encoding='utf-8').read()); assert a.tempo and a.beats, 'no beats'; print(a.tempo, a.time_signature, len(a.beats), 'beats')" "$RUNNER_TEMP/analysis.json"

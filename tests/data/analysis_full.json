@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "title": "示例 Example",
+  "artist": "OpenBapo",
+  "duration": 4.25,
+  "beats": [
+    {"time": 0.5, "is_downbeat": true, "bar_index": 0, "beat_in_bar": 1},
+    {"time": 1.0, "is_downbeat": false, "bar_index": 0, "beat_in_bar": 2},
+    {"time": 1.5, "is_downbeat": false, "bar_index": 0, "beat_in_bar": 3},
+    {"time": 2.0, "is_downbeat": false, "bar_index": 0, "beat_in_bar": 4},
+    {"time": 2.5, "is_downbeat": true, "bar_index": 1, "beat_in_bar": 1},
+    {"time": 3.0, "is_downbeat": false, "bar_index": 1, "beat_in_bar": 2},
+    {"time": 3.5, "is_downbeat": false, "bar_index": 1, "beat_in_bar": 3},
+    {"time": 4.0, "is_downbeat": false, "bar_index": 1, "beat_in_bar": 4}
+  ],
+  "tempo": {"bpm": 120.0},
+  "time_signature": {"numerator": 4, "denominator": 4},
+  "key": {"tonic": 7, "mode": "major", "confidence": 0.87},
+  "chords": [
+    {"start": 0.5, "end": 2.5, "root": 7, "quality": "maj", "bass": null, "confidence": 0.93},
+    {"start": 2.5, "end": 3.5, "root": 2, "quality": "maj", "bass": 6, "confidence": 0.71},
+    {"start": 3.5, "end": 4.25, "root": 4, "quality": "hdim7", "bass": null, "confidence": 0.32}
+  ],
+  "notes": [
+    {"start": 0.5, "end": 0.74, "pitch": 67, "start_tick": 0, "duration_ticks": 6},
+    {"start": 0.75, "end": 0.99, "pitch": 69, "start_tick": 6, "duration_ticks": 6},
+    {"start": 1.0, "end": 1.45, "pitch": 71, "start_tick": 12, "duration_ticks": 12},
+    {"start": 1.5, "end": 2.2, "pitch": 74, "start_tick": 24, "duration_ticks": 18},
+    {"start": 2.5, "end": 2.66, "pitch": 72, "start_tick": 48, "duration_ticks": 4},
+    {"start": 2.67, "end": 2.82, "pitch": 71, "start_tick": 52, "duration_ticks": 4}
+  ],
+  "lyrics": [
+    {"start": 0.5, "end": 0.74, "text": "Des", "line_index": 0, "note_ref": 0},
+    {"start": 0.75, "end": 0.99, "text": "pe", "line_index": 0, "note_ref": 1},
+    {"start": 1.0, "end": 1.45, "text": "ra", "line_index": 0, "note_ref": 2},
+    {"start": 1.5, "end": 2.2, "text": "do", "line_index": 0, "note_ref": 3},
+    {"start": 2.5, "end": 2.66, "text": "你", "line_index": 1, "note_ref": 4},
+    {"start": 2.67, "end": 2.82, "text": "好", "line_index": 1, "note_ref": 5},
+    {"start": 3.0, "end": 3.2, "text": "啊", "line_index": 1, "note_ref": null}
+  ]
+}

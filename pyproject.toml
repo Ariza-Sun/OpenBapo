@@ -1,0 +1,137 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openbapo"
+version = "0.0.1"
+description = "Turn a song recording into a guitar play-along sheet."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7,<3",
+    "pyphen>=0.14",  # English syllables for lyrics; used under its MPL 1.1 option
+]
+
+[project.optional-dependencies]
+bot = ["discord.py>=2.6,<3"]
+# Rendering PNG / PDF from the SVG pages (needs the system libcairo).
+render = [
+    "cairosvg>=2.7",
+    "pypdf>=4",
+]
+# Model inference. Kept out of the core package so arranging and rendering
+# install without torch; also needs the ffmpeg command-line tools.
+analysis = [
+    "accelerate>=1.12",  # qwen-asr loads its models through it
+    "audioop-lts; python_version >= '3.13'",  # pydub (via lv-chordia) needs the removed stdlib module
+    "beat-this>=1.1",
+    "demucs>=4.1",
+    "einops",
+    "faster-whisper>=1.1",
+    "librosa>=0.10",
+    "lv-chordia @ git+https://github.com/openmirlab/lv-chordia.git",
+    "numpy>=1.26",
+    "opencc-python-reimplemented",  # Traditional -> Simplified Chinese in recognised lyrics
+    "qwen-asr>=0.0.6",  # Qwen3-ASR, the default lyrics recognizer (Whisper is the fallback)
+    "scipy>=1.10",
+    "silero-vad>=5",
+    "rotary-embedding-torch",
+    "soxr",
+    "torch>=2.1",
+    "torchaudio>=2.1",  # imported by beat_this; must match the torch build (CPU / CUDA)
+    "tqdm",
+    "transformers>=4.40",  # the Chinese wav2vec2 aligner
+]
+dev = [
+    "discord.py>=2.6,<3",  # offline command / persistent-control contract tests
+    "hypothesis>=6.100",
+    "librosa>=0.10",  # the rule-based chord experts are tested on CPU
+    "music21>=9",  # reads the MusicXML export back in tests
+    "mypy>=1.10",
+    "numpy>=1.26",
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+openbapo = "openbapo.cli:main"
+openbapo-bot = "openbapo.bot.app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openbapo"]
+
+[tool.hatch.metadata]
+# lv-chordia is only published on GitHub, so the analysis extra points at it directly.
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["src/openbapo/analysis/chords/models/btc_vendor"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/openbapo/bot/*" = ["RUF001", "RUF002", "RUF003"]  # bilingual Discord copy
+"src/openbapo/arrange/strums.py" = ["RUF001", "RUF002", "RUF003"]
+"src/openbapo/arrange/sheet.py" = ["RUF001", "RUF002", "RUF003"]  # warnings and the header are Chinese
+"src/openbapo/render/svg.py" = ["RUF001", "RUF002", "RUF003"]  # the sheet's labels are Chinese
+"tests/test_arrange_sheet.py" = ["RUF001", "RUF002", "RUF003"]
+"tests/test_render.py" = ["RUF001", "RUF002", "RUF003"]
+"tests/test_lyrics_text.py" = ["RUF001", "RUF002", "RUF003"]
+"src/openbapo/lyrics/text.py" = ["RUF001", "RUF002", "RUF003"]  # Chinese section labels and punctuation
+"tests/test_arrange_strums.py" = ["RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src"]
+
+[[tool.mypy.overrides]]
+# Model packages ship no type information and are imported lazily.
+module = [
+    "beat_this.*",
+    "demucs.*",
+    "faster_whisper.*",
+    "huggingface_hub",
+    "opencc",
+    "pypinyin",
+    "silero_vad",
+    "soxr",
+    "stable_whisper",
+    "torchaudio",
+    "torchaudio.*",
+    "transformers",
+    "librosa",
+    "librosa.*",
+    "lv_chordia.*",
+    "pypdfium2",
+    "pyphen",
+    "qwen_asr",
+    "pypdfium2.*",
+    "scipy.*",
+    "torch",
+    "torch.*",
+]
+ignore_missing_imports = true
+follow_untyped_imports = false
+
+[[tool.mypy.overrides]]
+# Third-party model code kept verbatim.
+module = ["openbapo.analysis.chords.models.btc_vendor.*"]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--strict-markers", "-m", "not models"]
+markers = [
+    "models: needs model weights and the analysis extra; run with `pytest -m models`",
+]
+
+[[tool.mypy.overrides]]
+module = ["cairosvg", "cairosvg.*", "music21", "music21.*"]
+ignore_missing_imports = true

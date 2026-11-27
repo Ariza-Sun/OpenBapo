@@ -1,0 +1,33 @@
+services:
+  bot:
+    build: .
+    init: true
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      OPENBAPO_DATA_DIR: /data
+      OPENBAPO_DEVICE: cuda
+    volumes:
+      - results:/data
+      - models:/cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    stop_grace_period: 20s
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import pathlib,time; p=pathlib.Path('/data/heartbeat'); assert p.exists() and time.time()-p.stat().st_mtime < 120"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+volumes:
+  results:
+  models:
