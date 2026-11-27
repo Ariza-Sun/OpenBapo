@@ -108,7 +108,7 @@ Run `openbapo <command> --help` for every option.
 3. **Chords and key.** Several chord recognizers vote on every beat; the bass line and the key break ties.
 4. **Lyrics.** Recognize the sung words and align every syllable to the beat it is sung on.
 5. **Arrange.** Choose the chord shapes and capo, pick a strum pattern for the tempo and meter, optionally simplify chords.
-6. **Render.** Lay out chord diagrams over a tab staff over the lyrics, as on a printed play-along sheet.
+6. **Render.** Draw each line of the sheet as three rows: chord diagrams on top, the strumming tab in the middle and the lyrics underneath, like a printed play-along sheet.
 
 The analysis (steps 1–4) runs once per song. Arranging and rendering take about a second, so changing the key or the strum pattern is instant and never reruns the models.
 
