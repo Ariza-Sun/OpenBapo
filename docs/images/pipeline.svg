@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1270" height="390" viewBox="0 0 1270 390"
+     font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a4a4a"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #315b46; stroke-width: 1.6; }
+      .end { fill: #315b46; }
+      .title { font-size: 17px; font-weight: 700; fill: #1f2a24; }
+      .titleW { font-size: 17px; font-weight: 700; fill: #ffffff; }
+      .sub { font-size: 12px; fill: #6b6b6b; }
+      .subW { font-size: 12px; fill: #dfe9e3; }
+      .edge { fill: none; stroke: #4a4a4a; stroke-width: 1.6; }
+      .label { font-size: 12px; fill: #4a4a4a; }
+      .lane { font-size: 13px; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect width="1270" height="390" fill="#ffffff"/>
+
+  <!-- Lanes -->
+  <rect x="330" y="28" width="460" height="212" rx="10" fill="#eef4f0"/>
+  <text x="344" y="50" class="lane" fill="#315b46">Accompaniment: rhythm and harmony</text>
+  <rect x="330" y="258" width="460" height="120" rx="10" fill="#f3f0f8"/>
+  <text x="344" y="280" class="lane" fill="#5b4a86">Vocals: lyrics</text>
+
+  <!-- Nodes -->
+  <rect x="24" y="180" width="96" height="56" rx="8" class="box"/>
+  <text x="72" y="214" text-anchor="middle" class="title">Audio</text>
+
+  <rect x="164" y="172" width="128" height="72" rx="8" class="box"/>
+  <text x="228" y="202" text-anchor="middle" class="title">Separate</text>
+  <text x="228" y="224" text-anchor="middle" class="sub">Demucs</text>
+
+  <rect x="356" y="74" width="170" height="72" rx="8" class="box"/>
+  <text x="441" y="104" text-anchor="middle" class="title">Beats and bars</text>
+  <text x="441" y="126" text-anchor="middle" class="sub">Beat This!</text>
+
+  <rect x="590" y="74" width="180" height="72" rx="8" class="box"/>
+  <text x="680" y="104" text-anchor="middle" class="title">Chords and key</text>
+  <text x="680" y="126" text-anchor="middle" class="sub">BTC · lv-chordia · rules</text>
+
+  <rect x="356" y="294" width="414" height="64" rx="8" class="box"/>
+  <text x="563" y="320" text-anchor="middle" class="title">Lyrics</text>
+  <text x="563" y="342" text-anchor="middle" class="sub">Qwen3-ASR recognition · wav2vec2 alignment</text>
+
+  <rect x="840" y="172" width="200" height="72" rx="8" class="box"/>
+  <text x="940" y="202" text-anchor="middle" class="title">Arrange</text>
+  <text x="940" y="224" text-anchor="middle" class="sub">capo · shapes · strumming</text>
+
+  <rect x="1080" y="172" width="170" height="72" rx="8" class="end"/>
+  <text x="1165" y="202" text-anchor="middle" class="titleW">Sheet</text>
+  <text x="1165" y="224" text-anchor="middle" class="subW">PDF · PNG · MusicXML</text>
+
+  <!-- Edges -->
+  <path d="M120,208 L162,208" class="edge" marker-end="url(#arrow)"/>
+
+  <path d="M292,190 C322,190 326,110 354,110" class="edge" marker-end="url(#arrow)"/>
+  <text x="334" y="180" class="label">drums + bass</text>
+
+  <path d="M228,172 L228,16 L680,16 L680,72" class="edge" marker-end="url(#arrow)"/>
+  <text x="250" y="11" class="label">bass stem (chord roots)</text>
+
+  <path d="M526,110 L588,110" class="edge" marker-end="url(#arrow)"/>
+  <text x="532" y="100" class="label">per beat</text>
+
+  <path d="M228,244 L228,326 L354,326" class="edge" marker-end="url(#arrow)"/>
+  <text x="238" y="318" class="label">vocal stem</text>
+
+  <path d="M480,146 L480,200 L838,200" class="edge" marker-end="url(#arrow)"/>
+  <text x="640" y="194" class="label">bar lines</text>
+
+  <path d="M770,110 C816,110 806,180 838,180" class="edge" marker-end="url(#arrow)"/>
+  <text x="782" y="100" class="label">chords</text>
+
+  <path d="M770,326 C870,326 940,300 940,246" class="edge" marker-end="url(#arrow)"/>
+  <text x="782" y="350" class="label">syllable timing</text>
+
+  <path d="M1040,208 L1078,208" class="edge" marker-end="url(#arrow)"/>
+</svg>

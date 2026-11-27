@@ -101,12 +101,7 @@ Run `openbapo <command> --help` for every option.
 
 ## How it works
 
-```
- audio ─► separate ─► beats & bars ─► chords & key ─► lyrics ─► arrange ─► render
-          Demucs      Beat This!      BTC, lv-chordia  Qwen3-ASR  capo,      SVG, PDF,
-          (vocals,                    + rule experts   + wav2vec2  shapes,    PNG,
-           drums …)                   fused per beat   alignment   strumming  MusicXML
-```
+<img src="docs/images/pipeline.svg" alt="The pipeline: audio is separated by Demucs; the accompaniment goes to beat tracking (Beat This!) and chord and key recognition (BTC, lv-chordia, rules), the vocals to lyrics recognition (Qwen3-ASR) and alignment (wav2vec2); both meet in Arrange, which feeds the Sheet (PDF, PNG, MusicXML)" width="100%">
 
 1. **Separate.** Split the mix into vocals, drums, bass and the rest. The stems stay in memory and are never stored or shared.
 2. **Beats and bars.** Find every beat and downbeat, then settle the tempo and time signature.
